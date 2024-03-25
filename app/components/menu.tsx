@@ -1,3 +1,4 @@
+'use client';
 import React, { useCallback, useState, useEffect } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import Modal from './modal';
