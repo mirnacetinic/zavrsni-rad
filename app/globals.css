@@ -2,32 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+.searchbar-container {
+    display: flex;
+    justify-content: center;
   }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  
+  .searchbar {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    opacity: 0.95;
   }
-}
+  
+  .searchbar-input-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .searchbar-input {
+    width: 100%;
+    max-width: 12rem;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border: none;
+    outline: none;
+    background-color: transparent;
+  }
+  
+  .searchbar-input:last-child {
+    border-radius: 0 9999px 9999px 0;
+  }
+  
+  .searchbar-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .searchbar-button {
+    background-color: #6B46C1;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .searchbar-button:hover {
+    background-color: #9B7BDC;
+  }
+  
+
+  .searchbar-input-container > * {
+    margin-bottom: 1rem;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  
+  .animate-slideInDown {
+    animation: slideInDown 0.6s ease-in-out forwards;
+  }
+
+  .animate-menu {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
