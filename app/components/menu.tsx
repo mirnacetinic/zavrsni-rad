@@ -1,6 +1,6 @@
 'use client';
-import React, { useCallback, useState, useEffect } from "react";
-import { AiOutlineMenu } from "react-icons/ai";
+import { useCallback, useState, useEffect } from "react";
+import { AiOutlineMenu, AiOutlineLogin, AiOutlineUserAdd  } from "react-icons/ai";
 import Modal from './modal';
 
 const Menu = () => {
@@ -31,9 +31,15 @@ const Menu = () => {
             {menuOpen && 
             (
                 <div className={'fixed flex flex-col top-12 right-2 w-40 rounded shadow-md bg-white text-semibold text-black animate-menu'}>
-                    <div onClick={()=>openModal("login")} className="text-center px-4 py-2 cursor-pointer rounded hover:bg-gray-300">Login</div>
-                    <div onClick={()=>openModal("signup")} className="text-center px-4 py-2 cursor-pointer rounded hover:bg-gray-300">Signup</div>
+                    <div onClick={() => openModal("login")} className="flex items-center justify-center px-2 py-2 cursor-pointer rounded hover:bg-gray-300">
+                    <AiOutlineLogin className="mr-2" />
+                    <span>Login</span>
                 </div>
+                <div onClick={() => openModal("signup")} className="flex items-center justify-center px-2 py-2 cursor-pointer rounded hover:bg-gray-300">
+                    <AiOutlineUserAdd className="mr-2" />
+                    <span>Signup</span>
+                 </div>
+            </div>
             )}
             <Modal isOpen={modalOpen} onClose={()=>openModal("")} content= {modalOption} /> 
         </div>

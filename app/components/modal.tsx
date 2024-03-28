@@ -1,5 +1,7 @@
 'use client';
-import React, { useState, ChangeEvent } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState, ChangeEvent } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 
 interface ModalProps {
@@ -9,7 +11,10 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, content }: ModalProps) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
     email: "",
     password: ""
   });
@@ -22,9 +27,40 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
     }));
   };
 
-  const handleLogin = () => {
-    console.log(formData);
+  const handleLogin = async () => {
+    const login = await signIn('credentials',{ email : formData.email, password: formData.password, callbackUrl: 'http://localhost:3000/confirm'});
+    if(login?.error){
+      console.log(login.error);
+    }
   };
+
+  const handleRegister = async () => {
+    try {
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email,
+          password: formData.password
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        console.log("Registration success");
+        onClose();
+        router.push("/confirm");
+      } else {
+        console.log("Registration failed");
+      }
+    } catch (error) {
+      console.error('Error registering:', error);
+    }
+  };
+  
 
   return (
     <div>
@@ -39,23 +75,29 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900">{content === "login" ? "Login" : "Sign Up"}</h3>
                 <div className="text-black mt-6">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleInputChange}
+                  {content =="signup" &&(
+                    <>
+                      <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleInputChange}
+                        className="block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
+
+                      <input type="text" name="surname" placeholder="Surname" value={formData.surname} onChange={handleInputChange}
+                        className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>  
+                    </>)}
+                  <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange}
+                    className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
+
+                  <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange}
                     className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>
-                  <button onClick={handleLogin} className="mt-6 w-full px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
-                    {content === "login" ? "Login" : "Sign Up"}
-                  </button>
+
+                  {content === "login" ? 
+                    <button onClick={handleLogin}
+                      className="mt-6 w-full px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
+                      Login </button> 
+                  : 
+                    <button onClick={handleRegister}
+                    className="mt-6 w-full px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
+                    Sign up </button> 
+                  }   
                 </div>
               </div>
             </div>
