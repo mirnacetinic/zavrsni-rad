@@ -7,10 +7,11 @@ import { AiOutlineClose } from "react-icons/ai";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpen: (modalContent: string) => void;
   content: string;
 }
 
-const Modal = ({ isOpen, onClose, content }: ModalProps) => {
+const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,7 +20,7 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
     password: ""
   });
 
-  const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -28,7 +29,7 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
   };
 
   const handleLogin = async () => {
-    const login = await signIn('credentials',{ email : formData.email, password: formData.password, callbackUrl: 'http://localhost:3000/confirm'});
+    const login = await signIn('credentials',{ email : formData.email, password: formData.password, callbackUrl: '/confirm'});
     if(login?.error){
       console.log(login.error);
     }
@@ -51,8 +52,8 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
 
       if (response.ok) {
         console.log("Registration success");
-        onClose();
-        router.push("/confirm");
+        onOpen("login");
+        router.refresh();
       } else {
         console.log("Registration failed");
       }
@@ -82,7 +83,8 @@ const Modal = ({ isOpen, onClose, content }: ModalProps) => {
 
                       <input type="text" name="surname" placeholder="Surname" value={formData.surname} onChange={handleInputChange}
                         className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>  
-                    </>)}
+                    </>
+                  )}
                   <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange}
                     className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
 

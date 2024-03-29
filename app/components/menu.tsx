@@ -12,10 +12,15 @@ const Menu = () => {
         menuState(now => !now);
     }, []);
 
-    const openModal = useCallback((modalOption:string)=>{
-        modalState(now =>!now);
+    const openModal = useCallback((modalOption: string) => {
         selectedOption(modalOption);
-    },[]);
+        modalState(true);
+    }, []);
+
+    const closeModal = useCallback(() => {
+        selectedOption("");
+        modalState(false);
+    }, []);
 
     useEffect(() => {
         if (modalOpen) {
@@ -41,9 +46,10 @@ const Menu = () => {
                  </div>
             </div>
             )}
-            <Modal isOpen={modalOpen} onClose={()=>openModal("")} content= {modalOption} /> 
+                <Modal isOpen={modalOpen} onClose={closeModal} onOpen={openModal} content={modalOption} /> 
         </div>
     );
 }
 
 export default Menu;
+
