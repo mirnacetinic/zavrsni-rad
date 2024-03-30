@@ -1,7 +1,7 @@
 'use client';
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState, ChangeEvent } from "react";
+import { useForm, FieldValues} from "react-hook-form";
 import { AiOutlineClose } from "react-icons/ai";
 
 interface ModalProps {
@@ -12,39 +12,28 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
+  const{
+    register,
+    handleSubmit,
+    formState: {errors},
+    reset,
+
+  } = useForm();
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    email: "",
-    password: ""
-  });
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
-
-  const handleLogin = async () => {
-    const login = await signIn('credentials',{ email : formData.email, password: formData.password, callbackUrl: '/confirm'});
+  const handleLogin = async (data: FieldValues) => {
+    const login = await signIn('credentials',{email : data.email, password: data.password, callbackUrl: '/confirm'});
     if(login?.error){
+      reset();
       console.log(login.error);
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (data:FieldValues) => {
     try {
       const response = await fetch('/api/user', {
         method: 'POST',
-        body: JSON.stringify({
-          name: formData.name,
-          surname: formData.surname,
-          email: formData.email,
-          password: formData.password
-        }),
+        body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json'
         }
@@ -55,6 +44,7 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
         onOpen("login");
         router.refresh();
       } else {
+        reset();
         console.log("Registration failed");
       }
     } catch (error) {
@@ -78,25 +68,50 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                 <div className="text-black mt-6">
                   {content =="signup" &&(
                     <>
-                      <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleInputChange}
+                      <input {...register("name", {
+                        required:"Name is required",
+                        minLength:{
+                          value:2,
+                          message:"Name must be at least 2 characters",
+                        }})} 
+                        type="text" name="name" placeholder="Name" 
                         className="block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
+                          {errors.name && (
+                            <p className="text-red-500">{`${errors.name.message}`}</p>
+                          )}
 
-                      <input type="text" name="surname" placeholder="Surname" value={formData.surname} onChange={handleInputChange}
+                      <input {...register("surname",
+                        {required:"Surname is required"})} type="text" name="surname" placeholder="Surname"
                         className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>  
+                          {errors.surname && (
+                          <p className="text-red-500">{`${errors.surname.message}`}</p>
+                        )}
                     </>
                   )}
-                  <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange}
+                  <input {...register("email",
+                    {required:"Email is required",
+                      pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[a-z]+$/i,
+                      message: 'Invalid email format',
+                    },})} type="email" name="email" placeholder="Email" 
                     className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
+                      {errors.email && (
+                          <p className="text-red-500">{`${errors.email.message}`}</p>
+                        )}
 
-                  <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange}
+                  <input {...register("password",
+                    {required:"Password is required"})} type="password" name="password" placeholder="Password"
                     className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>
+                      {errors.password && (
+                          <p className="text-red-500">{`${errors.password.message}`}</p>
+                        )}
 
                   {content === "login" ? 
-                    <button onClick={handleLogin}
+                    <button onClick={handleSubmit(handleLogin)}
                       className="mt-6 w-full px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
                       Login </button> 
                   : 
-                    <button onClick={handleRegister}
+                    <button onClick={handleSubmit(handleRegister)}
                     className="mt-6 w-full px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
                     Sign up </button> 
                   }   
