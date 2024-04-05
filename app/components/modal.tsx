@@ -2,6 +2,7 @@
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm, FieldValues} from "react-hook-form";
+import toast from "react-hot-toast";
 import { AiOutlineClose } from "react-icons/ai";
 
 interface ModalProps {
@@ -16,21 +17,25 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
     register,
     handleSubmit,
     formState: {errors},
-    reset,
 
   } = useForm();
   const router = useRouter();
 
   const handleLogin = async (data: FieldValues) => {
-    const login = await signIn('credentials',{email : data.email, password: data.password, callbackUrl: '/confirm'});
-    if(login?.error){
-      reset();
-      console.log(login.error);
-    }
+    await signIn('credentials',{email : data.email, password: data.password, redirect: false })
+    .then((login) => {
+      if(login?.ok){
+        onClose();
+        router.push("/confirm");
+        toast.success("Logged in")
+      }
+      if(login?.error){
+        toast.error(login.error);
+      }
+    });
   };
 
   const handleRegister = async (data:FieldValues) => {
-    try {
       const response = await fetch('/api/user', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -40,16 +45,13 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
       });
 
       if (response.ok) {
-        console.log("Registration success");
+        toast.success("Registration success");
         onOpen("login");
         router.refresh();
-      } else {
-        reset();
-        console.log("Registration failed");
-      }
-    } catch (error) {
-      console.error('Error registering:', error);
+    } else {
+        toast.error(response.headers.get("message"));
     }
+    
   };
   
 
@@ -81,7 +83,11 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                           )}
 
                       <input {...register("surname",
-                        {required:"Surname is required"})} type="text" name="surname" placeholder="Surname"
+                        {required:"Surname is required",
+                        minLength:{
+                          value:2,
+                          message:"Surame must be at least 2 characters",
+                        }})} type="text" name="surname" placeholder="Surname"
                         className="mt-4 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-gray-300"/>  
                           {errors.surname && (
                           <p className="text-red-500">{`${errors.surname.message}`}</p>
