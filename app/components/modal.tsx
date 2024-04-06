@@ -17,7 +17,6 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
     register,
     handleSubmit,
     formState: {errors},
-
   } = useForm();
   const router = useRouter();
 
@@ -26,7 +25,7 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
     .then((login) => {
       if(login?.ok){
         onClose();
-        router.push("/confirm");
+        router.refresh();
         toast.success("Logged in")
       }
       if(login?.error){
@@ -36,7 +35,7 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
   };
 
   const handleRegister = async (data:FieldValues) => {
-      const response = await fetch('/api/user', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -76,7 +75,7 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                           value:2,
                           message:"Name must be at least 2 characters",
                         }})} 
-                        type="text" name="name" placeholder="Name" 
+                        type="text" name="name" placeholder="Name"
                         className="block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
                           {errors.name && (
                             <p className="text-red-500">{`${errors.name.message}`}</p>

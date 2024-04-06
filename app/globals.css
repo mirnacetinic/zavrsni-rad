@@ -91,5 +91,33 @@
     animation: fadeIn 0.3s ease-in-out;
   }
 
+  .menu-options {
+    text-align: center;
+    position: absolute;
+    top: 3rem;
+    right: 1rem;
+    width: 12rem;
+    background-color: white;
+    border-radius: 0.5rem;
+  }
+  
+  .menu-item {
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  
+  .menu-item:hover {
+    background-color: #f0f0f0;
+    border-radius: 0.5rem;
+  }
+  
+  .menu-icon {
+    margin-right: 0.5rem;
+  }
+
   
   

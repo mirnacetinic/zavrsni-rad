@@ -1,9 +1,15 @@
 'use client';
 import { useState, useCallback } from "react";
-import { AiOutlineMenu, AiOutlineLogin, AiOutlineUserAdd } from "react-icons/ai";
+import { AiOutlineMenu, AiOutlineLogin, AiOutlineUserAdd, AiOutlineLogout, AiOutlineProfile, AiOutlinePicLeft, AiOutlineApartment } from "react-icons/ai";
 import Modal from './modal';
+import { User } from "@prisma/client";
+import { signOut } from "next-auth/react";
 
-const Menu = () => {
+interface MenuProps{
+    user?: User | null;
+}
+
+const Menu: React.FC<MenuProps> = ({user})=>{
     const [menuOpen, setMenuOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalOption, setModalOption] = useState("");
@@ -27,22 +33,44 @@ const Menu = () => {
             <div className="md:block cursor-pointer" onClick={toggleMenu}>
                 <AiOutlineMenu/>
             </div>
-            {menuOpen && 
-            (
-                <div className={`fixed ${menuOpen ? "block" : "hidden"} top-12 right-2 w-40 rounded shadow-md bg-white text-semibold text-black`}>
-                    <div onClick={() => openModal("login")} className="flex items-center justify-center px-2 py-2 cursor-pointer rounded hover:bg-gray-300">
-                        <AiOutlineLogin className="mr-2" />
-                        <span>Login</span>
-                    </div>
-                    <div onClick={() => openModal("signup")} className="flex items-center justify-center px-2 py-2 cursor-pointer rounded hover:bg-gray-300">
-                        <AiOutlineUserAdd className="mr-2" />
-                        <span>Signup</span>
-                    </div>
-                </div>
-            )}
-            <Modal isOpen={modalOpen} onClose={closeModal} onOpen={openModal} content={modalOption} /> 
+            {menuOpen && (
+        <div className="menu-options">
+          {user ? (
+            <>
+              <div onClick={() => {}} className="menu-item">
+                <AiOutlinePicLeft className="menu-icon" />
+                <span> My Profile</span>
+              </div>
+              <div onClick={() => {}} className="menu-item">
+                <AiOutlineProfile className="menu-icon" />
+                <span>My reservations</span>
+              </div>
+              <div onClick={() => {}} className="menu-item">
+                <AiOutlineApartment className="menu-icon" />
+                <span>Become a host</span>
+              </div>
+              <div onClick={() => signOut()} className="menu-item">
+                <AiOutlineLogout className="menu-icon" />
+                <span>Logout</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div onClick={() => openModal("login")} className="menu-item">
+                <AiOutlineLogin className="menu-icon" />
+                <span>Login</span>
+              </div>
+              <div onClick={() => openModal("signup")} className="menu-item">
+                <AiOutlineUserAdd className="menu-icon" />
+                <span>Signup</span>
+              </div>
+            </>
+          )}
         </div>
-    );
-}
+      )}
+      <Modal isOpen={modalOpen} onClose={closeModal} onOpen={openModal} content={modalOption} />
+    </div>
+  );
+};
 
 export default Menu;
