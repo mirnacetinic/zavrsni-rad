@@ -15,7 +15,7 @@ const Nav: React.FC<NavProps> = ({user})=>{
                 <div className="flex flex-row items-center text-white space-x-4">
                     <a href="/">Home</a>
                     <a href="/about">About</a>
-                    <Menu user={user}/>
+                    <Menu user = {user}/>
                 </div>
             </div>
         </div>

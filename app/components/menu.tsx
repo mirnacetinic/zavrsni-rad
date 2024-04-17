@@ -1,9 +1,10 @@
 'use client';
 import { useState, useCallback } from "react";
-import { AiOutlineMenu, AiOutlineLogin, AiOutlineUserAdd, AiOutlineLogout, AiOutlineProfile, AiOutlinePicLeft, AiOutlineApartment } from "react-icons/ai";
+import { AiOutlineMenu, AiOutlineLogin, AiOutlineUserAdd, AiOutlineLogout, AiOutlineProfile, AiOutlinePicLeft, AiOutlineApartment, AiOutlineCode } from "react-icons/ai";
 import Modal from './modal';
 import { User } from "@prisma/client";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 interface MenuProps{
     user?: User | null;
@@ -48,6 +49,10 @@ const Menu: React.FC<MenuProps> = ({user})=>{
               <div onClick={() => {}} className="menu-item">
                 <AiOutlineApartment className="menu-icon" />
                 <span>Become a host</span>
+              </div>
+              <div className="menu-item">
+                <AiOutlineCode className="menu-icon" />
+                <Link href="/dashboard">Dahboard</Link>
               </div>
               <div onClick={() => signOut()} className="menu-item">
                 <AiOutlineLogout className="menu-icon" />
