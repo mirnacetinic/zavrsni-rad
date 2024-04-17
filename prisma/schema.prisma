@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  HOST
+}
+
+enum AccommodationType {
+  HOUSE
+  VILLA
+  APARTMENT
+  ROOM
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  name           String
+  surname        String
+  email          String        @unique
+  hashPassword   String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  role           Role          @default(USER)
+  objects        Object[]
+  favourites     Unit[]
+  reviews        Review[]
+}
+
+model Location {
+  id      Int     @id @default(autoincrement())
+  country String
+  city    String
+  zip     String   @unique
+  objects Object[]
+}
+
+model Amenity {
+  id        Int     @id @default(autoincrement())
+  name      String 
+  price     Int
+  unitId    Int
+  unit      Unit    @relation(fields: [unitId], references: [id])
+  objectId  Int
+  object    Object  @relation(fields: [objectId], references: [id])
+}
+
+model Review {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id])
+  unitId  Int
+  unit    Unit  @relation(fields: [unitId], references: [id])
+}
+
+model Object {
+  id            Int                @id @default(autoincrement())
+  title         String
+  type          AccommodationType
+  description   String
+  locationId    Int
+  location      Location           @relation(fields: [locationId], references: [id])
+  userId        Int
+  user          User               @relation(fields: [userId], references: [id])
+  units         Unit[] 
+  amenities     Amenity[]
+}
+
+model Unit {
+  id            Int                @id @default(autoincrement())
+  title         String
+  type          AccommodationType
+  description   String
+  objectId      Int
+  object        Object             @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  userId        Int?
+  likedBy       User?              @relation(fields: [userId], references: [id])
+  reviews       Review[] 
+  amenities     Amenity[]
+}
