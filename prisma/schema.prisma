@@ -20,10 +20,10 @@ enum Role {
 }
 
 enum AccommodationType {
-  HOUSE
-  VILLA
-  APARTMENT
-  ROOM
+  House
+  Villa
+  Apartment
+  Room
 }
 
 model User {
@@ -48,24 +48,6 @@ model Location {
   objects Object[]
 }
 
-model Amenity {
-  id        Int     @id @default(autoincrement())
-  name      String 
-  price     Int
-  unitId    Int
-  unit      Unit    @relation(fields: [unitId], references: [id])
-  objectId  Int
-  object    Object  @relation(fields: [objectId], references: [id])
-}
-
-model Review {
-  id      Int   @id @default(autoincrement())
-  userId  Int
-  user    User  @relation(fields: [userId], references: [id])
-  unitId  Int
-  unit    Unit  @relation(fields: [unitId], references: [id])
-}
-
 model Object {
   id            Int                @id @default(autoincrement())
   title         String
@@ -76,7 +58,7 @@ model Object {
   userId        Int
   user          User               @relation(fields: [userId], references: [id])
   units         Unit[] 
-  amenities     Amenity[]
+  amenities     ObjectAmenity[]         
 }
 
 model Unit {
@@ -88,6 +70,27 @@ model Unit {
   object        Object             @relation(fields: [objectId], references: [id], onDelete: Cascade)
   userId        Int?
   likedBy       User?              @relation(fields: [userId], references: [id])
-  reviews       Review[] 
-  amenities     Amenity[]
+  reviews       Review[]         
+}
+
+model Amenity {
+  id        Int     @id @default(autoincrement())
+  name      String 
+  price     Int
+  objects   ObjectAmenity[]
+}
+
+model ObjectAmenity{
+  id Int @id @default(autoincrement())
+  amenity  Amenity? @relation(fields: [amenityId],references: [id])
+  object   Object? @relation(fields: [objectId],references: [id])
+  amenityId Int?
+  objectId Int? 
+}
+model Review {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id])
+  unitId  Int
+  unit    Unit  @relation(fields: [unitId], references: [id])
 }

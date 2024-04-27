@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import InfoCard from "./infocard";
 import { useRouter } from "next/navigation";
-import Form, { FormField } from "./form";
+import Form from "../inputs/form";
 
 export interface PanelOption {
     label: string;
@@ -17,7 +17,6 @@ const Panel: React.FC<PanelProps> = ({ options }) => {
     const router = useRouter();
     const [selectedOption, setSelectedOption] = useState<PanelOption | null>(null);
     const [showForm, setShowForm] = useState(false);
-    const formFields: FormField[] = []; 
 
     const handleOptionClick = (selected: PanelOption) => {
         router.refresh();
@@ -51,9 +50,9 @@ const Panel: React.FC<PanelProps> = ({ options }) => {
                                 Add {selectedOption.label}
                             </button>
                         </div>
-                        <div> {selectedOption.data.map((item, index) => (
-                            <InfoCard key={index} data={item} />
-                        ))}</div>
+                       <div>
+                            <InfoCard data={selectedOption.data}/>
+                        </div>
                     </div>
                 ) : 
                 (
@@ -63,7 +62,9 @@ const Panel: React.FC<PanelProps> = ({ options }) => {
             {showForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-70 z-50">
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-lg">
-                        <Form formFields={formFields} onSubmit={() => {}} onClose={handleCloseForm} />
+                        {selectedOption &&(
+                        <Form type={selectedOption.label} onSubmit={() => {}} onClose={handleCloseForm} />)
+                        }
                     </div>
                 </div>
             )}

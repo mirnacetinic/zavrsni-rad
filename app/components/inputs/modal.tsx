@@ -72,18 +72,17 @@ const Modal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                       <input {...register("name", {
                         required:"Name is required",
                         minLength:{
-                          value:2,
-                          message:"Name must be at least 2 characters",
+                        value:2,
+                        message:"Name must be at least 2 characters",
                         }})} 
                         type="text" name="name" placeholder="Name"
                         className="block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300"/>
                           {errors.name && (
                             <p className="text-red-500">{`${errors.name.message}`}</p>
                           )}
-
                       <input {...register("surname",
                         {required:"Surname is required",
-                        minLength:{
+                          minLength:{
                           value:2,
                           message:"Surame must be at least 2 characters",
                         }})} type="text" name="surname" placeholder="Surname"

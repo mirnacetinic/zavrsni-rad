@@ -14,11 +14,7 @@ export default async function getUser(){
     });
 
     if(user){
-      return {
-        email:user.email,
-        name: user.name,
-        role: user.role
-      };
+      return user;
     }
 
     return null;

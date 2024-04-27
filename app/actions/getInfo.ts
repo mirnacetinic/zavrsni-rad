@@ -1,14 +1,14 @@
 import prisma from "../lib/db";
 
-export default async function getInfo(type:string) {
+export default async function getInfo(type:string,searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
     let result;
 
     switch (type) {
         case 'users':
             result = await getUsers();
             break;
-        case 'listings':
-            result = await getListings();
+        case 'objects':
+            result = await getObjects(searchParams);
             break;
         case 'locations':
             result = await getLocations();
@@ -32,33 +32,54 @@ async function getUsers() {
     
 }
 
-async function getListings() {
-    const listings = await prisma.object.findMany( {include: {
-        location: true,
-        units:true
-    }});
+async function getObjects(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
+    const where: any = {};
 
-    
-    const safeListings = listings.map((listing) => ({
-        Title: listing.title,
-        Description: listing.description,
-        Country: listing.location.country,
-        City: listing.location.city,
-        Units: listing.units.map((unit) => ({
-            Title: unit.title,
-            Description: unit.description
-        }))
+    if (searchParams) {
+        
+
+        if (searchParams.whereTo) {
+            where['location'] = { city: searchParams.whereTo };
+        }
+        // if (checkIn) {
+        //     where['checkIn'] = checkIn;
+        // }
+        // if (checkOut) {
+        //     where['checkOut'] = checkOut;
+        // }
+        // if (searchParams.guests) {
+        //     where['guests'] = searchParams.guests;
+        // }
+    }
+
+    const objects = await prisma.object.findMany({
+        where,
+        include: { location: true, units: true, amenities: { include: { amenity: true } } }
+    });
+
+    const safeObjects = objects.map((listing) => ({
+        id: listing.id,
+        title: listing.title,
+        description: listing.description,
+        type: listing.type,
+        country: listing.location.country,
+        city: listing.location.city,
+        units: listing.units.map((unit) => ({
+            unitTitle: unit.title,
+            unitDescription: unit.description
+        })),
+        amenities: listing.amenities.map(amenity => amenity.amenity),
     }));
 
-    return safeListings;
-    
+    return safeObjects;
 }
+
 
 async function getLocations() {
     const locations = await prisma.location.findMany();
     const safeLocations = locations.map((location) => ({
-        Country: location.country,
-        City: location.city,
+        country: location.country,
+        city: location.city,
         ZIP: location.zip
        
     }));

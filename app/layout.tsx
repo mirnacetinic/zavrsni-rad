@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inconsolata } from "next/font/google";
 import "./globals.css";
-import Nav from "./components/nav";
+import Nav from "./components/navigation/nav";
 import { Toaster } from "react-hot-toast";
 import getUser from "./actions/getUser";
 

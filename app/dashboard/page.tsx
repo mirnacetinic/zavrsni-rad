@@ -1,10 +1,9 @@
 import getInfo from "../actions/getInfo";
 import getUser from "../actions/getUser";
-import Panel from "../components/panel";
+import Panel from "../components/cards/panel";
 
 const Dashboard = async () => {
     const user = await getUser();
-
     return (
         <div className="container mx-auto px-4 py-8">
             {user ? (
@@ -15,7 +14,7 @@ const Dashboard = async () => {
                             <Panel
                                 options={[
                                     { label: 'Users', data: await getInfo('users') },
-                                    { label: 'Listings', data: await getInfo('listings') },
+                                    { label: 'Objects', data: await getInfo('objects') },
                                     { label: 'Locations', data: await getInfo('locations') },
                                     { label: 'Reservations', data: [] },
                                     { label: 'Insights', data: [] }
