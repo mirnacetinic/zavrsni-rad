@@ -35,7 +35,7 @@ model User {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   role           Role          @default(USER)
-  objects        Object[]
+  accomodations  Accomodation[]
   favourites     Unit[]
   reviews        Review[]
 }
@@ -44,11 +44,11 @@ model Location {
   id      Int     @id @default(autoincrement())
   country String
   city    String
-  zip     String   @unique
-  objects Object[]
+  zip     String   @unique 
+  accomodations Accomodation[]
 }
 
-model Object {
+model Accomodation {
   id            Int                @id @default(autoincrement())
   title         String
   type          AccommodationType
@@ -58,7 +58,7 @@ model Object {
   userId        Int
   user          User               @relation(fields: [userId], references: [id])
   units         Unit[] 
-  amenities     ObjectAmenity[]         
+  amenities     AccomodationAmenity[]         
 }
 
 model Unit {
@@ -66,8 +66,8 @@ model Unit {
   title         String
   type          AccommodationType
   description   String
-  objectId      Int
-  object        Object             @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  accomodationId      Int
+  accomodation        Accomodation            @relation(fields: [accomodationId], references: [id], onDelete: Cascade)
   userId        Int?
   likedBy       User?              @relation(fields: [userId], references: [id])
   reviews       Review[]         
@@ -77,15 +77,15 @@ model Amenity {
   id        Int     @id @default(autoincrement())
   name      String 
   price     Int
-  objects   ObjectAmenity[]
+  accomodations   AccomodationAmenity[]
 }
 
-model ObjectAmenity{
+model AccomodationAmenity{
   id Int @id @default(autoincrement())
   amenity  Amenity? @relation(fields: [amenityId],references: [id])
-  object   Object? @relation(fields: [objectId],references: [id])
+  accomodation   Accomodation? @relation(fields: [accomodationId],references: [id])
   amenityId Int?
-  objectId Int? 
+  accomodationId Int? 
 }
 model Review {
   id      Int   @id @default(autoincrement())

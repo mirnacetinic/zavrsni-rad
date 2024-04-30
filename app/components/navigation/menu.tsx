@@ -5,6 +5,7 @@ import Modal from "../inputs/modal";
 import { User } from "@prisma/client";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import HostModal from "../inputs/hostmodal";
 
 interface MenuProps {
     user?: User | null;
@@ -13,10 +14,15 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ user }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [hostModalOpen, sethostModalOpen] = useState(false);
     const [modalOption, setModalOption] = useState("");
 
     const toggleMenu = useCallback(() => {
         setMenuOpen(prev => !prev);
+    }, []);
+
+    const hostModal = useCallback(() => {
+        sethostModalOpen(prev => !prev);
     }, []);
 
     const openModal = useCallback((option: string) => {
@@ -46,7 +52,7 @@ const Menu: React.FC<MenuProps> = ({ user }) => {
                                 <AiOutlineProfile className="menu-icon" />
                                 <span>My reservations</span>
                             </div>
-                            <div key="host" className="menu-item" onClick={() => {}}>
+                            <div key="host" className="menu-item" onClick={() => {hostModal()}}>
                                 <AiOutlineApartment className="menu-icon" />
                                 <span>Become a host</span>
                             </div>
@@ -60,6 +66,7 @@ const Menu: React.FC<MenuProps> = ({ user }) => {
                                 <AiOutlineLogout className="menu-icon" />
                                 <span>Logout</span>
                             </div>
+                            <HostModal user={user.email} isOpen={hostModalOpen} onClose={hostModal} />
                         </>
                     ) : (
                         <>

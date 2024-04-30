@@ -1,6 +1,13 @@
-import getInfo from "../actions/getInfo";
+import { getAccomodations, getLocations, getUsers } from "../actions/getInfo";
 import getUser from "../actions/getUser";
 import Panel from "../components/cards/panel";
+
+export interface SafeUser{
+    name : string,
+    surname : string,
+    email : string,
+
+}
 
 const Dashboard = async () => {
     const user = await getUser();
@@ -13,13 +20,11 @@ const Dashboard = async () => {
                             <h1 className="text-2xl font-semibold mb-4">Welcome, {user.name}!</h1>
                             <Panel
                                 options={[
-                                    { label: 'Users', data: await getInfo('users') },
-                                    { label: 'Objects', data: await getInfo('objects') },
-                                    { label: 'Locations', data: await getInfo('locations') },
+                                    { label: 'Users', data: await getUsers()},
+                                    { label: 'Accomodations', data: await getAccomodations() },
+                                    { label: 'Locations', data: await getLocations() },
                                     { label: 'Reservations', data: [] },
-                                    { label: 'Insights', data: [] }
-                                ]}
-                            />
+                                    { label: 'Insights', data: [] }]}/> 
                         </>
                     ) : (
                         <div className="text-lg">You don't have permission to view this site.</div>

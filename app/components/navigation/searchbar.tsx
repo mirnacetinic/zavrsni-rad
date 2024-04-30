@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState} from "react";
 
-const Searchbar = ({ small = false, searchParams }: { small?: boolean; searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
+const Searchbar = ({searchParams }: {searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
   const router = useRouter();
   const [whereTo, setWhereTo] = useState(searchParams?.whereTo || "");
   const [checkIn, setCheckIn] = useState(searchParams?.checkIn || "");
@@ -17,11 +17,11 @@ const Searchbar = ({ small = false, searchParams }: { small?: boolean; searchPar
     if (checkOut) params.set("checkOut", checkOut);
     if (guests) params.set("guests", guests);
 
-    router.push(`/objects?${params.toString()}`);
+    router.push(`/accomodations?${params.toString()}`);
   };
 
   return (
-    <div className={`searchbar-container ${small ? "w-60" : "w-full"}`}>
+    <div className="searchbar-container">
       <div className="searchbar rounded md:rounded-full">
         <div className="flex flex-col md:flex-row items-center justify-between px-4">
           <div className="mb-4 md:mr-2 md:mb-0 flex flex-col items-center w-full md:w-auto">

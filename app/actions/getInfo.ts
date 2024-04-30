@@ -1,26 +1,6 @@
 import prisma from "../lib/db";
 
-export default async function getInfo(type:string,searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
-    let result;
-
-    switch (type) {
-        case 'users':
-            result = await getUsers();
-            break;
-        case 'objects':
-            result = await getObjects(searchParams);
-            break;
-        case 'locations':
-            result = await getLocations();
-            break;
-        default:
-            throw new Error('Invalid type provided');
-    }
-
-    return result;
-}
-
-async function getUsers() {
+export  async function getUsers() {
     const users = await prisma.user.findMany();
     const safeUsers = users.map((user) => ({
         name: user.name,
@@ -32,7 +12,7 @@ async function getUsers() {
     
 }
 
-async function getObjects(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
+export async function getAccomodations(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
     const where: any = {};
 
     if (searchParams) {
@@ -52,35 +32,35 @@ async function getObjects(searchParams?: { whereTo?: string; checkIn?: string; c
         // }
     }
 
-    const objects = await prisma.object.findMany({
+    const accomodations = await prisma.accomodation.findMany({
         where,
         include: { location: true, units: true, amenities: { include: { amenity: true } } }
     });
 
-    const safeObjects = objects.map((listing) => ({
-        id: listing.id,
-        title: listing.title,
-        description: listing.description,
-        type: listing.type,
-        country: listing.location.country,
-        city: listing.location.city,
-        units: listing.units.map((unit) => ({
+    const safeaccomodations = accomodations.map((accomodation) => ({
+        id: accomodation.id,
+        title: accomodation.title,
+        description: accomodation.description,
+        type: accomodation.type,
+        country: accomodation.location.country,
+        city: accomodation.location.city,
+        units: accomodation.units.map((unit) => ({
             unitTitle: unit.title,
             unitDescription: unit.description
         })),
-        amenities: listing.amenities.map(amenity => amenity.amenity),
+        amenities: accomodation.amenities.map(amenity => amenity.amenity),
     }));
 
-    return safeObjects;
+    return safeaccomodations;
 }
 
 
-async function getLocations() {
+export async function getLocations() {
     const locations = await prisma.location.findMany();
     const safeLocations = locations.map((location) => ({
         country: location.country,
         city: location.city,
-        ZIP: location.zip
+        zip: location.zip
        
     }));
 
