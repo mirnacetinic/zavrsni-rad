@@ -1,4 +1,5 @@
 import getAccmodation from "@/app/actions/getAccomodation";
+import UnitCard from "@/app/components/cards/unitcard";
 
 const  accommodationView = async ({params}: {params: { accommodationid: string;}}) => {
     if(params){
@@ -14,32 +15,20 @@ const  accommodationView = async ({params}: {params: { accommodationid: string;}
                     <div>
                         <h1 className="text-3xl font-bold mb-4">{accommodation.title}</h1>
                         <h3 className="text-xl font-semibold mb-2">
-                            {accommodation.type} - {accommodation.location.city}, {accommodation.location.country}
+                            {accommodation.type} - {accommodation.city}, {accommodation.country}
                         </h3>
                         <p className="text-lg mb-4">{accommodation.description}</p>
                     </div>
                    
+                    {accommodation.units.length !=0 && (
                     <div>
                         <h2 className="text-xl font-semibold mb-2">Units:</h2>
                         <ul>
                             {accommodation.units.map((unit, index) => (
-                                <li key={index} className="text-lg">
-                                    {unit.type} - {unit.title}
-                                </li>
+                                <UnitCard unit={unit} key={index}/>
                             ))}
                         </ul>
-                    </div>
-                    {accommodation.amenities.length!=null &&(
-                        <div>
-                            <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
-                            <ul>
-                            {accommodation.amenities.map((amenity: any, index) => (
-                                <li key={index} className="text-lg">
-                                    {amenity.amenity.name} - {amenity.amenity.price}€
-                                </li>
-                            ))}
-                            </ul>
-                        </div>)}
+                    </div>)}
                 </div>
             )
         }

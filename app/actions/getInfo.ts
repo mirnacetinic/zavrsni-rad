@@ -6,52 +6,53 @@ export  async function getUsers() {
         name: user.name,
         surname: user.surname,
         email: user.email,
+        role : user.role,
     }));
 
     return safeUsers;
     
 }
 
-export async function getAccomodations(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
-    const where: any = {};
+export async function getAmenities(){
+    const amenities = (await prisma.amenity.findMany());
+    return amenities;
+}
 
+export async function getAccommodations(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
+    const where: any = {};
     if (searchParams) {
         
-
         if (searchParams.whereTo) {
-            where['location'] = { city: searchParams.whereTo };
+            where['location'] = { city: {contains : searchParams.whereTo, mode:'insensitive'} };
         }
-        // if (checkIn) {
+        //if (searchParams.checkIn) {
         //     where['checkIn'] = checkIn;
-        // }
-        // if (checkOut) {
+        //}
+        // if (serachParams.checkOut) {
         //     where['checkOut'] = checkOut;
         // }
-        // if (searchParams.guests) {
+        if (searchParams.guests && parseInt(searchParams.guests)<1) {
+            throw new Error("Minimal number of guests is 1!")
         //     where['guests'] = searchParams.guests;
-        // }
+        }
     }
 
-    const accomodations = await prisma.accomodation.findMany({
+    const accommodations = await prisma.accommodation.findMany({
         where,
-        include: { location: true, units: true, amenities: { include: { amenity: true } } }
+        include: { location: true, amenities: { include: { amenity: true } } },
     });
 
-    const safeaccomodations = accomodations.map((accomodation) => ({
-        id: accomodation.id,
-        title: accomodation.title,
-        description: accomodation.description,
-        type: accomodation.type,
-        country: accomodation.location.country,
-        city: accomodation.location.city,
-        units: accomodation.units.map((unit) => ({
-            unitTitle: unit.title,
-            unitDescription: unit.description
-        })),
-        amenities: accomodation.amenities.map(amenity => amenity.amenity),
+    const safeaccommodations = accommodations.map((accommodation) => ({
+        id: accommodation.id,
+        title: accommodation.title,
+        description: accommodation.description,
+        type: accommodation.type,
+        country: accommodation.location.country,
+        city: accommodation.location.city,
+        amenities: accommodation.amenities.map(amenity => amenity.amenity?.name),
     }));
 
-    return safeaccomodations;
+    return safeaccommodations;
 }
 
 

@@ -1,7 +1,16 @@
 import prisma from "@/app/lib/db";
 import { NextResponse } from "next/server";
 
+export async function GET(req:Request) {
+    try {
+        const locations = await prisma.location.findMany();
+        return NextResponse.json({ locations });
+    } catch (error) {
+        return NextResponse.json({ status: 500, headers:{ "message":'Error fetching locations'} });
+    }
 
+    
+}
 export async function POST(req:Request) {
         const body = await req.json();
         const {city,country,zip} = body;

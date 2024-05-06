@@ -41,8 +41,8 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
       );
       break;
 
-    case 'Accomodations':
-      route='api/accomodation'
+    case 'Accommodations':
+      route='api/accommodation'
       formFields.push(
         { label: 'Title', type: 'text', name: 'title' },
         { label: 'Description', type: 'text', name: 'description' }
@@ -65,7 +65,7 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type="text" name="location" list="locations-datalist"/>
+            type="text" name="location" list="locations-datalist" required/>
           <datalist id="locations-datalist">
             {locations?.map((location, index) => (
               <option value={location.zip} key={index}> {location.city}, {location.country} </option>
@@ -78,7 +78,7 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Owner</label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type="text" name="user" list="users-datalist"/>
+            type="text" name="user" list="users-datalist" required/>
           <datalist id="users-datalist">
             {users?.map((user, index) => (
               <option value={user.email} key={index}>{user.name} {user.surname}</option>
@@ -96,6 +96,12 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
         { label: 'ZIP', type: 'text', name: 'zip' }
       );
       break;
+
+      case 'Amenities':
+        route = 'api/amenity';
+        formFields.push(
+          {label:'Name', type: 'text', name:'name'}
+        );
 
     default:
       break;
@@ -123,7 +129,7 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
         router.refresh();
 
     } else {
-        toast.error(response.headers.get("message"));
+        toast.error(response.headers.get('message'));
     }
       
     } catch (error : any) {

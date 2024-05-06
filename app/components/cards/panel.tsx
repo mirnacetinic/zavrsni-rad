@@ -68,8 +68,8 @@ const Panel: React.FC<PanelProps> = ({options}) => {
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-lg">
                     {selectedOption && (
                             <Form type={selectedOption.label}
-                                locations={selectedOption.label === 'Accomodations' ? options.find(option => option.label === 'Locations')?.data : []}
-                                users={selectedOption.label === 'Accomodations' ? options.find(option => option.label === 'Users')?.data : []}
+                                locations={selectedOption.label === 'Accommodations' ? options.find(option => option.label === 'Locations')?.data : []}
+                                users={selectedOption.label === 'Accommodations' ? options.find(option => option.label === 'Users')?.data : []}
                                 onClose={handleCloseForm} />)}
                     </div>
                 </div>

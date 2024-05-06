@@ -35,8 +35,8 @@ model User {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   role           Role          @default(USER)
-  accomodations  Accomodation[]
-  favourites     Unit[]
+  accommodations Accommodation[]
+  favourites     UserFavorites[]
   reviews        Review[]
 }
 
@@ -45,10 +45,10 @@ model Location {
   country String
   city    String
   zip     String   @unique 
-  accomodations Accomodation[]
+  Accommodations Accommodation[]
 }
 
-model Accomodation {
+model Accommodation {
   id            Int                @id @default(autoincrement())
   title         String
   type          AccommodationType
@@ -58,35 +58,42 @@ model Accomodation {
   userId        Int
   user          User               @relation(fields: [userId], references: [id])
   units         Unit[] 
-  amenities     AccomodationAmenity[]         
+  amenities     AccommodationAmenity[]         
 }
 
 model Unit {
-  id            Int                @id @default(autoincrement())
-  title         String
-  type          AccommodationType
-  description   String
-  accomodationId      Int
-  accomodation        Accomodation            @relation(fields: [accomodationId], references: [id], onDelete: Cascade)
-  userId        Int?
-  likedBy       User?              @relation(fields: [userId], references: [id])
-  reviews       Review[]         
+  id                   Int                @id @default(autoincrement())
+  title                String
+  type                 AccommodationType
+  description          String
+  AccommodationId      Int
+  Accommodation        Accommodation       @relation(fields: [AccommodationId], references: [id], onDelete: Cascade)
+  likedBy              UserFavorites[]       
+  reviews              Review[]         
 }
 
 model Amenity {
   id        Int     @id @default(autoincrement())
   name      String 
-  price     Int
-  accomodations   AccomodationAmenity[]
+  Accommodations   AccommodationAmenity[]
 }
 
-model AccomodationAmenity{
-  id Int @id @default(autoincrement())
-  amenity  Amenity? @relation(fields: [amenityId],references: [id])
-  accomodation   Accomodation? @relation(fields: [accomodationId],references: [id])
-  amenityId Int?
-  accomodationId Int? 
+model AccommodationAmenity{
+  amenity  Amenity? @relation(fields: [amenityId],references: [id], onDelete: Cascade)
+  accommodation  Accommodation? @relation(fields: [accommodationId],references: [id], onDelete: Cascade)
+  amenityId Int
+  accommodationId Int
+  @@id([amenityId,accommodationId])
 }
+
+model UserFavorites{
+  unit  Unit? @relation(fields: [unitId],references: [id])
+  user  User? @relation(fields: [userId],references: [id])
+  unitId Int
+  userId Int 
+  @@id([unitId,userId])
+}
+
 model Review {
   id      Int   @id @default(autoincrement())
   userId  Int

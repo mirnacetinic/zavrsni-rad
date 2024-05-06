@@ -1,9 +1,9 @@
-import { getAccomodations } from "../actions/getInfo";
+import { getAccommodations } from "../actions/getInfo";
 import AccomodationCard from "../components/cards/accomodationcard";
 import Searchbar from "../components/navigation/searchbar";
 
-const Accomodations = async ({ searchParams }:{ searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
-  const accomodations = await getAccomodations(searchParams);
+const accommodations = async ({ searchParams }:{ searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
+  const accommodations = await getAccommodations(searchParams);
 
   return (
     <div className="flex">
@@ -13,11 +13,11 @@ const Accomodations = async ({ searchParams }:{ searchParams?: { whereTo?: strin
         </div>
 
         <div className="sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-          {accomodations.length === 0 ? (
+          {accommodations.length === 0 ? (
             <div className="text-gray-600">Sorry, no matches!</div>
           ) : (
-            accomodations.map((accomodations: any) => (
-              <AccomodationCard key={accomodations.id} data={accomodations} />
+            accommodations.map((accommodations: any) => (
+              <AccomodationCard key={accommodations.id} data={accommodations} />
             ))
           )}
         </div>
@@ -26,4 +26,4 @@ const Accomodations = async ({ searchParams }:{ searchParams?: { whereTo?: strin
   );
 };
 
-export default Accomodations;
+export default accommodations;

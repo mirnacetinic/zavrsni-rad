@@ -1,4 +1,4 @@
-import { getAccomodations, getLocations, getUsers } from "../actions/getInfo";
+import { getLocations, getUsers, getAccommodations, getAmenities } from "../actions/getInfo";
 import getUser from "../actions/getUser";
 import Panel from "../components/cards/panel";
 
@@ -21,7 +21,8 @@ const Dashboard = async () => {
                             <Panel
                                 options={[
                                     { label: 'Users', data: await getUsers()},
-                                    { label: 'Accomodations', data: await getAccomodations() },
+                                    { label: 'Accommodations', data: await getAccommodations() },
+                                    { label: 'Amenities', data: await getAmenities() },
                                     { label: 'Locations', data: await getLocations() },
                                     { label: 'Reservations', data: [] },
                                     { label: 'Insights', data: [] }]}/> 
