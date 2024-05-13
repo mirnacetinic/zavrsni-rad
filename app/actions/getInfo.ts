@@ -18,6 +18,22 @@ export async function getAmenities(){
     return amenities;
 }
 
+export async function getUnits(){
+    const units = await prisma.unit.findMany();
+    return units;
+}
+
+export async function getAccommodationUnits(accommodationId:string) {
+    const units = prisma.unit.findMany({
+        where: { accommodationId : parseInt(accommodationId)},
+        include:{ 
+            amenities : true
+        }
+        });
+
+        return units; 
+}
+
 export async function getAccommodations(searchParams?: { whereTo?: string; checkIn?: string; checkOut?:string; guests?:string }) {
     const where: any = {};
     if (searchParams) {
@@ -31,16 +47,19 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
         // if (serachParams.checkOut) {
         //     where['checkOut'] = checkOut;
         // }
-        if (searchParams.guests && parseInt(searchParams.guests)<1) {
-            throw new Error("Minimal number of guests is 1!")
-        //     where['guests'] = searchParams.guests;
+        if (searchParams.guests) {
+            if(parseInt(searchParams.guests) >= 1)
+                where['units'] = { some: { capacity: { gte: parseInt(searchParams.guests) } } }; 
+            else{
+                throw new Error("Minimal number of guests is 1!");
+            }
         }
+
     }
 
     const accommodations = await prisma.accommodation.findMany({
         where,
-        include: { location: true, amenities: { include: { amenity: true } } },
-    });
+        include: { location: true}});
 
     const safeaccommodations = accommodations.map((accommodation) => ({
         id: accommodation.id,
@@ -49,21 +68,46 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
         type: accommodation.type,
         country: accommodation.location.country,
         city: accommodation.location.city,
-        amenities: accommodation.amenities.map(amenity => amenity.amenity?.name),
+        imageUrl : accommodation.imageUrl
     }));
 
     return safeaccommodations;
 }
 
+export async function getHostAccommodation(id:number){
+    const accommodations = await prisma.accommodation.findMany({
+        where: { userId : id },
+        include: { location: true },
+    });
+
+    const safeAccommodations = accommodations.map((accommodation) => ({
+        title: accommodation.title,
+        description: accommodation.description,
+        type: accommodation.type,
+        country: accommodation.location.country,
+        city: accommodation.location.city
+    }));
+
+    return safeAccommodations;
+
+}
 
 export async function getLocations() {
     const locations = await prisma.location.findMany();
-    const safeLocations = locations.map((location) => ({
-        country: location.country,
-        city: location.city,
-        zip: location.zip
-       
-    }));
+    return locations;
+}
 
-    return safeLocations;
+export async function getReservations() {
+    const reservations = await prisma.reservation.findMany();
+
+    const safeReservations = reservations.map((reservation)=>({
+        id : reservation.id,
+        user : reservation.userId,
+        unit : reservation.unitId,
+        checkIn: reservation.checkIn.toDateString(),
+        checkOut : reservation.checkOut.toDateString(),
+        guests : reservation.guests
+
+    }))
+    return safeReservations;
 }

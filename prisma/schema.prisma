@@ -27,77 +27,94 @@ enum AccommodationType {
 }
 
 model User {
-  id             Int           @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   name           String
   surname        String
-  email          String        @unique
+  email          String          @unique
   hashPassword   String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  role           Role          @default(USER)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  role           Role            @default(USER)
   accommodations Accommodation[]
+  reservations   Reservation[]
   favourites     UserFavorites[]
   reviews        Review[]
 }
 
 model Location {
-  id      Int     @id @default(autoincrement())
-  country String
-  city    String
-  zip     String   @unique 
-  Accommodations Accommodation[]
+  id             Int             @id @default(autoincrement())
+  country        String
+  city           String
+  zip            String          @unique
+  accommodations Accommodation[]
 }
 
 model Accommodation {
-  id            Int                @id @default(autoincrement())
-  title         String
-  type          AccommodationType
-  description   String
-  locationId    Int
-  location      Location           @relation(fields: [locationId], references: [id])
-  userId        Int
-  user          User               @relation(fields: [userId], references: [id])
-  units         Unit[] 
-  amenities     AccommodationAmenity[]         
+  id          Int               @id @default(autoincrement())
+  title       String
+  type        AccommodationType
+  description String
+  locationId  Int
+  location    Location          @relation(fields: [locationId], references: [id])
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id])
+  units       Unit[]
+  imageUrl    String?
 }
 
 model Unit {
-  id                   Int                @id @default(autoincrement())
-  title                String
-  type                 AccommodationType
-  description          String
-  AccommodationId      Int
-  Accommodation        Accommodation       @relation(fields: [AccommodationId], references: [id], onDelete: Cascade)
-  likedBy              UserFavorites[]       
-  reviews              Review[]         
+  id              Int               @id @default(autoincrement())
+  title           String
+  type            AccommodationType
+  description     String
+  capacity        Int
+  amenities       UnitAmenity[]
+  accommodationId Int
+  accommodation   Accommodation     @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  likedBy         UserFavorites[]
+  reviews         Review[]
+  reservations    Reservation[]
 }
 
 model Amenity {
-  id        Int     @id @default(autoincrement())
-  name      String 
-  Accommodations   AccommodationAmenity[]
+  id    Int           @id @default(autoincrement())
+  name  String
+  units UnitAmenity[]
 }
 
-model AccommodationAmenity{
-  amenity  Amenity? @relation(fields: [amenityId],references: [id], onDelete: Cascade)
-  accommodation  Accommodation? @relation(fields: [accommodationId],references: [id], onDelete: Cascade)
+model UnitAmenity {
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
   amenityId Int
-  accommodationId Int
-  @@id([amenityId,accommodationId])
+  unit      Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId    Int
+
+  @@id([amenityId, unitId])
 }
 
-model UserFavorites{
-  unit  Unit? @relation(fields: [unitId],references: [id])
-  user  User? @relation(fields: [userId],references: [id])
+model UserFavorites {
+  unit   Unit @relation(fields: [unitId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
   unitId Int
-  userId Int 
-  @@id([unitId,userId])
+  userId Int
+
+  @@id([unitId, userId])
+}
+
+model Reservation {
+  id       Int      @id @default(autoincrement())
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+  guests   Int
+  checkIn  DateTime
+  checkOut DateTime
+  unitId   Int
+  unit     Unit     @relation(fields: [unitId], references: [id])
 }
 
 model Review {
-  id      Int   @id @default(autoincrement())
-  userId  Int
-  user    User  @relation(fields: [userId], references: [id])
-  unitId  Int
-  unit    Unit  @relation(fields: [unitId], references: [id])
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  unitId Int
+  unit   Unit @relation(fields: [unitId], references: [id])
 }

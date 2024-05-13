@@ -11,6 +11,7 @@ interface CustomCalendarProps {
 const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const now = new Date();
+    now.setHours(0,0,0,0);
 
     const generateDays = (year: number, month: number) => {
         const firstDay = new Date(year, month, 1);
@@ -33,7 +34,7 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const days = generateDays(currentYear, currentMonth);
 
-    if(selected && selectedDate==null)(setSelectedDate(new Date(selected)));
+    if(selected && selectedDate == null )(setSelectedDate(new Date(selected)));
 
     const handlePrevMonth = () => {
         if (isNow(currentMonth)) {
@@ -55,7 +56,7 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     const handleDayClick = (day: number | null) => {
         if (day !== null) {
             const selectedDate = new Date(currentYear, currentMonth, day, 23);
-            if (isFuture(day) && selectedDate >= now) {
+            if (selectedDate >= now) {
                 setSelectedDate(selectedDate);
                 onSelect(selectedDate);
             }
@@ -63,7 +64,7 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     };
 
     const isNow = (month: number) => {
-        return now.getMonth() >= month && now.getFullYear() >= currentYear;
+        return now.getMonth() == month && now.getFullYear() == currentYear;
     };
 
     const isFuture = (day: number) => {
@@ -88,8 +89,8 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
                 {days.map((day, index) => (
                     <div key={index} onClick={() => handleDayClick(day)} 
                         className={`text-center cursor-pointer 
-                        ${(day === selectedDate?.getDate() && currentMonth === selectedDate?.getMonth() && currentYear==selectedDate.getFullYear()) ? 
-                            'bg-purple-400 text-white' : (day !== null && isNow(currentMonth) && !isFuture(day)) ? 'disabled text-gray-400' : ''}`}>
+                        ${(day === selectedDate?.getDate() && currentMonth === selectedDate?.getMonth() && currentYear === selectedDate.getFullYear()) ? 
+                            'bg-purple-400 text-white' : ((day !== null && isNow(currentMonth) && !isFuture(day))) ? 'disabled text-gray-400' : ''}`}>
                         {day}
                     </div>))}
             </div>

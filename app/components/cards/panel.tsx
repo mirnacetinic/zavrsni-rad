@@ -1,22 +1,18 @@
 'use client';
-import React, { useState } from "react";
+import { useState} from "react";
 import InfoCard from "./infocard";
-import { useRouter } from "next/navigation";
 import Form from "../inputs/form";
-import { SafeUser } from "@/app/dashboard/page";
 
 export interface PanelOption {
     label: string;
     data: any[]; 
-    users? : SafeUser[],
 }
 
 interface PanelProps {
     options: PanelOption[];
 }
 
-const Panel: React.FC<PanelProps> = ({options}) => {
-    const router = useRouter();
+const Panel = ({ options }: PanelProps) => {
     const [selectedOption, setSelectedOption] = useState<PanelOption | null>(null);
     const [showForm, setShowForm] = useState(false);
 
@@ -31,6 +27,7 @@ const Panel: React.FC<PanelProps> = ({options}) => {
 
     const handleCloseForm = () => {
         setShowForm(false); 
+     
     };
 
     return (
@@ -55,7 +52,7 @@ const Panel: React.FC<PanelProps> = ({options}) => {
                             </button>
                         </div>
                        <div>
-                            <InfoCard data={selectedOption.data}/>
+                            <InfoCard data={selectedOption.data} type={selectedOption.label}/>
                         </div>
                     </div>
                 ) : 

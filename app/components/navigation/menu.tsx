@@ -11,7 +11,7 @@ interface MenuProps {
     user?: User | null;
 }
 
-const Menu: React.FC<MenuProps> = ({ user }) => {
+const Menu = ({ user }: MenuProps) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [hostModalOpen, sethostModalOpen] = useState(false);
@@ -52,10 +52,17 @@ const Menu: React.FC<MenuProps> = ({ user }) => {
                                 <AiOutlineProfile className="menu-icon" />
                                 <span>My reservations</span>
                             </div>
+                            {user.role === "USER" && (
                             <div key="host" className="menu-item" onClick={() => {hostModal()}}>
                                 <AiOutlineApartment className="menu-icon" />
                                 <span>Become a host</span>
-                            </div>
+                            </div>)}
+                            {user.role === "HOST" && (
+                                <div key="hostboard" className="menu-item">
+                                    <AiOutlineCode className="menu-icon" />
+                                    <Link href="/hostboard">Hostboard</Link>
+                                </div>
+                            )}
                             {user.role === "ADMIN" && (
                                 <div key="dashboard" className="menu-item">
                                     <AiOutlineCode className="menu-icon" />

@@ -4,6 +4,10 @@ import "./globals.css";
 import Nav from "./components/navigation/nav";
 import { Toaster } from "react-hot-toast";
 import getUser from "./actions/getUser";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+ 
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 
 export const metadata: Metadata = {
@@ -26,6 +30,7 @@ export default async function RootLayout({
       <body className={font.className}>
         <Nav user= {user}/>
         <Toaster/>
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)}/>
         {children}
       </body>
     </html>

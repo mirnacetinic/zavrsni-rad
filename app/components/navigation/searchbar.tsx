@@ -47,34 +47,34 @@ const Searchbar = ({searchParams }: {searchParams?: { whereTo?: string; checkIn?
       <div className="searchbar-container">
         <div className="searchbar rounded md:rounded-full">
           <div className="flex flex-col md:flex-row items-center justify-between px-4">
-            <div className="mb-4 md:mr-2 md:mb-0 flex flex-col items-center w-full md:w-auto">
+            <div className="searchbar-div">
               <label htmlFor="whereTo" className="searchbar-label">
                 Where to:
               </label>
               <input id="whereTo" type="text" placeholder="Enter destination" className="searchbar-input" value={whereTo}
                 onChange={(e) => setWhereTo(e.target.value)} />
             </div>
-            <div className="mb-4 md:mr-2 md:mb-0 flex flex-col items-center w-full md:w-auto">
+            <div className="searchbar-div">
               <label htmlFor="checkIn" className="searchbar-label">
                 Check in:
               </label>
               <input id="checkIn" type="text" placeholder="Select date" className="searchbar-input" value={checkIn}
                 onClick={showCheckIn} onChange={(e) => setCheckIn(e.target.value)}/>
-                <div className="calendar-container absolute mt-16">
+                <div className="absolute mt-16">
                   <CustomCalendar hidden={checkInHidden} onSelect={handleCheckInSelect} selected={checkIn} />
                 </div>
             </div>
-            <div className="mb-4 md:mr-2 md:mb-0 flex flex-col items-center w-full md:w-auto">
+            <div className="searchbar-div">
               <label htmlFor="checkOut" className="searchbar-label">
                 Check out:
               </label>
               <input id="checkOut" type="text" placeholder="Select date" className="searchbar-input" value={checkOut}
                 onClick={showCheckOut} onChange={(e) => setCheckOut(e.target.value)}/>
-                <div className="calendar-container absolute mt-16">
+                <div className="absolute mt-16">
                   <CustomCalendar hidden={checkOutHidden} onSelect={handleCheckOutSelect} selected={checkOut}/>
                 </div>
             </div>
-            <div className="mb-4 md:mr-2 md:mb-0 flex flex-col items-center w-full md:w-auto">
+            <div className="searchbar-div">
               <label htmlFor="guests" className="searchbar-label">
                 Guests:
               </label>

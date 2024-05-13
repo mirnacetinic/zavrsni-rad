@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import { Location, User } from '@prisma/client';
@@ -11,7 +12,7 @@ interface FormProps {
   onClose: () => void;
 }
 
-const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
+const Form = ({ type, onClose, locations, users }: FormProps) => {
   const formFields: { label: string; type: string; name: string }[] = [];
   const customFields: JSX.Element[] = [];
   const router = useRouter();
@@ -102,6 +103,7 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
         formFields.push(
           {label:'Name', type: 'text', name:'name'}
         );
+        break;
 
     default:
       break;
@@ -125,7 +127,7 @@ const Form: React.FC<FormProps> = ({ type, onClose, locations, users }) => {
       });
 
       if (response.ok) {
-        toast.success(type+" instance created");
+        toast.success(type + " instance created");
         router.refresh();
 
     } else {

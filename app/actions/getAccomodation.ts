@@ -1,35 +1,42 @@
 import prisma from "../lib/db";
 
-
-export default async function getAccommodation(id:string){
-    try{
+export default async function getAccommodation(id: string) {
+    try {
         const accommodation = await prisma.accommodation.findUnique({
-            where : {id : parseInt(id)},
-            include: { 
+            where: { id: parseInt(id)},
+            include: {
                 location: true,
-                units: true, 
-                amenities: { 
-                        include: { amenity: true },
-                    }, 
-            },
+                units:{
+                    include:{
+                        amenities: {
+                            select: {
+                                amenity: {
+                                    select: {
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            }
         });
 
-        if(accommodation){
-        const safeAccomodation={
-            ...accommodation,
-            country: accommodation.location.country,
-            city: accommodation.location.city,
-            units : accommodation.units.map((unit)=>unit),
-            amenities: accommodation.amenities.map(amenity => amenity.amenity?.name),
+        if (accommodation) {
+            const safeAccommodation = {
+                ...accommodation,
+                country: accommodation.location.country,
+                city: accommodation.location.city,
+                units: accommodation.units.map(unit => ({
+                    ...unit,
+                    amenities: unit.amenities.map(a => a.amenity.name)
+                }))
+            }
+
+            return safeAccommodation;
         }
-        
-
-        return safeAccomodation;
-    }
-        
-    }catch(error:any){
+    } catch (error: any) {
         throw new Error("Couldn't load the listing");
-
     }
 }
-    

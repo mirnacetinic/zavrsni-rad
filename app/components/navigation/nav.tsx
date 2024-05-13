@@ -6,7 +6,7 @@ interface NavProps{
   user?: User | null;
 }
 
-const Nav: React.FC<NavProps> = ({user})=>{
+const Nav = ({user}:NavProps)=>{
   return (
     <div className="w-full bg-purple-500 shadow-lg py-5">
         <div className="px-4">

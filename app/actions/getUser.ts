@@ -10,11 +10,19 @@ export default async function getUser(){
         return null;
       }
       const user = await prisma.user.findUnique({
-        where: { email : session.user.email as string}
+        where: { email : session.user.email as string}, include:{
+          favourites : true
+        }
     });
 
     if(user){
-      return user;
+      return{
+        email : user.email,
+        name : user.name,
+        surname : user.surname,
+        role : user.role,
+        favourites : user.favourites.map(fav=>fav.unitId)
+      }
     }
 
     return null;

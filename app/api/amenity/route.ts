@@ -1,7 +1,7 @@
 import prisma from "@/app/lib/db";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const amenities = await prisma.amenity.findMany();
         return NextResponse.json({ amenities });
@@ -30,5 +30,23 @@ export async function POST(req:Request) {
                 return NextResponse.json(newAmenity);
             }
 
+}
 
+export async function DELETE(req: Request) {
+    const body = await req.json();
+    const { id } = body;
+
+    try {
+        const deletedAmenity = await prisma.amenity.delete({
+            where: {id: id}
+        });
+
+        if (!deletedAmenity) {
+            return NextResponse.json({ status: 404, headers: { "message": "Amenity not found!" } });
+        }
+
+        return NextResponse.json({ status: 200, headers: { "message": "Amenity deleted successfully!" } });
+    } catch (error) {
+        return NextResponse.json({ status: 500, headers: { "message": "Error deleting amenity" } });
+    }
 }
