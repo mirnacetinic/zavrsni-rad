@@ -1,6 +1,6 @@
-import { getHostAccommodation} from "../actions/getInfo";
 import getUser from "../actions/getUser";
-import Panel from "../components/cards/panel";
+import { PanelNav } from "../components/navigation/panelnav";
+import '../dashboard/style.css';
 
 
 const HostBoard = async () => {
@@ -12,11 +12,11 @@ const HostBoard = async () => {
                     {user.role === "HOST" ? (
                         <>
                             <h1 className="text-2xl font-semibold mb-4">Welcome, {user.name}!</h1>
-                            <Panel
+                            <PanelNav path="hostboard"
                                 options={[
-                                    { label: 'My Accommodations', data: await getHostAccommodation(user.id)},
-                                    { label: 'Reservations', data: [] },
-                                    { label: 'Insights', data: [] }]}/> 
+                                    'Accommodations', 
+                                     'Reservations',
+                                    'Insights']}/> 
                         </>
                     ) : (
                         <div className="text-lg">You don't have permission to view this site.</div>

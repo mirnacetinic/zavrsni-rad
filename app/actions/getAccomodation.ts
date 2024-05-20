@@ -6,6 +6,7 @@ export default async function getAccommodation(id: string) {
             where: { id: parseInt(id)},
             include: {
                 location: true,
+                user: true,
                 units:{
                     include:{
                         amenities: {
@@ -26,6 +27,7 @@ export default async function getAccommodation(id: string) {
         if (accommodation) {
             const safeAccommodation = {
                 ...accommodation,
+                user : accommodation.user.name + ' ' + accommodation.user.surname,
                 country: accommodation.location.country,
                 city: accommodation.location.city,
                 units: accommodation.units.map(unit => ({

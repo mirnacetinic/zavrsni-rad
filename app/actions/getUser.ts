@@ -10,18 +10,22 @@ export default async function getUser(){
         return null;
       }
       const user = await prisma.user.findUnique({
-        where: { email : session.user.email as string}, include:{
-          favourites : true
+        where: { email : session.user.email as string}, 
+        include:{
+          favourites : true,
+          reservations : true
         }
     });
 
     if(user){
       return{
+        id : user.id,
         email : user.email,
         name : user.name,
         surname : user.surname,
         role : user.role,
-        favourites : user.favourites.map(fav=>fav.unitId)
+        favourites : user.favourites.map(f=>f.unitId),
+        reservations : user.reservations.map(r=>r)
       }
     }
 

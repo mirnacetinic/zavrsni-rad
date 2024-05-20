@@ -17,7 +17,6 @@ export async function POST(req:Request) {
 
         else{
             const hashPass = await hash(password, 10);
-          
             const newUser = await prisma.user.create({
                 data: {
                     name,
@@ -29,5 +28,24 @@ export async function POST(req:Request) {
 
             return NextResponse.json(newUser);
         }
+
+}
+
+export async function DELETE(req:Request){
+    const body = await req.json();
+    const {id} = body;
+    try{
+        const deletedUser = await prisma.user.delete({
+            where: { id : parseInt(id) }
+        })
+
+        if(deletedUser){
+            return NextResponse.json({deletedUser:deletedUser},{status:200, headers:{"message":"User deleted successfully!"}})
+        }
+
+    }catch(error:any){
+        return NextResponse.json({ deletedUser: null }, { status: 500, headers: { "message": "Error deleting user" } });
+
+    }
 
 }

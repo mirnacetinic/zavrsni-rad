@@ -38,6 +38,7 @@ const ReservationModal = ({ isOpen, onClose, checkIn, checkOut, guests, email, u
 
   const router = useRouter();
   const [step, setStep] = useState(Steps.RESERVE);
+
   useEffect(() => {
     setValue("checkIn", checkIn);
     setValue("checkOut", checkOut);
@@ -72,6 +73,8 @@ const ReservationModal = ({ isOpen, onClose, checkIn, checkOut, guests, email, u
         toast.success("Reservation success");
         const responseData = await response.json();
         reset();
+        setStep(Steps.RESERVE);
+        router.push('/reservations');
         onClose();
       } else {
         toast.error(response.headers.get('message'));
@@ -101,19 +104,19 @@ const ReservationModal = ({ isOpen, onClose, checkIn, checkOut, guests, email, u
                         value:1,
                         message:"Guests minimum is 1!"
                     }})}
-                    type="number" name="guests" placeholder="guests"
-                    className="mt-2 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300" />
-                    <p className="text-red-500">{errors?.guests?.message}</p>
+                    type="number" readOnly name="guests" placeholder="guests"
+                    className="form-input" />
+                    <p className="error">{errors?.guests?.message}</p>
                     <input {...register("checkIn", {
                     required: "CheckIn is required"})}
-                    type="text" name="checkIn" placeholder="checkIn" 
-                    className="mt-2 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300" />
-                    <p className="text-red-500">{errors?.checkIn?.message}</p>
+                    type="text" readOnly name="checkIn" placeholder="checkIn" 
+                    className="form-input" />
+                    <p className="error">{errors?.checkIn?.message}</p>
                     <input {...register("checkOut", {
                     required: "CheckOut is required"})}
-                    type="text" name="checkOut" placeholder="checkOut" 
-                    className="mt-2 block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-purple-300" />
-                    <p className="text-red-500">{errors?.checkOut?.message}</p>
+                    type="text" readOnly name="checkOut" placeholder="checkOut" 
+                    className="form-input" />
+                    <p className="error">{errors?.checkOut?.message}</p>
                 </div>
               )}
 
@@ -128,22 +131,24 @@ const ReservationModal = ({ isOpen, onClose, checkIn, checkOut, guests, email, u
                     <p>Payment</p>
                 </div>
               )}
+              <div className="bottom-3 left-0 w-full flex justify-center">
               <button onClick={back}
-                className={`mx-8 mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600 
+                className={`form_button 
                 ${step === Steps.RESERVE ? "hidden" : ""}`}>
                 Back
               </button>
               <button onClick={next}
-                className={`mx-4 mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600 
+                className={`form_button 
                 ${step === Steps.FINISH ? "hidden" : ""}`}>
                 Next
               </button>
               {step === Steps.FINISH && (
                 <button onClick={handleSubmit(handleSubmitReservation)}
-                  className="mx-4 mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-600">
+                  className="form_button">
                   Confirm
                 </button>
               )}
+              </div>
             </div>
           </div>
         </>

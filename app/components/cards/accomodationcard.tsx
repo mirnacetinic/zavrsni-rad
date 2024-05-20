@@ -1,10 +1,10 @@
 'use client';
-import { Accommodation, Location, Unit } from "@prisma/client";
+import { Accommodation, Location} from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MdLocationPin } from "react-icons/md";
 
 interface AccommodationCardProps {
-    data: Accommodation & Location & {units : Unit[]};
+    data: Accommodation & Location;
 }
 
 const AccomodationCard = ({ data }:AccommodationCardProps) => {

@@ -1,17 +1,19 @@
-import { useState } from "react";
+'use client';
+import { useState, useEffect } from "react";
 import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 
 interface CustomCalendarProps {
     hidden: boolean;
     onSelect: (date: Date) => void;
-    selected? : string;
-   
+    selected?: string;
+    disabledBefore?: Date;
+    disabledAfter?: Date;
 }
 
-const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
+const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAfter }: CustomCalendarProps) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const now = new Date();
-    now.setHours(0,0,0,0);
+    now.setHours(0, 0, 0, 0);
 
     const generateDays = (year: number, month: number) => {
         const firstDay = new Date(year, month, 1);
@@ -34,7 +36,11 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const days = generateDays(currentYear, currentMonth);
 
-    if(selected && selectedDate == null )(setSelectedDate(new Date(selected)));
+    useEffect(() => {
+        if (selected && !selectedDate) {
+            setSelectedDate(new Date(selected));
+        }
+    }, [selected, selectedDate]);
 
     const handlePrevMonth = () => {
         if (isNow(currentMonth)) {
@@ -56,19 +62,24 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
     const handleDayClick = (day: number | null) => {
         if (day !== null) {
             const selectedDate = new Date(currentYear, currentMonth, day, 23);
-            if (selectedDate >= now) {
+            if (selectedDate >= now && (!disabledBefore || selectedDate >= disabledBefore) && (!disabledAfter || selectedDate <= disabledAfter)) {
                 setSelectedDate(selectedDate);
                 onSelect(selectedDate);
             }
         }
     };
 
-    const isNow = (month: number) => {
-        return now.getMonth() == month && now.getFullYear() == currentYear;
-    };
-
     const isFuture = (day: number) => {
         return day >= now.getDate();
+    };
+    
+    const isNow = (month: number) => {
+        return now.getMonth() === month && now.getFullYear() === currentYear;
+    };
+
+    const isDisabled = (day: number) => {
+        const date = new Date(currentYear, currentMonth, day);
+        return (disabledBefore && date < disabledBefore) || (disabledAfter && date > disabledAfter);
     };
 
     return (
@@ -79,18 +90,19 @@ const CustomCalendar = ({ hidden, onSelect, selected}: CustomCalendarProps) => {
                 <AiFillCaretRight className="cursor-pointer" onClick={handleNextMonth} />
             </div>
             <div className="p-2 grid grid-cols-7 gap-1 border rounded border-gray-400">
-                <div className="text-center text-gray-600">Sun</div>
-                <div className="text-center text-gray-600">Mon</div>
-                <div className="text-center text-gray-600">Tue</div>
-                <div className="text-center text-gray-600">Wed</div>
-                <div className="text-center text-gray-600">Thu</div>
-                <div className="text-center text-gray-600">Fri</div>
-                <div className="text-center text-gray-600">Sat</div>
+                <div className="text-center text-gray-600">Su</div>
+                <div className="text-center text-gray-600">Mo</div>
+                <div className="text-center text-gray-600">Tu</div>
+                <div className="text-center text-gray-600">We</div>
+                <div className="text-center text-gray-600">Th</div>
+                <div className="text-center text-gray-600">Fr</div>
+                <div className="text-center text-gray-600">Sa</div>
                 {days.map((day, index) => (
-                    <div key={index} onClick={() => handleDayClick(day)} 
+                    <div key={index} onClick={() => handleDayClick(day)}
                         className={`text-center cursor-pointer 
-                        ${(day === selectedDate?.getDate() && currentMonth === selectedDate?.getMonth() && currentYear === selectedDate.getFullYear()) ? 
-                            'bg-purple-400 text-white' : ((day !== null && isNow(currentMonth) && !isFuture(day))) ? 'disabled text-gray-400' : ''}`}>
+                        ${day === selectedDate?.getDate() && currentMonth === selectedDate?.getMonth() && currentYear === selectedDate?.getFullYear() ? 'bg-purple-400 text-white' : ''} 
+                        ${day !== null && isNow(currentMonth) && !isFuture(day) ? 'disabled text-gray-400' : ''} 
+                        ${day !== null && isDisabled(day) ? 'disabled text-gray-400 cursor-not-allowed' : ''}`}>
                         {day}
                     </div>))}
             </div>

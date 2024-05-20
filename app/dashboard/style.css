@@ -1,0 +1,57 @@
+.main-div{
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+    border-left: 1px, darkgray, solid;
+
+}
+
+.info{
+    width: full;
+
+}
+
+.title{
+    padding: 1rem;
+    font-size:large;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.layout{
+    display: flex;
+
+}
+
+.panel-nav{
+    position: sticky;
+    flex:1;
+    padding: 10px;
+
+}
+
+.panel-option{
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px 0px;
+    border-radius: 10px;
+}
+
+.panel-option:hover{
+    background-color: #9B7BDC;
+}
+
+.panel-list{
+    font-weight: bold;
+    font-size: 13px;
+    margin: 10px 0px;
+}
+
+.content{
+    flex:4;
+    padding: 20px;
+
+}

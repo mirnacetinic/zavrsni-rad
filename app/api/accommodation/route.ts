@@ -45,6 +45,7 @@ export async function POST(req: Request) {
                         type: unit.type,
                         description: unit.description,
                         capacity: parseInt(unit.capacity),
+                        images : unit.images,
                         amenities: {
                             create: unit.amenities.map((amenity: any) => ({
                                 amenity: { connect: { id: parseInt(amenity) } }

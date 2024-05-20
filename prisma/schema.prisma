@@ -19,6 +19,13 @@ enum Role {
   HOST
 }
 
+enum Status{
+  Canceled
+  Finished
+  Active
+
+}
+
 enum AccommodationType {
   House
   Villa
@@ -35,6 +42,7 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   role           Role            @default(USER)
+  active         Boolean         @default(true)
   accommodations Accommodation[]
   reservations   Reservation[]
   favourites     UserFavorites[]
@@ -71,6 +79,7 @@ model Unit {
   amenities       UnitAmenity[]
   accommodationId Int
   accommodation   Accommodation     @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  images          String[]          @default([])
   likedBy         UserFavorites[]
   reviews         Review[]
   reservations    Reservation[]
@@ -92,8 +101,8 @@ model UnitAmenity {
 }
 
 model UserFavorites {
-  unit   Unit @relation(fields: [unitId], references: [id])
-  user   User @relation(fields: [userId], references: [id])
+  unit   Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   unitId Int
   userId Int
 
@@ -109,12 +118,13 @@ model Reservation {
   checkOut DateTime
   unitId   Int
   unit     Unit     @relation(fields: [unitId], references: [id])
+  status   Status   @default(Active)
 }
 
 model Review {
   id     Int  @id @default(autoincrement())
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   unitId Int
-  unit   Unit @relation(fields: [unitId], references: [id])
+  unit   Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 }

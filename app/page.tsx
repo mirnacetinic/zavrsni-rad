@@ -3,7 +3,7 @@ import Searchbar from "./components/navigation/searchbar";
 export default function Home() {
   return (
     <div>
-      <div className="h-[90vh] bg-cover bg-center" style={{backgroundImage: 'url("/images/sky.jpg")', backgroundPositionY: '60%', backgroundSize:'cover'}}>
+      <div className="h-[90vh] bg-cover bg-center" style={{backgroundImage: 'url("/images/sky.jpg")'}}>
         <div className="flex items-center justify-center h-full">
           <Searchbar/>
         </div>

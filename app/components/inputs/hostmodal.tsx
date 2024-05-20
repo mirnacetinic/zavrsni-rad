@@ -5,7 +5,7 @@ import { FieldValues, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { AiOutlineClose } from "react-icons/ai";
 import UnitModal from "./unitmodal";
-import { UploadDropzone } from "@/app/utils/uploadthing";
+import { UploadButton} from "@/app/utils/uploadthing";
 import Image from "next/image";
 import { MdOutlineApartment, MdOutlineBedroomParent, MdOutlineHouse, MdOutlineVilla } from "react-icons/md";
 
@@ -141,7 +141,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
     <>
       {isOpen && (
         <>
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-70 z-50 animate-fadeIn"></div>
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-70 z-50 animate-fadeIn">
           <div className="fixed inset-0 flex items-center justify-center z-50 animate-slideInDown">
             <div className="p-8 border h-96 w-96 shadow-lg rounded-md bg-white relative">
               <div className="absolute text-black top-2 right-2 cursor-pointer" onClick={onClose}>
@@ -160,7 +160,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                 <label htmlFor="disagree">No</label>
                 <p className="mt-3 text-gray-500"><small>*By agreeing to host your property on StayAway, you acknowledge and accept our terms of service, including our privacy policy and community guidelines.
                    Your commitment ensures a safe and respectful environment for all users.*</small></p>
-                 <p className="text-red-500">{errors?.agree?.message}</p>
+                 <p className="error">{errors?.agree?.message}</p>
               </div>)}
 
               {step === Steps.TYPE && (
@@ -178,7 +178,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                       <MdOutlineBedroomParent className={`text-3xl cursor-pointer ${type === 'Room' ? 'text-purple-500' : 'text-gray-400'}`} onClick={() => {setValue('type','Room'); setType('Room');}} />
                       <span className="m-2">Room</span>
                   </div>
-                  <p className="mt-2 text-red-500">{errors?.type?.message}</p>
+                  <p className="error">{errors?.type?.message}</p>
                   <input {...register("type", { required: "Select the type of property" })} type="hidden" />
                   <input {...register("unitsNo", { required: "Select number of units",
                           min: {
@@ -186,7 +186,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                             message: "Your accommodation must have at least 1 unit!"}})}
                       type="number" id="unitsNo" min={1} className="text-center form-input" 
                       placeholder="How many units are there?" />
-                  <p className="text-red-500">{errors?.unitsNo?.message}</p>
+                  <p className="error">{errors?.unitsNo?.message}</p>
               </div>)}
 
               {step === Steps.INFO && (
@@ -198,7 +198,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                       message: "Title must be at least 2 characters",
                     }})}
                     type="text" name="title" placeholder="Title" className="form-input" />
-                    <p className="text-red-500">{errors?.title?.message}</p>
+                    <p className="error">{errors?.title?.message}</p>
                   <textarea {...register("description", {
                     required: "Description is required",
                     minLength: {
@@ -207,7 +207,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                     }})}
                     name="description" placeholder="Description" className="form-input" />
                   {errors?.description && (
-                    <p className="text-red-500">{errors?.description.message}</p>)}
+                    <p className="error">{errors?.description.message}</p>)}
                     <input {...register("location", {
                       required: "Location is required",
                       validate: (value)=> validateLocation(value) || "Unknow location",
@@ -219,13 +219,21 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                           {location.city}, {location.country}
                         </option>))}
                     </datalist>
-                      <p className="text-red-500">{errors?.location?.message}</p>
+                      <p className="error">{errors?.location?.message}</p>
                 </div>)}
 
               {step === Steps.IMAGES && (
               <>
-                <UploadDropzone
-                  endpoint="imageUploader"
+                <UploadButton
+                     appearance={{
+                      button({ ready, isUploading }) {
+                        return {
+                          background:"#6b46c1",
+                          ...(ready && { color: "#ecfdf5" }),
+                          ...(isUploading && { color: "#d1d5db" }),
+                        };}
+                    }}
+                  endpoint="imageAcc"
                   onClientUploadComplete={(res) => {
                     toast.success("Upload Completed");
                     setImage(res[0].url);
@@ -234,7 +242,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                     alert(`ERROR! ${error.message}`);
                   }}/>
                 {image? 
-                <div><Image src={image} alt="Pic" width={200} height={100}/></div> : null}
+                <div className="flex justify-center"><Image src={image} alt="Pic" width={200} height={100}/></div> : null}
               </>)}
 
               {step === Steps.UNITS && (
@@ -269,6 +277,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                     </button>)}
                 </div>
               </div>
+          </div>
           </div>
         </>
       )}
