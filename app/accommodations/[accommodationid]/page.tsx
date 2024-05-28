@@ -1,4 +1,5 @@
 import getAccommodation from "@/app/actions/getAccomodation";
+import { getAccommodationUnits } from "@/app/actions/getInfo";
 import getUser from "@/app/actions/getUser";
 import UnitCard from "@/app/components/cards/unitcard";
 import { MdLocationPin, MdPerson, MdStar} from "react-icons/md";
@@ -8,6 +9,7 @@ const AccommodationView = async ({params}: {params: { accommodationid: string;}}
         const accommodation = await getAccommodation(params.accommodationid);
         const user = await getUser();
         if(accommodation){
+          const units = await getAccommodationUnits(accommodation.id);
             return (
               <div className="w-full max-w-6xl mx-auto p-4">
               <div className="mb-4 flex flex-col items-center md:flex-row">
@@ -29,10 +31,10 @@ const AccommodationView = async ({params}: {params: { accommodationid: string;}}
                 </h3>
                 <p className="text-lg mb-4">{accommodation.description}</p>
               </div>
-              {accommodation.units.length !== 0 && (
+              {units.length !== 0 && (
                 <div>
                   <h2 className="text-xl font-semibold mb-2">Units:</h2>
-                  {accommodation.units.map((unit: any, index: number) => (
+                  {units.map((unit: any, index: number) => (
                     <UnitCard key={index} user={user} unit={unit} />
                   ))}
                 </div>

@@ -2,6 +2,17 @@ import prisma from "../lib/db";
 
 export async function getUsers() {
   const users = await prisma.user.findMany({
+    include:{
+      _count: {
+        select: { reservations: true },
+      },
+      favourites : {
+        select:{
+          unit: true
+        }
+      }
+     
+    },
     orderBy:{
       createdAt: 'desc'
     }
@@ -12,6 +23,9 @@ export async function getUsers() {
     surname: user.surname,
     email: user.email,
     role: user.role,
+    status : user.status,
+    reservations : user._count.reservations,
+    favourites : user.favourites.map(fav=>fav.unit.id)
   }));
 
   return safeUsers;
@@ -43,33 +57,57 @@ export async function getUnits() {
   });
 
   const safeUnits = units.map(unit=>({
-    id: unit.id,
-    name: unit.title,
-    type: unit.type,
-    description: unit.description,
-    accommodation: unit.accommodation.title,
-    capacity: unit.capacity,
+   ...unit,
+  accommodation: unit.accommodation.title,
+    
     amenities: unit.amenities.map(amenity => amenity.amenity.name) 
   }));
 
   return safeUnits;
 }
 
-export async function getAccommodationUnits(accommodationId: string) {
-  const units = prisma.unit.findMany({
-    where: { accommodationId: parseInt(accommodationId) },
+export async function getAccommodationUnits(accommodationId: number) {
+  const units = await prisma.unit.findMany({
+    where: { accommodationId: accommodationId },
     include: {
-      amenities: true,
+      reservations : {
+        where:{
+          status: {not: 'Canceled'}
+        }
+      },
+      amenities: {
+        include:{
+          amenity: true
+        }
+      },
+      priceLists: true,
     },
   });
 
-  return units;
+  const safeUnits = units.map((unit)=>({
+    ...unit,
+    amenities : unit.amenities.map(a=>a.amenity.name),
+    reservations : unit.reservations.map(r=>({
+      checkIn: r.checkIn,
+      checkOut : r.checkOut})),
+    prices : unit.priceLists.map(price=>({
+      price : price.price,
+      from : price.startDate,
+      to : price.endDate}))
+    }));
+    
+  return safeUnits;
 }
 
 export async function getAccommodations(searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string; }) {
   const where: any = {};
   const unitConditions: any[] = [];
-
+  where.status = 'Active';
+  unitConditions.push({
+    not : undefined
+  },{
+    priceLists :{some : {not : undefined}}
+  })
   if (searchParams) {
     if (searchParams.whereTo) {
       where["location"] = {
@@ -85,6 +123,16 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
         throw new Error("CheckIn must be before the checkOut!");
       } else {
         unitConditions.push({
+          priceLists: {
+            some: {
+              AND: [
+                { startDate: { lte: startDate } },
+                { endDate: { gte: endDate } },
+              ],
+            },
+          },
+        });
+        unitConditions.push({
           reservations: {
             none: {
               AND: [
@@ -93,7 +141,7 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
                   OR: [
                     {
                       checkIn: { lte: startDate },
-                      checkOut: { gt: startDate }, 
+                      checkOut: { gte: startDate }, 
                     },
                     {
                       checkIn: { lt: endDate }, 
@@ -104,7 +152,7 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
                       checkOut: { lte: endDate },
                     },
                   ],
-                },
+                }
               ],
             },
           },
@@ -137,15 +185,22 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
     type: accommodation.type,
     country: accommodation.location.country,
     city: accommodation.location.city,
+    address : accommodation.address,
     imageUrl: accommodation.imageUrl,
+    status : accommodation.status
   }));
 
   return safeAccommodations;
 }
 
-export async function getHostAccommodation(id: number) {
+export async function getDashAccommodation(host?:number) {
+  const where: any = {};
+  if(host){
+    where.userId = host;
+
+  }
   const accommodations = await prisma.accommodation.findMany({
-    where: { userId: id },
+    where,
     include: { location: true }
   });
 
@@ -156,7 +211,10 @@ export async function getHostAccommodation(id: number) {
     type: accommodation.type,
     country: accommodation.location.country,
     city: accommodation.location.city,
-    imageUrl: accommodation.imageUrl,
+    address : accommodation.address,
+    status : accommodation.status
+  
+  
   }));
 
   return safeAccommodations;
@@ -167,10 +225,13 @@ export async function getLocations() {
   return locations;
 }
 
-export async function getReservations(guest? : number) {
+export async function getReservations(guest? : number, unit? : number) {
   const where : any = {};
   if(guest){
     where.userId = guest;
+  }
+  if(unit){
+    where.unitId = unit;
   }
   const reservations = await prisma.reservation.findMany(
     { where,
@@ -182,7 +243,7 @@ export async function getReservations(guest? : number) {
         }
       }
     }, orderBy:{
-      checkIn : 'desc'
+      createdAt : 'asc'
     }}
   );
 
@@ -194,7 +255,8 @@ export async function getReservations(guest? : number) {
     checkIn: reservation.checkIn.toDateString(),
     checkOut: reservation.checkOut.toDateString(),
     guests: reservation.guests,
-    status : reservation.status
+    status : reservation.status,
+    price : reservation.price
   }));
 
   return safeReservations;

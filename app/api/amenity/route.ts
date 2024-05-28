@@ -50,3 +50,23 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ status: 500, headers: { "message": "Error deleting amenity" } });
     }
 }
+
+export async function PUT(req: Request) {
+    const body = await req.json();
+    const { id, data } = body;
+
+    try {
+     
+        const updated = await prisma.amenity.update({
+            where: {id : id},
+            data
+        })
+        if (!updated) {
+            return NextResponse.json({amenity:null},{ status: 404, headers: { "message": "Amenity not found!" } });
+        }
+
+        return NextResponse.json({updated},{ status: 200, headers: { "message": "Amenity updated successfully!" } });
+    } catch (error) {
+        return NextResponse.json({ status: 500, headers: { "message": "Error updating amenity" } });
+    }
+}

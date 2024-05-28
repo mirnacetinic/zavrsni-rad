@@ -13,7 +13,7 @@ if(user){
           <h2>My Favourites</h2>
           <div className="grid md:grid-cols-3 gap-4 mt-6">
             {accommodations.length === 0 ? (
-              <div className="text-gray-600">Sorry, you don't have any favourites!</div>
+              <div className="text-gray-600">Sorry, you do not have any favourites!</div>
             ) : (
               accommodations.map((accommodations: any) => (
                 <AccomodationCard key={accommodations.id} data={accommodations}/>

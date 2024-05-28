@@ -7,20 +7,6 @@ export default async function getAccommodation(id: string) {
             include: {
                 location: true,
                 user: true,
-                units:{
-                    include:{
-                        amenities: {
-                            select: {
-                                amenity: {
-                                    select: {
-                                        name: true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
             }
         });
 
@@ -30,10 +16,6 @@ export default async function getAccommodation(id: string) {
                 user : accommodation.user.name + ' ' + accommodation.user.surname,
                 country: accommodation.location.country,
                 city: accommodation.location.city,
-                units: accommodation.units.map(unit => ({
-                    ...unit,
-                    amenities: unit.amenities.map(a => a.amenity.name)
-                }))
             }
 
             return safeAccommodation;

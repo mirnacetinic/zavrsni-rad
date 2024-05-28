@@ -3,26 +3,30 @@ import "@/app/dashboard/style.css";
 import getUser from "../actions/getUser";
 
 
-export default async function DashBoardLayout({
+export default async function HostboardLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     const user = await getUser();
     if(!user){
-        return (<div className="text-lg">You need to sign in to see the dashboard.</div>);
+        return (<div className="text-lg">You need to sign in to see the hostboard.</div>);
         
     }
 
     else{
-        if(user.role!='ADMIN'){
+        if(user.role!='HOST'){
             return (<div className="text-lg">You do not have permission to view this site.</div>);
         }
 
     return (
         <div className="layout">
             <div className="panel-nav">
-                <PanelNav path="dashboard" options={['Users', 'Accommodations', 'Units', 'Reservations', 'Locations', 'Amenities', 'Insights']} />
+            <PanelNav path="hostboard"
+                                options={[
+                                    'Accommodations', 
+                                     'Reservations',
+                                    'Insights']}/> 
             </div>
             <div className="content overflow-auto">
                 {children}

@@ -126,20 +126,20 @@ const UnitModal = ({ isOpen, onClose, onAddUnit }: ModalProps) => {
                       className="form-input"
                     />
                     <p className="error">{errors?.title?.message}</p>
-                    <input
-                      {...register("description", {
-                        required: "Description is required",
-                        minLength: {
-                          value: 2,
-                          message: "Description must be at least 2 characters",
-                        },
-                      })}
-                      type="text"
-                      name="description"
-                      placeholder="Description"
-                      className="form-input"
-                    />
-                    {errors?.description && <p className="error">{errors?.description.message}</p>}
+                    <textarea {...register("description", {
+                    required: "Description is required",
+                    minLength: {
+                      value: 2,
+                      message: "Description must be at least 2 characters",
+                    },
+                    maxLength:{
+                      value :200,
+                      message : "Description is limited to 200 characters"
+                    }
+                  })}
+                    name="description" placeholder="Description" className="form-input" />
+                  {errors?.description && (
+                    <p className="error">{errors?.description.message}</p>)}
                     <input
                       {...register("capacity", {
                         required: "Capacity is required",

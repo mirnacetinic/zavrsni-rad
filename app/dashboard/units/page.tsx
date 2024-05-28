@@ -11,7 +11,9 @@ const UnitsPage = async () =>{
             Units
             <Form type='unit'/>
         </div>
+        {units.length!==0 &&(
         <div className="info"><InfoCard data={units} type='unit' /></div>
+    )}
         </div>
     )
 }

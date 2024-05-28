@@ -19,11 +19,7 @@ export default async function getUser(){
 
     if(user){
       return{
-        id : user.id,
-        email : user.email,
-        name : user.name,
-        surname : user.surname,
-        role : user.role,
+        ...user,
         favourites : user.favourites.map(f=>f.unitId),
         reservations : user.reservations.map(r=>r)
       }

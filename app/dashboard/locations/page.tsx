@@ -11,9 +11,10 @@ const LocationsPage = async () =>{
             Locations
             <Form type='location'/>
         </div>
+        {locations.length!==0 && (
         <div className="info">
             <InfoCard data={locations} type='location' />
-        </div>
+        </div>)}
         </div>
         
     )

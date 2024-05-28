@@ -4,7 +4,7 @@ import { hash } from "bcrypt";
 
 export async function POST(req:Request) {
         const body = await req.json();
-        const {name, surname, email, password, role} = body;
+        const{data : {name, surname, email, password, role, status}} = body;
 
         const existingUser = await prisma.user.findUnique({
             where: { email : email }
@@ -23,7 +23,8 @@ export async function POST(req:Request) {
                     surname,
                     email,
                     hashPassword:hashPass,
-                    role
+                    role,
+                    status
                 }})
 
             return NextResponse.json(newUser);
@@ -48,4 +49,41 @@ export async function DELETE(req:Request){
 
     }
 
+}
+
+export async function PUT(req:Request){
+    const body = await req.json();
+    const{id, data : {name, surname, email, password, role, status}} = body;
+    try{
+        const hashPass = await hash(password, 10);
+        const updatedUser = await prisma.user.update({
+            where: { id : id },
+            data: {
+                name,
+                surname,
+                email,
+                hashPassword:hashPass,
+                role,
+                status
+            }
+        });
+
+        if(updatedUser){
+            return NextResponse.json({updatedUser:updatedUser},{status:200, headers:{"message":"User updated successfully!"}})
+        }
+
+    }catch(error:any){
+        return NextResponse.json({ updatedUser: null }, { status: 500, headers: { "message": "Error updating user" } });
+
+    }
+
+}
+
+export async function GET() {
+    try {
+        const users = await prisma.user.findMany();
+        return NextResponse.json({users});
+    } catch (error: any) {
+        return NextResponse.json({ users: null }, { status: 500, headers: { "message": "Error fetching users" } });
+    }
 }

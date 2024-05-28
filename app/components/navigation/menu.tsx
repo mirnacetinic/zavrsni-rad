@@ -75,14 +75,19 @@ const Menu = ({ user }: MenuProps) => {
                 <div key="host" className="menu-item" onClick={() => {hostModal()}}>
                   <AiOutlineApartment className="menu-icon" />
                   <span>Become a host</span>
-                  <HostModal user={user.email} isOpen={hostModalOpen} onClose={()=>sethostModalOpen(false)}/>
                 </div>
               )}
               {user.role === "HOST" && (
+                <>
+                <div key="hostacc" className="menu-item" onClick={() => {hostModal()}}>
+                <AiOutlineApartment className="menu-icon" />
+                <span>New Accommodation</span>
+                </div>
                 <div key="hostboard" className="menu-item" onClick={()=>{toggleMenu();}}>
                   <AiOutlineCode className="menu-icon" />
                   <Link href="/hostboard">Hostboard</Link>
                 </div>
+                </>
               )}
               {user.role === "ADMIN" && (
                 <div key="dashboard" className="menu-item" onClick={()=>toggleMenu()}>
@@ -110,7 +115,7 @@ const Menu = ({ user }: MenuProps) => {
         </div>
       )}
       <AuthModal isOpen={modalOpen} onClose={closeModal} onOpen={openModal} content={modalOption}/>
-      {user && ( <HostModal user={user.email} isOpen={hostModalOpen} onClose={()=>sethostModalOpen(false)}/>)}
+      {user && ( <HostModal user={user} isOpen={hostModalOpen} onClose={()=>sethostModalOpen(false)}/>)}
     </div>
   );
 };

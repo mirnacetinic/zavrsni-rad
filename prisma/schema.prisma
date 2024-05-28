@@ -19,11 +19,16 @@ enum Role {
   HOST
 }
 
-enum Status{
+enum Status {
   Canceled
   Finished
   Active
+}
 
+enum ActiveStatus {
+  Active
+  Suspended
+  Inactive
 }
 
 enum AccommodationType {
@@ -42,7 +47,7 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   role           Role            @default(USER)
-  active         Boolean         @default(true)
+  status         ActiveStatus  @default(Active)
   accommodations Accommodation[]
   reservations   Reservation[]
   favourites     UserFavorites[]
@@ -61,9 +66,11 @@ model Accommodation {
   id          Int               @id @default(autoincrement())
   title       String
   type        AccommodationType
+  status      ActiveStatus  @default(Active)
   description String
   locationId  Int
   location    Location          @relation(fields: [locationId], references: [id])
+  address     String
   userId      Int
   user        User              @relation(fields: [userId], references: [id])
   units       Unit[]
@@ -83,6 +90,7 @@ model Unit {
   likedBy         UserFavorites[]
   reviews         Review[]
   reservations    Reservation[]
+  priceLists      PriceList[]
 }
 
 model Amenity {
@@ -110,15 +118,18 @@ model UserFavorites {
 }
 
 model Reservation {
-  id       Int      @id @default(autoincrement())
-  userId   Int
-  user     User     @relation(fields: [userId], references: [id])
-  guests   Int
-  checkIn  DateTime
-  checkOut DateTime
-  unitId   Int
-  unit     Unit     @relation(fields: [unitId], references: [id])
-  status   Status   @default(Active)
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  guests    Int
+  checkIn   DateTime
+  checkOut  DateTime
+  unitId    Int
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  status    Status   @default(Active)
+  createdAt DateTime @default(now())
+  price     Int
+  paymentId String   @unique
 }
 
 model Review {
@@ -127,4 +138,13 @@ model Review {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   unitId Int
   unit   Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+}
+
+model PriceList {
+  id        Int      @id @default(autoincrement())
+  unitId    Int
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate   DateTime
+  price     Float
 }

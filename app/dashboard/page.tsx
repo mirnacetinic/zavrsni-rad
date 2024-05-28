@@ -12,7 +12,7 @@ const Dashboard = async () => {
                         <h1 className="text-2xl font-semibold mb-4">Welcome, {user.name}!</h1>
                         
                     ) : (
-                        <div className="text-lg">You don't have permission to view this site.</div>
+                        <div className="text-lg">You do not have permission to view this site.</div>
                     )}
                 </>
             ) : (

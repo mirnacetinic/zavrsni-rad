@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { checkIn, checkOut, guests, unitId, email } = body;
+    const { checkIn, checkOut, guests, unitId, email, paymentId, price } = body;
 
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
@@ -35,10 +35,10 @@ export async function POST(req: Request) {
             AND: [
                 {
                     checkIn: {
-                        lt: checkOutDate
+                        lte: checkOutDate
                     },
                     checkOut: {
-                        gt: checkInDate
+                        gte: checkInDate
                     }
                 }
             ]
@@ -56,7 +56,9 @@ export async function POST(req: Request) {
                 checkOut: checkOutDate,
                 guests: parseInt(guests),
                 unitId: existingUnit.id,
-                userId: existingUser.id
+                userId: existingUser.id,
+                paymentId,
+                price
             }
         });
 
@@ -88,14 +90,12 @@ export async function DELETE(req: Request) {
 
 export async function PUT(req:Request){
     const body = await req.json();
-    const {id, status} = body;
+    const {id, data} = body;
 
     try{
         const updatedReservation = await prisma.reservation.update({
             where:{id:id},
-            data : {
-                status: status
-            }
+            data
         })
 
         if(updatedReservation){

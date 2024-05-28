@@ -8,11 +8,12 @@ import UnitModal from "./unitmodal";
 import { UploadButton} from "@/app/utils/uploadthing";
 import Image from "next/image";
 import { MdOutlineApartment, MdOutlineBedroomParent, MdOutlineHouse, MdOutlineVilla } from "react-icons/md";
+import { SafeUser } from "@/app/types/type";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: string;
+  user: SafeUser;
 }
 
 enum Steps {
@@ -41,13 +42,14 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
       agree: '',
       unitsNo: '',
       description: '',
-      title: ''
+      title: '',
+      address : '',
     }
   });
 
   const router = useRouter();
 
-  const [step, setStep] = useState(Steps.AGREEMENT);
+  const [step, setStep] = useState(user.role === 'HOST' ? Steps.TYPE : Steps.AGREEMENT);
   const [locations, setLocations] = useState<Location[]>([]);
   const [units, setUnits] = useState<FieldValues[]>([]); 
   const [unitOpen, setUnitOpen] = useState(false);
@@ -84,7 +86,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
         setLocations(data.locations);
       })
       .catch((error) => {
-        console.error('Error fetching locations:', error);
+        toast.error('Error fetching locations:', error);
       });
   }, []);
 
@@ -108,12 +110,12 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
   };
 
   const validateLocation = (location: string): boolean => {
-    const foundLocation = locations.find(loc => loc.zip === location);
+    const foundLocation = locations.find(loc => loc.id === parseInt(location));
     return !!foundLocation;
   };  
 
   const createAccommodation = async (data: FieldValues) => {
-    data.user = user;
+    data.user = user.id;
     data.units = units;
     data.imageUrl = image;
     const response = await fetch("/api/accommodation", {
@@ -204,7 +206,12 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                     minLength: {
                       value: 2,
                       message: "Description must be at least 2 characters",
-                    }})}
+                    },
+                    maxLength:{
+                      value :200,
+                      message : "Description is limited to 200 characters"
+                    }
+                  })}
                     name="description" placeholder="Description" className="form-input" />
                   {errors?.description && (
                     <p className="error">{errors?.description.message}</p>)}
@@ -215,11 +222,19 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
                       className="form-input" type="text" placeholder="Location" name="location" list="locations-datalist" />
                     <datalist id="locations-datalist">
                       {locations.map((location) => (
-                        <option key={location.city} value={location.zip} >
+                        <option key={location.city} value={location.id} >
                           {location.city}, {location.country}
                         </option>))}
                     </datalist>
                       <p className="error">{errors?.location?.message}</p>
+                      <input {...register("address", {
+                    required: "Address is required",
+                    minLength: {
+                      value: 3,
+                      message: "Address must be at least 3 characters",
+                    }})}
+                    type="text" name="address" placeholder="Address" className="form-input" />
+                    <p className="error">{errors?.address?.message}</p>
                 </div>)}
 
               {step === Steps.IMAGES && (
@@ -264,7 +279,7 @@ const HostModal = ({ isOpen, onClose, user }: ModalProps) => {
 
                 <div className="absolute bottom-3 left-0 w-full flex justify-center">
                   <button onClick={back}
-                    className={`form_button ${step === Steps.AGREEMENT ? "hidden" : ""}`}>
+                    className={`form_button ${step === Steps.AGREEMENT || (step === Steps.TYPE && user.role=='HOST') ? "hidden" : ""}`}>
                     Back
                   </button>
                   <button onClick={next} className={`form_button ${step === Steps.FINISH ? "hidden" : ""}`}>

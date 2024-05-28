@@ -2,15 +2,21 @@
 import { useState, useEffect } from "react";
 import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 
+interface Reservation {
+    checkIn: Date;
+    checkOut: Date;
+}
+
 interface CustomCalendarProps {
     hidden: boolean;
     onSelect: (date: Date) => void;
+    reservations?: Reservation[];
     selected?: string;
     disabledBefore?: Date;
     disabledAfter?: Date;
 }
 
-const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAfter }: CustomCalendarProps) => {
+const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAfter, reservations }: CustomCalendarProps) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -18,7 +24,7 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
     const generateDays = (year: number, month: number) => {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        const days = [];
+        const days: (number | null)[] = [];
 
         for (let i = 0; i < firstDay.getDay(); i++) {
             days.push(null);
@@ -62,7 +68,7 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
     const handleDayClick = (day: number | null) => {
         if (day !== null) {
             const selectedDate = new Date(currentYear, currentMonth, day, 23);
-            if (selectedDate >= now && (!disabledBefore || selectedDate >= disabledBefore) && (!disabledAfter || selectedDate <= disabledAfter)) {
+            if (selectedDate >= now && (!disabledBefore || selectedDate >= disabledBefore) && (!disabledAfter || selectedDate <= disabledAfter) && !(isReserved(day))) {
                 setSelectedDate(selectedDate);
                 onSelect(selectedDate);
             }
@@ -72,18 +78,50 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
     const isFuture = (day: number) => {
         return day >= now.getDate();
     };
-    
+
     const isNow = (month: number) => {
         return now.getMonth() === month && now.getFullYear() === currentYear;
     };
 
-    const isDisabled = (day: number) => {
+    const isDisabled = (day: number | null) => {
+        if (day === null) return true;
         const date = new Date(currentYear, currentMonth, day);
-        return (disabledBefore && date < disabledBefore) || (disabledAfter && date > disabledAfter);
+        
+        if ((disabledBefore && date < disabledBefore) || (isNow(currentMonth) && !isFuture(day)) ||(disabledAfter && date > disabledAfter)) return true;
+
+
+        if (reservations) {
+            for (const reservation of reservations) {
+                const checkInDate = reservation.checkIn;
+                const checkOutDate = reservation.checkOut;
+
+                if (date >= checkInDate && date <= checkOutDate) return true;
+
+                if (disabledBefore && checkInDate > disabledBefore && date > checkOutDate) return true;
+                if (disabledAfter && checkOutDate < disabledAfter && date < checkInDate) return true;
+            }
+        }
+
+        return false;
+    };
+
+    const isReserved = (day: number | null) => {
+        if (day == null) return false;
+        const currentDate = new Date(currentYear, currentMonth, day);
+        if (reservations) {
+            for (const reservation of reservations) {
+                const checkInDate = reservation.checkIn;
+                const checkOutDate = reservation.checkOut;
+                if (currentDate >= checkInDate && currentDate <= checkOutDate) {
+                    return true;
+                }
+            }
+        }
+        return false;
     };
 
     return (
-        <div className={`flex flex-col h-70 w-60 p-4 bg-white border rounded border-purple-500 shadow ${hidden ? 'hidden' : ''}`}>
+        <div className={`flex flex-col h-70 w-60 p-4 bg-white cursor-default border rounded border-purple-500 shadow ${hidden ? 'hidden' : ''}`}>
             <div className="flex items-center justify-between bg-purple-400 rounded p-1 mb-1">
                 <AiFillCaretLeft className={`cursor-pointer ${isNow(currentMonth) ? 'opacity-50 disabled' : ''}`} onClick={handlePrevMonth} />
                 <span className="text-lg font-semibold">{months[currentMonth]} {currentYear}</span>
@@ -99,11 +137,10 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
                 <div className="text-center text-gray-600">Sa</div>
                 {days.map((day, index) => (
                     <div key={index} onClick={() => handleDayClick(day)}
-                        className={`text-center cursor-pointer 
+                        className={`text-center rounded
                         ${day === selectedDate?.getDate() && currentMonth === selectedDate?.getMonth() && currentYear === selectedDate?.getFullYear() ? 'bg-purple-400 text-white' : ''} 
-                        ${day !== null && isNow(currentMonth) && !isFuture(day) ? 'disabled text-gray-400' : ''} 
-                        ${day !== null && isDisabled(day) ? 'disabled text-gray-400 cursor-not-allowed' : ''}`}>
-                        {day}
+                        ${isReserved(day) ? 'bg-red-200 cursor-not-allowed ' : isDisabled(day) ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'}`}>
+                        {day !== null ? day : ''}
                     </div>))}
             </div>
         </div>

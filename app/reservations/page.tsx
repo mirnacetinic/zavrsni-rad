@@ -12,7 +12,7 @@ const ReservationsPage = async () => {
         <div>
         <div>My reservations</div>
         <div className="flex">
-            {reservations.length === 0? (<div>Looks like you don't have any reservations</div>):
+            {reservations.length === 0? (<div>Looks like you don not have any reservations</div>):
             (<div className="grid grid-cols-2 gap-6 w-full">
                 {reservations.map((r, index)=>(
                     <ReservationCard key={index} reservation={r}/>

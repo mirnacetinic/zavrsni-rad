@@ -1,5 +1,4 @@
 import getUser from "../actions/getUser";
-import { PanelNav } from "../components/navigation/panelnav";
 import '../dashboard/style.css';
 
 
@@ -10,16 +9,11 @@ const HostBoard = async () => {
             {user ? (
                 <>
                     {user.role === "HOST" ? (
-                        <>
-                            <h1 className="text-2xl font-semibold mb-4">Welcome, {user.name}!</h1>
-                            <PanelNav path="hostboard"
-                                options={[
-                                    'Accommodations', 
-                                     'Reservations',
-                                    'Insights']}/> 
-                        </>
+                        
+                        <h1 className="text-2xl font-semibold mb-4">Welcome, {user.name}!</h1>
+                       
                     ) : (
-                        <div className="text-lg">You don't have permission to view this site.</div>
+                        <div className="text-lg">You do not have permission to view this site.</div>
                     )}
                 </>
             ) : (

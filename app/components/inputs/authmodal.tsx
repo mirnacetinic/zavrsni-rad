@@ -18,7 +18,6 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     defaultValues: {
       name: "",
@@ -140,7 +139,7 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                 Login
               </button>
               <p className="mt-1 text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <span
                   className="text-purple-800 cursor-pointer"
                   onClick={() => onOpen("signup")}

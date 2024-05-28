@@ -13,12 +13,14 @@ export function PanelNav({ options, path }: PanelProps) {
     return (
         <div className="panel-div">
             <ul className="panel-list">
-            {options.map((option) => (
-                <Link href={`/${path}/${option.toLowerCase()}`} >
-                <li key={option}  className={`panel-option ${selectedOption === option ? 'bg-purple-500' : ''}`} onClick={()=>setSelectedOption(option)}>
+            {options.map((option, index) => (
+                <Link key={index} href={`/${path}/${option.toLowerCase()}`} >
+                <li key={index}  className={`panel-option ${selectedOption === option ? 'bg-purple-500' : ''}`} onClick={()=>setSelectedOption(option)}>
+                
                     {option}
                 </li>
                 </Link>
+                
             ))}
             </ul>
         </div>

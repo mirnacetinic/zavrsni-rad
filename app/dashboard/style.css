@@ -2,17 +2,16 @@
     display:flex;
     flex-direction: column;
     width: 100%;
-    border-left: 1px, darkgray, solid;
 
 }
 
+
 .info{
-    width: full;
+    width: 100%;
 
 }
 
 .title{
-    padding: 1rem;
     font-size:large;
     display: flex;
     flex-direction: row;
@@ -26,8 +25,9 @@
 
 .panel-nav{
     position: sticky;
-    flex:1;
+    flex:0.5;
     padding: 10px;
+    border-right: 1px solid #ccc;
 
 }
 
@@ -52,6 +52,14 @@
 
 .content{
     flex:4;
-    padding: 20px;
+    padding: 16px;
+
+}
+
+.charts{
+    margin-top: 10px; 
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 
 }
