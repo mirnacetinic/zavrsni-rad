@@ -53,13 +53,15 @@ export async function DELETE(req: Request) {
 
 export async function PUT(req: Request) {
     const body = await req.json();
-    const { id, data } = body;
+    const { id, name } = body;
 
     try {
      
         const updated = await prisma.amenity.update({
             where: {id : id},
-            data
+            data :{
+                name
+            }
         })
         if (!updated) {
             return NextResponse.json({amenity:null},{ status: 404, headers: { "message": "Amenity not found!" } });

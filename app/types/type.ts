@@ -50,8 +50,11 @@ export interface safeReservation{
     guest: string,
     unit: number,
     unitTitle : string,
+    accommodation : number,
     checkIn: string,
     checkOut: string,
     guests: number,
-    status : string
+    status : string,
+    price : number,
+    review : number | undefined
 }

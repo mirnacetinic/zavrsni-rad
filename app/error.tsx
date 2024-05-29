@@ -1,28 +1,26 @@
-'use client' 
- 
-import { useEffect } from 'react'
- 
+"use client";
+
+import Link from "next/link";
+
+
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error)
-  }, [error])
- 
+
   return (
-    <div>
-      <h2>Something went wrong!</h2>
+    <div className="flex flex-col items-center">
+      <h2 className="text-xl">Something went wrong!</h2>
       <p>{error.message}</p>
-      <button
-        onClick={
-          () => reset()
-        }>
-        Try again
-      </button>
+      <div>
+      <button  className="form_button" onClick={() => reset()}>Try again</button>
+      or 
+      <button className="form_button"><Link href="/">Go Home</Link></button>
+      </div>
+      
     </div>
-  )
+  );
 }

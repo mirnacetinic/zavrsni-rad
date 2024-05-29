@@ -51,7 +51,6 @@ model User {
   accommodations Accommodation[]
   reservations   Reservation[]
   favourites     UserFavorites[]
-  reviews        Review[]
 }
 
 model Location {
@@ -88,7 +87,6 @@ model Unit {
   accommodation   Accommodation     @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
   images          String[]          @default([])
   likedBy         UserFavorites[]
-  reviews         Review[]
   reservations    Reservation[]
   priceLists      PriceList[]
 }
@@ -128,23 +126,23 @@ model Reservation {
   unit      Unit     @relation(fields: [unitId], references: [id])
   status    Status   @default(Active)
   createdAt DateTime @default(now())
-  price     Int
+  price     Float
   paymentId String   @unique
+  review    Review?
 }
 
 model Review {
-  id     Int  @id @default(autoincrement())
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  unitId Int
-  unit   Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  reservationId Int @id @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  rating Int
+  createdAt DateTime  @default(now())
 }
 
 model PriceList {
   id        Int      @id @default(autoincrement())
   unitId    Int
   unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  startDate DateTime
-  endDate   DateTime
+  from DateTime
+  to   DateTime
   price     Float
 }

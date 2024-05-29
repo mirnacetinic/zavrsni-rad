@@ -107,7 +107,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret, onSuccess }) 
       <PaymentElement id="payment-element" options={{ layout: 'auto' }} />
       <button disabled={isLoading || !stripe || !elements} id="submit" className="form_button mt-4">
         <span id="button-text">
-          {isLoading ? <div className="spinner" id="spinner"></div> : 'Pay now'}
+          {isLoading ? 'Loading...' : 'Pay now'}
         </span>
       </button>
     </form>

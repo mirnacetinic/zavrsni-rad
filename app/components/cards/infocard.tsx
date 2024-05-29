@@ -23,36 +23,27 @@ const InfoCard = <T extends { id: number }>({
 }: InfoCardProps<T>) => {
   const router = useRouter();
   const [filteredData, setFilteredData] = useState(data);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof T;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [sortParametars, setSortParametars] = useState<{key: keyof T; direction: "asc" | "desc";} | null>(null);
 
   useEffect(() => {
     setFilteredData(data);
   }, [data]);
 
   const sortData = (key: keyof T) => {
-    const direction =
-      sortConfig?.key === key && sortConfig.direction === "asc"
-        ? "desc"
-        : "asc";
-    const sortedData = [...filteredData].sort((a, b) => {
-      const aVal = String(a[key]).toLowerCase();
-      const bVal = String(b[key]).toLowerCase();
+    const direction = sortParametars?.key === key && sortParametars.direction === "asc" ? "desc" : "asc";
+    const sorted = [...filteredData].sort((a, b) => {
+      const valueA = String(a[key]).toLowerCase();
+      const valueB = String(b[key]).toLowerCase();
 
-      if (aVal < bVal) return direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return direction === "asc" ? 1 : -1;
+      if (valueA < valueB) return direction === "asc" ? -1 : 1;
+      if (valueA > valueB) return direction === "asc" ? 1 : -1;
       return 0;
     });
-    setFilteredData(sortedData);
-    setSortConfig({ key, direction });
+    setFilteredData(sorted);
+    setSortParametars({ key, direction });
   };
 
-  const handleFilterChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: keyof T
-  ) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof T) => {
     const { value } = e.target;
     const filtered = data.filter((item) =>
       String(item[key]).toLowerCase().includes(value.toLowerCase())
@@ -78,7 +69,7 @@ const InfoCard = <T extends { id: number }>({
         );
       }
     } catch (error: any) {
-      toast.error(`Error deleting ${type}`, error.message);
+      toast.error(`Error deleting ${type}`);
     }
   };
 
@@ -91,13 +82,11 @@ const InfoCard = <T extends { id: number }>({
               <tr className="mx-1 border-b border-neutral-200">
                 {Object.keys(data[0]).map((key) => (
                   <th key={key} className="p-2">
-                    <div
-                      onClick={() => sortData(key as keyof T)}
-                      className="cursor-pointer flex flex-row text-center text-white font-light"
-                    >
-                      {sortConfig?.key === key ? (
+                    <div onClick={() => sortData(key as keyof T)}
+                      className="cursor-pointer flex flex-row text-center text-white font-light">
+                      {sortParametars?.key === key ? (
                         <>
-                          {sortConfig.direction === "asc" ? (
+                          {sortParametars.direction === "asc" ? (
                             <FaSortUp className="mr-1" />
                           ) : (
                             <FaSortDown className="mr-1" />
@@ -108,14 +97,10 @@ const InfoCard = <T extends { id: number }>({
                       )}
                       {key.toUpperCase()} <AiOutlineSearch className="mx-1" />
                     </div>
-                    <input
-                      type="text"
-                      onChange={(e) => handleFilterChange(e, key as keyof T)}
+                    <input type="text" onChange={(e) => handleFilterChange(e, key as keyof T)}
                       className="cursor-pointer m-1 block w-full p-1 pr-8 border border-gray-300 rounded-md text-sm"
-                      placeholder="Filter"
-                    />
-                  </th>
-                ))}
+                      placeholder="Filter" />
+                  </th>))}
                 <th className="p-2"></th>
               </tr>
             </thead>
@@ -129,11 +114,7 @@ const InfoCard = <T extends { id: number }>({
                   ))}
                   <td className="flex flex-row justify-center p-2">
                     <Form type={type} initialData={item} users={users} locations={locations}/>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteInstance(item.id);
-                      }}
+                    <button onClick={(e) => {e.stopPropagation(); deleteInstance(item.id);}}
                       className="form_button">
                       Delete
                     </button>

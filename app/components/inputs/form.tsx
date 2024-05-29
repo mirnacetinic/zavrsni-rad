@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ModalBase from "../cards/modalbase";
 import { useState, useEffect } from "react";
 import { SafeUser } from "@/app/types/type";
+import CustomCalendar from "./customcalendar";
 
 interface FormProps {
   type: string;
@@ -118,15 +119,14 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
       );
 
       customFields.push(
-        <div className="mb-4 w-full" key="location">
+        <div className="mb-4 w-full" key="locationId">
           <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
           <select
             className="form-input"
-            name="location"
-            value={formData.location || ''}
+            name="locationId"
+            value={formData.locationId || ''}
             onChange={handleInputChange}
-            required
-          >
+            required>
             <option value="">Select Location</option>
             {locations?.map((location, index) => (
               <option key={index} value={location.id}>
@@ -138,15 +138,14 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
       );
 
       customFields.push(
-        <div className="mb-2 w-full" key="user">
+        <div className="mb-2 w-full" key="ownerId">
           <label className="block text-gray-700 text-sm font-bold mb-2">Owner</label>
           <select
             className="form-input"
-            name="user"
-            value={formData.user || ''}
+            name="ownerId"
+            value={formData.ownerId || ''}
             onChange={handleInputChange}
-            required
-          >
+            required>
             <option value="">Select Owner</option>
             {users?.map((user, index) => (
               <option key={index} value={user.id}>
@@ -198,8 +197,7 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
             name="guestId"
             value={formData.guestId || ''}
             onChange={handleInputChange}
-            required
-          >
+            required>
             <option value="">Select Guest</option>
             {users?.map((user, index) => (
               <option key={index} value={user.id}>
@@ -209,6 +207,43 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
           </select>
         </div>
       );
+
+      customFields.push(
+        <div>
+        <label htmlFor="checkIn" className="block mb-2">Check in:</label>
+            <input
+              id="checkIn"
+              type="text"
+              placeholder="Select date"
+              value={formData.checkIn || ''}
+              onChange={handleInputChange}
+              className="form-input"
+            />
+            <CustomCalendar
+              selected={formData.checkIn}
+              onSelect={(date) =>formData.checkIn = date}
+              hidden={false}
+             
+            /></div>
+      )
+      customFields.push(
+        <div>
+        <label htmlFor="checkOut" className="block mb-2">Check Out:</label>
+            <input
+              id="checkOut"
+              type="text"
+              placeholder="Select date"
+              value={formData.checkOut || ''}
+              onChange={handleInputChange}
+              className="form-input"
+            />
+            <CustomCalendar
+              selected={formData.checkOut}
+              onSelect={(date) =>formData.checkOut = date}
+              hidden={false}
+             
+            /></div>
+      )
       break;
 
     default:

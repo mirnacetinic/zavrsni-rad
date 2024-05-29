@@ -155,6 +155,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
               className="form-input"
             />
             <CustomCalendar
+            prices={unit.prices}
               reservations={unit.reservations}
               selected={checkIn}
               onSelect={(date) => handleDateSelect(date, setCheckIn, () => setCheckInHidden(true))}
@@ -174,6 +175,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
               className="form-input"
             />
             <CustomCalendar
+            prices={unit.prices}
               reservations={unit.reservations}
               selected={checkOut}
               onSelect={(date) => handleDateSelect(date, setCheckOut, () => setCheckOutHidden(true))}

@@ -95,7 +95,7 @@ export async function PUT(req:Request){
     try{
         const updatedReservation = await prisma.reservation.update({
             where:{id:id},
-            data
+            ...data
         })
 
         if(updatedReservation){

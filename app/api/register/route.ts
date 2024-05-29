@@ -4,7 +4,7 @@ import { hash } from "bcrypt";
 
 export async function POST(req:Request) {
         const body = await req.json();
-        const{data : {name, surname, email, password, role, status}} = body;
+        const{ name, surname, email, password, role, status} = body;
 
         const existingUser = await prisma.user.findUnique({
             where: { email : email }
@@ -53,7 +53,7 @@ export async function DELETE(req:Request){
 
 export async function PUT(req:Request){
     const body = await req.json();
-    const{id, data : {name, surname, email, password, role, status}} = body;
+    const {id, name, surname, email, password, role, status} = body;
     try{
         const hashPass = await hash(password, 10);
         const updatedUser = await prisma.user.update({

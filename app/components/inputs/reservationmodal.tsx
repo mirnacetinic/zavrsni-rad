@@ -74,7 +74,7 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
       router.push("/reservations");
       onClose();
     } else {
-      const errorMessage = await response.text();
+      const errorMessage = response.headers.get("message");
       toast.error(errorMessage || "Reservation failed");
     }
   };
@@ -110,13 +110,16 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
         </div>
       )}
       {step === Steps.PAYMENT && (
+    
         <div className="text-black">
           {clientSecret && (
+            
             <Elements stripe={stripePromise} options={{ clientSecret }}>
               <CheckoutForm onSuccess={(id:string)=>setPayment(id)} clientSecret={clientSecret} />
             </Elements>
           )}
         </div>
+     
       )}
       {step === Steps.FINISH && (
         <div className="text-black">

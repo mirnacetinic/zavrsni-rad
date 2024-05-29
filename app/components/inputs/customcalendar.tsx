@@ -11,12 +11,13 @@ interface CustomCalendarProps {
     hidden: boolean;
     onSelect: (date: Date) => void;
     reservations?: Reservation[];
+    prices? : {price:number,from:Date,to:Date}[];
     selected?: string;
     disabledBefore?: Date;
     disabledAfter?: Date;
 }
 
-const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAfter, reservations }: CustomCalendarProps) => {
+const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAfter, reservations, prices }: CustomCalendarProps) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -86,9 +87,13 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
     const isDisabled = (day: number | null) => {
         if (day === null) return true;
         const date = new Date(currentYear, currentMonth, day);
-        
-        if ((disabledBefore && date < disabledBefore) || (isNow(currentMonth) && !isFuture(day)) ||(disabledAfter && date > disabledAfter)) return true;
+        if ((disabledBefore && date < disabledBefore) || (isNow(currentMonth) && !isFuture(day)) || (disabledAfter && date > disabledAfter)) return true;
 
+        if(prices){
+            const setPrice=prices.filter((price)=>price.from<=date && price.to>=date);
+            if(setPrice.length!=1) return true;
+            
+        }
 
         if (reservations) {
             for (const reservation of reservations) {
@@ -110,9 +115,7 @@ const CustomCalendar = ({ hidden, onSelect, selected, disabledBefore, disabledAf
         const currentDate = new Date(currentYear, currentMonth, day);
         if (reservations) {
             for (const reservation of reservations) {
-                const checkInDate = reservation.checkIn;
-                const checkOutDate = reservation.checkOut;
-                if (currentDate >= checkInDate && currentDate <= checkOutDate) {
+                if (currentDate >= reservation.checkIn && currentDate <= reservation.checkOut) {
                     return true;
                 }
             }

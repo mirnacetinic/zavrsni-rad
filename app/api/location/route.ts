@@ -95,11 +95,15 @@ export async function DELETE(req: Request) {
 
 export async function PUT(req: Request) {
   const body = await req.json();
-  const { data } = body;
+  const { id, city, country, zip } = body;
   try {
     const updated = await prisma.location.update({
-      where: { id: data.id },
-      data,
+      where: { id: id },
+      data : {
+        city,
+        country,
+        zip
+      }
     });
     if (!updated) {
       return NextResponse.json(

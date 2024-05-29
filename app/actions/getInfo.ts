@@ -90,11 +90,8 @@ export async function getAccommodationUnits(accommodationId: number) {
     reservations : unit.reservations.map(r=>({
       checkIn: r.checkIn,
       checkOut : r.checkOut})),
-    prices : unit.priceLists.map(price=>({
-      price : price.price,
-      from : price.startDate,
-      to : price.endDate}))
-    }));
+    prices : unit.priceLists
+}));
     
   return safeUnits;
 }
@@ -126,8 +123,8 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
           priceLists: {
             some: {
               AND: [
-                { startDate: { lte: startDate } },
-                { endDate: { gte: endDate } },
+                { from: { lte: startDate } },
+                { to: { gte: endDate } },
               ],
             },
           },
@@ -201,19 +198,31 @@ export async function getDashAccommodation(host?:number) {
   }
   const accommodations = await prisma.accommodation.findMany({
     where,
-    include: { location: true }
+    include: { 
+      location: true,
+      user:{
+        select:{
+          name: true,
+          surname:true,
+          id : true
+        }
+      }
+
+     }
   });
 
   const safeAccommodations = accommodations.map((accommodation) => ({
     id: accommodation.id,
+    ownerId : accommodation.user.id,
+    owner : accommodation.user.name + ' ' + accommodation.user.surname,
     title: accommodation.title,
     description: accommodation.description,
     type: accommodation.type,
+    locationId : accommodation.locationId,
     country: accommodation.location.country,
     city: accommodation.location.city,
     address : accommodation.address,
-    status : accommodation.status
-  
+    status : accommodation.status,
   
   }));
 
@@ -236,10 +245,17 @@ export async function getReservations(guest? : number, unit? : number) {
   const reservations = await prisma.reservation.findMany(
     { where,
       include:{
-      user : true,
+      user : {select:{ name:true, surname:true}},
+      review: {
+        select:{
+          rating:true
+        }
+      },
       unit : {
         select:{
-          title:true
+          title:true,
+          type: true,
+          accommodationId : true
         }
       }
     }, orderBy:{
@@ -251,12 +267,14 @@ export async function getReservations(guest? : number, unit? : number) {
     id: reservation.id,
     guest: reservation.user.name + ' ' + reservation.user.surname,
     unit: reservation.unitId,
-    unitTitle : reservation.unit.title,
+    unitTitle : reservation.unit.type + ' ' + reservation.unit.title,
+    accommodation : reservation.unit.accommodationId,
     checkIn: reservation.checkIn.toDateString(),
     checkOut: reservation.checkOut.toDateString(),
     guests: reservation.guests,
     status : reservation.status,
-    price : reservation.price
+    price : reservation.price,
+    review : reservation.review?.rating
   }));
 
   return safeReservations;
