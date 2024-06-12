@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CustomCalendar from "../inputs/customcalendar";
 
-const Searchbar = ({ searchParams }: { searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
+const Searchbar = ({ searchParams } : { searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
     const router = useRouter();
     const [whereTo, setWhereTo] = useState(searchParams?.whereTo || "");
     const [checkIn, setCheckIn] = useState(searchParams?.checkIn || "");
@@ -32,21 +32,21 @@ const Searchbar = ({ searchParams }: { searchParams?: { whereTo?: string; checkI
         setCheckInHidden(true);
     };
 
-    const handleCheckInSelect = (date: Date) => {
-        setCheckIn(date !== null ? date.toDateString() : "");
-        setCheckInHidden(true);
-    };
+    const handleDateSelect = (date: Date | null, setDate: (date: string) => void, hideCalendar: () => void) => {
+        if(date){
+          setDate(date.toDateString());
+          hideCalendar();
+        }
+        else{ 
+          setDate("");
+        }
+      };
 
-    const handleCheckOutSelect = (date: Date) => {
-        setCheckOut(date !== null ? date.toDateString() : "");
-        setCheckOutHidden(true);
-    };
-
-    const checkInDate = checkIn ? new Date(checkIn) : null;
-    const checkOutDate = checkOut ? new Date(checkOut) : null;
+    const checkInDate = checkIn ? new Date(checkIn) : undefined;
+    const checkOutDate = checkOut ? new Date(checkOut) : undefined;
 
     return (
-        <div>
+        <div className="z-20">
             <div className="searchbar-container">
                 <div className="searchbar rounded md:rounded-full">
                     <div className="flex flex-col md:flex-row items-center justify-between px-4">
@@ -61,20 +61,20 @@ const Searchbar = ({ searchParams }: { searchParams?: { whereTo?: string; checkI
                             <label htmlFor="checkIn" className="searchbar-label">
                                 Check in:
                             </label>
-                            <input id="checkIn" type="text" placeholder="Select date" className="searchbar-input" value={checkIn}
+                            <input readOnly id="checkIn" type="text" placeholder="Select date" className="searchbar-input" value={checkIn}
                                 onClick={showCheckIn} onChange={(e) => setCheckIn(e.target.value)} />
                             <div className="absolute mt-16">
-                                <CustomCalendar hidden={checkInHidden} onSelect={handleCheckInSelect} selected={checkIn} disabledAfter={checkOutDate || undefined} />
+                                <CustomCalendar hidden={checkInHidden} onSelect={(date) => handleDateSelect(date, setCheckIn, () => setCheckInHidden(true))} selected={checkInDate} disabledAfter={checkOutDate} />
                             </div>
                         </div>
                         <div className="searchbar-div">
                             <label htmlFor="checkOut" className="searchbar-label">
                                 Check out:
                             </label>
-                            <input id="checkOut" type="text" placeholder="Select date" className="searchbar-input" value={checkOut}
+                            <input readOnly id="checkOut" type="text" placeholder="Select date" className="searchbar-input" value={checkOut}
                                 onClick={showCheckOut} onChange={(e) => setCheckOut(e.target.value)} />
-                            <div className="absolute mt-16">
-                                <CustomCalendar hidden={checkOutHidden} onSelect={handleCheckOutSelect} selected={checkOut} disabledBefore={checkInDate || undefined} />
+                            <div className="absolute  mt-16">
+                                <CustomCalendar hidden={checkOutHidden} onSelect={(date) => handleDateSelect(date, setCheckOut, () => setCheckOutHidden(true))} selected={checkOutDate} disabledBefore={checkInDate} />
                             </div>
                         </div>
                         <div className="searchbar-div">

@@ -1,3 +1,4 @@
+"use client";
 import toast from "react-hot-toast";
 import ModalBase from "../cards/modalbase";
 import { useState } from "react";
@@ -9,27 +10,24 @@ interface ModalProps {
 }
 
 const ReviewModal: React.FC<ModalProps> = ({ reservationId }) => {
-    const router = useRouter();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
+  const [hostRating, setHostRating] = useState(0);
+  const [hoverHost, setHoverHost] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-
-  const handleStarClick = (value: number) => {
-    setRating(value);
-  };
-
-  const handleMouseOver = (value: number) => {
-    setHoverRating(value);
-  };
-
-  const handleMouseLeave = () => {
-    setHoverRating(0);
-  };
+  const [experience, setExperience] = useState("");
 
   const handleSubmitReview = async () => {
+    if (!rating || !hostRating || experience.length === 0) {
+      toast.error("Missing data");
+      return;
+    }
     const data = {
-     reservationId,
-      rating,
+      reservationId: reservationId,
+      rating: rating,
+      hostRating: hostRating,
+      experience: experience,
     };
 
     const response = await fetch("/api/review", {
@@ -65,18 +63,34 @@ const ReviewModal: React.FC<ModalProps> = ({ reservationId }) => {
       <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <div className="text-center">
           <label>Tell us about your experience</label>
-          <input type="text" className="form-input"></input>
+          <textarea
+            className="form-input"
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+          ></textarea>
+          <label>Rate the unit</label>
           <div className="flex justify-center mt-4">
             {[1, 2, 3, 4, 5].map((value) => (
               <MdOutlineStarPurple500
                 key={value}
-                className={`cursor-pointer ${
-                  value <= (hoverRating || rating) ? "text-purple-500" : "text-gray-400"
-                }`}
+                className={`cursor-pointer ${value <= (hoverRating || rating) ? "text-purple-500" : "text-gray-400"}`}
                 size={30}
-                onClick={() => handleStarClick(value)}
-                onMouseOver={() => handleMouseOver(value)}
-                onMouseLeave={handleMouseLeave}
+                onClick={() => setRating(value)}
+                onMouseOver={() => setHoverRating(value)}
+                onMouseLeave={() => setHoverRating(0)}
+              />
+            ))}
+          </div>
+          <label>Rate your host</label>
+          <div className="flex justify-center mt-4">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <MdOutlineStarPurple500
+                key={value}
+                className={`cursor-pointer ${value <= (hoverHost || hostRating) ? "text-purple-500" : "text-gray-400"}`}
+                size={30}
+                onClick={() => setHostRating(value)}
+                onMouseOver={() => setHoverHost(value)}
+                onMouseLeave={() => setHoverHost(0)}
               />
             ))}
           </div>

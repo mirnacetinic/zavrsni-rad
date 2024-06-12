@@ -14,19 +14,16 @@ export default function Home() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold mb-2">Split, Croatia</h3>
             <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam et velit nec urna imperdiet consectetur.</p>
-            <a href="#" className="text-blue-500 mt-2 inline-block">Read more</a>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold mb-2">Crikvenica, Croatia</h3>
             <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam et velit nec urna imperdiet consectetur.</p>
-            <a href="#" className="text-blue-500 mt-2 inline-block">Read more</a>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold mb-2">Zadar, Croatia</h3>
             <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam et velit nec urna imperdiet consectetur.</p>
-            <a href="#" className="text-blue-500 mt-2 inline-block">Read more</a>
           </div>
         </div>
       </div>

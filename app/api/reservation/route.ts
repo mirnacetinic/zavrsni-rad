@@ -3,10 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { checkIn, checkOut, guests, unitId, email, paymentId, price } = body;
+    const { checkIn, checkOut, guests, unitId, email, paymentId, price, status, wasInquiry } = body;
 
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
+
+    if(checkOutDate<checkInDate){
+        return NextResponse.json({ reservation: null }, { status: 500, headers: { "message": "Wrong dates" } });
+
+    }
 
     const existingUser = await prisma.user.findUnique({
         where: { email: email }
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
     const conflictingReservation = await prisma.reservation.findFirst({
         where: {
             unitId: unitId,
-            status: 'Active',
+            status: {notIn: ['Canceled', 'Declined']},
             AND: [
                 {
                     checkIn: {
@@ -57,7 +62,9 @@ export async function POST(req: Request) {
                 guests: parseInt(guests),
                 unitId: existingUnit.id,
                 userId: existingUser.id,
+                wasInquiry: Boolean(wasInquiry),
                 paymentId,
+                status,
                 price
             }
         });
@@ -90,12 +97,18 @@ export async function DELETE(req: Request) {
 
 export async function PUT(req:Request){
     const body = await req.json();
-    const {id, data} = body;
+    const {id,...data} = body;
+
+    if(data.checkIn) {data.checkIn= new Date(data.checkIn)};
+    if(data.checkOut){ data.checkOut= new Date(data.checkOut)};
+    if(data.userId) {data.userId= parseInt(data.userId)};
+
 
     try{
         const updatedReservation = await prisma.reservation.update({
             where:{id:id},
-            ...data
+            data
+            
         })
 
         if(updatedReservation){

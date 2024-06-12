@@ -7,6 +7,19 @@ export default async function getAccommodation(id: string) {
             include: {
                 location: true,
                 user: true,
+                units:{
+                    select:{
+                        reservations:{
+                            select:{
+                                review:{
+                                    select:{
+                                        experience:true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         });
 
@@ -30,11 +43,13 @@ export default async function getAccommodation(id: string) {
                 user : accommodation.user.name + ' ' + accommodation.user.surname,
                 country: accommodation.location.country,
                 city: accommodation.location.city,
-                rating : avgRating._avg.rating
+                rating : avgRating._avg.rating,
+                reviews : accommodation.units?.flatMap(u=>u.reservations?.flatMap(r=>r.review?.experience).filter(e=>e!==undefined))
             }
 
             return safeAccommodation;
         }
+       
         return null;
     } catch (error: any) {
         throw new Error("Couldn't load the listing");

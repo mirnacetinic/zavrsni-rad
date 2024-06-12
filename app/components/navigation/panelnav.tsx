@@ -1,6 +1,6 @@
 'use client';
-import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface PanelProps {
     options: string[];
@@ -8,15 +8,16 @@ interface PanelProps {
 }
 
 export function PanelNav({ options, path }: PanelProps) {
-    const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
+    const pathname = usePathname().split("/").at(2);
     return (
         <div className="panel-div">
             <ul className="panel-list">
+                <Link key={path} href={`/${path}`}>
+                    <li key="board" className={`panel-option ${!pathname? 'bg-purple-500' : ''}`} >{path.toUpperCase()}</li>
+                </Link>
             {options.map((option, index) => (
-                <Link key={index} href={`/${path}/${option.toLowerCase()}`} >
-                <li key={index}  className={`panel-option ${selectedOption === option ? 'bg-purple-500' : ''}`} onClick={()=>setSelectedOption(option)}>
-                
+                <Link key={index} href={`/${path}/${option.toLowerCase()}`}>
+                <li key={index} className={`panel-option ${pathname === option.toLowerCase() ? 'bg-purple-500' : ''}`}>
                     {option}
                 </li>
                 </Link>

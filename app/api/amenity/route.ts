@@ -27,7 +27,7 @@ export async function POST(req:Request) {
                         name,
                     }})
     
-                return NextResponse.json(newAmenity);
+                return NextResponse.json({newAmenity}, {status: 200, headers:{"message":"Amenity created"}});
             }
 
 }

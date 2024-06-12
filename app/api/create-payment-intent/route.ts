@@ -23,7 +23,7 @@ export async function POST(req:Request) {
         
 
     })
-    if(paymentIntent) return NextResponse.json(paymentIntent.client_secret);
+    if(paymentIntent) return NextResponse.json(paymentIntent);
 
 
     return NextResponse.json(null);

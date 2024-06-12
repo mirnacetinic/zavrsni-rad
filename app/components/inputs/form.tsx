@@ -2,43 +2,61 @@
 import { Location } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import ModalBase from "../cards/modalbase";
 import { useState, useEffect } from "react";
+import ModalBase from "../cards/modalbase";
 import { SafeUser } from "@/app/types/type";
-import CustomCalendar from "./customcalendar";
+import { countries, status } from "@/app/types/type";
 
 interface FormProps {
   type: string;
-  initialData?: any; 
-  users? : SafeUser[];
-  locations? : Location[];
+  initialData?: any;
+  users?: SafeUser[];
+  locations?: Location[];
 }
 
-const Form = ({ type, initialData , locations, users}: FormProps) => {
-  const formFields: { label: string; type: string; name: string }[] = [];
-  const customFields: JSX.Element[] = [];
+const Form = ({ type, initialData, locations, users }: FormProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState(initialData || {});
+  const [unitOpen, setUnitOpen] = useState(false);
+  const formFields: { label: string; type: string; name: string }[] = [];
+  let customFields: { label: string; type: string; name: string; options?: { value: string; label: string }[] }[] = [];
   const router = useRouter();
+
   let route = `/api/${type}`;
+
+  const [formData, setFormData] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
-  }}, [initialData]);
+      setFormData({ ...initialData });
+    }
+  }, [initialData]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData: any) => ({ ...prevData, [name]: value }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     try {
+      const allowedFields = [
+        ...formFields.map((field) => field.name),
+        ...customFields.map((field) => field.name),
+      ];
+      let filteredData = Object.keys(formData)
+        .filter((key) => allowedFields.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = formData[key];
+          return obj;
+        }, {} as { [key: string]: any });
+
+      if (initialData) {
+        filteredData.id = initialData.id;
+      }
+
       const response = await fetch(route, {
         method: initialData ? "PUT" : "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(filteredData),
         headers: {
           "Content-Type": "application/json",
         },
@@ -56,6 +74,7 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
     }
   };
 
+
   switch (type) {
     case "user":
       route = "/api/register";
@@ -66,26 +85,20 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
         { label: "Password", type: "password", name: "password" }
       );
 
-      customFields.push(
-        <div className="mb-4 w-full" key="role">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
-          <select className="form-input" name="role" value={formData.role || ''} onChange={handleInputChange}>
-            <option value="ADMIN">Admin</option>
-            <option value="USER">User</option>
-            <option value="HOST">Host</option>
-          </select>
-        </div>
-      );
-      customFields.push(
-        <div className="mb-4 w-full" key="status">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Status</label>
-          <select className="form-input" name="status" value={formData.status || ''} onChange={handleInputChange}>
-            <option value="Active">Active</option>
-            <option value="Suspended">Suspended</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      );
+      customFields = [
+        { label: "Role", type: "select", name: "role", options: [
+          { value: "ADMIN", label: "Admin" },
+          { value: "USER", label: "User" },
+          { value: "HOST", label: "Host" },
+        ] },
+        { label: "Status", type: "select", name: "status", options: [
+          { value: "Active", label: "Active" },
+          { value: "Suspended", label: "Suspended" },
+          { value: "Inactive", label: "Inactive" },
+        ] },
+        { label: "Country", type: "select", name: "country", options: countries.map((country) => (
+          { value: country, label: country }))}
+      ];
       break;
 
     case "accommodation":
@@ -95,74 +108,34 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
         { label: "Address", type: "text", name: "address" }
       );
 
-      customFields.push(
-        <div className="mb-4 w-full" key="type">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Type</label>
-          <select className="form-input" name="type" value={formData.type || ''} onChange={handleInputChange}>
-            <option value="Villa">Villa</option>
-            <option value="House">House</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Room">Room</option>
-          </select>
-        </div>
-      );
-
-      customFields.push(
-        <div className="mb-4 w-full" key="status">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Status</label>
-          <select className="form-input" name="status" value={formData.status || ''} onChange={handleInputChange}>
-            <option value="Active">Active</option>
-            <option value="Suspended">Suspended</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      );
-
-      customFields.push(
-        <div className="mb-4 w-full" key="locationId">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
-          <select
-            className="form-input"
-            name="locationId"
-            value={formData.locationId || ''}
-            onChange={handleInputChange}
-            required>
-            <option value="">Select Location</option>
-            {locations?.map((location, index) => (
-              <option key={index} value={location.id}>
-                {location.city}, {location.country}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-
-      customFields.push(
-        <div className="mb-2 w-full" key="ownerId">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Owner</label>
-          <select
-            className="form-input"
-            name="ownerId"
-            value={formData.ownerId || ''}
-            onChange={handleInputChange}
-            required>
-            <option value="">Select Owner</option>
-            {users?.map((user, index) => (
-              <option key={index} value={user.id}>
-                {user.name} {user.surname}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
+      customFields = [
+        { label: "Type", type: "select", name: "type", options: [
+          { value: "Villa", label: "Villa" },
+          { value: "House", label: "House" },
+          { value: "Apartment", label: "Apartment" },
+          { value: "Room", label: "Room" },
+        ] },
+        { label: "Status", type: "select", name: "status", options: [
+          { value: "Active", label: "Active" },
+          { value: "Suspended", label: "Suspended" },
+          { value: "Inactive", label: "Inactive" },
+        ] },
+        { label: "Location", type: "select", name: "locationId", options: locations?.map((location) => (
+            { value: location.id.toString(), label: `${location.city}, ${location.country}` })) || [] },
+        { label: "Owner", type: "select", name: "ownerId", options: users?.map((user) => (
+            { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || [] }
+      ];
       break;
 
     case "location":
       formFields.push(
-        { label: "Country", type: "text", name: "country" },
         { label: "City", type: "text", name: "city" },
         { label: "ZIP", type: "text", name: "zip" }
       );
+
+      customFields = [{ label: "Country", type: "select", name: "country", options: countries.map((country) => (
+        { value: country, label: country }
+      ))}];
       break;
 
     case "amenity":
@@ -170,100 +143,81 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
       break;
 
     case "unit":
-      formFields.push(
-        { label: "Title", type: "text", name: "title" },
-        { label: "Description", type: "text", name: "description" }
-      );
-
-      customFields.push(
-        <div className="mb-4 w-full" key="type">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Type</label>
-          <select className="form-input" name="type" value={formData.type || ''} onChange={handleInputChange}>
-            <option value="Villa">Villa</option>
-            <option value="House">House</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Room">Room</option>
-          </select>
-        </div>
-      );
+      customFields = [
+        { label: "Unit", type: "text", name: "unit" },
+        { label: "Price", type: "number", name: "price" },
+        { label: "Availability", type: "select", name: "availability", options: [
+          { value: "Available", label: "Available" },
+          { value: "Unavailable", label: "Unavailable" }
+        ]}
+      ];
       break;
 
     case "reservation":
-      customFields.push(
-        <div className="mb-2 w-full" key="user">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Made by</label>
-          <select
-            className="form-input"
-            name="guestId"
-            value={formData.guestId || ''}
-            onChange={handleInputChange}
-            required>
-            <option value="">Select Guest</option>
-            {users?.map((user, index) => (
-              <option key={index} value={user.id}>
-                {user.name} {user.surname}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
+      customFields = [
+        { label: "Guest", type: "select", name: "userId", options: users?.map((user) => (
+            { value: user.id.toString(), label: `${user.name} ${user.surname}` }
+          )) || [] },
+        { label: "Check In", type: "text", name: "checkIn" },
+        { label: "Check Out", type: "text", name: "checkOut" },
+        { label: "Status", type: "select", name: "status", options: status.map((status) => (
+        { value: status, label: status }))}
 
-      customFields.push(
-        <div>
-        <label htmlFor="checkIn" className="block mb-2">Check in:</label>
-            <input
-              id="checkIn"
-              type="text"
-              placeholder="Select date"
-              value={formData.checkIn || ''}
-              onChange={handleInputChange}
-              className="form-input"
-            />
-            <CustomCalendar
-              selected={formData.checkIn}
-              onSelect={(date) =>formData.checkIn = date}
-              hidden={false}
-             
-            /></div>
-      )
-      customFields.push(
-        <div>
-        <label htmlFor="checkOut" className="block mb-2">Check Out:</label>
-            <input
-              id="checkOut"
-              type="text"
-              placeholder="Select date"
-              value={formData.checkOut || ''}
-              onChange={handleInputChange}
-              className="form-input"
-            />
-            <CustomCalendar
-              selected={formData.checkOut}
-              onSelect={(date) =>formData.checkOut = date}
-              hidden={false}
-             
-            /></div>
-      )
+      ];
       break;
 
     default:
       return null;
   }
 
-  return (
-    <div className="flex mt-2 mb-2">
-      <div>
+  if (!isOpen) {
+    return (
+      <div className="m-2">
         <button onClick={() => { setIsOpen(true) }} className="form_button">
           {initialData ? 'Edit' : `Add ${type}`}
         </button>
       </div>
-      <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <form className="w-full flex flex-col items-center" onSubmit={handleSubmit}>
-          {formFields.map((field, index) => (
-            <div key={index} className="mb-2 w-full">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                {field.label}
-              </label>
+    );
+  }
+
+  return (
+    <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)} height="max-h-[90vh]" width="w-[30vw]">
+      <div className="w-full flex flex-col items-center">
+        {formFields.map((field, index) => (
+          <div key={index} className="mb-2 w-full">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              {field.label}
+            </label>
+            <input
+              className="form-input"
+              type={field.type}
+              name={field.name}
+              value={formData[field.name] || ''}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+        ))}
+
+        {customFields.map((field, index) => (
+          <div key={index} className="mb-2 w-full">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              {field.label}
+            </label>
+            {field.type === "select" ? (
+              <select
+                className="form-input"
+                name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select {field.label}</option>
+                {field.options?.map((option, idx) => (
+                  <option key={idx} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            ) : (
               <input
                 className="form-input"
                 type={field.type}
@@ -272,17 +226,15 @@ const Form = ({ type, initialData , locations, users}: FormProps) => {
                 onChange={handleInputChange}
                 required
               />
-            </div>
-          ))}
+            )}
+          </div>
+        ))}
 
-          {customFields.map((field) => field)}
-
-          <button type="submit" className="form_button">
-            Submit
-          </button>
-        </form>
-      </ModalBase>
-    </div>
+        <button type="submit" className="form_button" onClick={handleSubmit}>
+          Submit
+        </button>
+      </div>
+    </ModalBase>
   );
 };
 

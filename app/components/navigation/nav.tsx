@@ -1,12 +1,17 @@
 'use client';
 import { SafeUser } from "@/app/types/type";
 import Menu from "./menu";
+import { useEffect } from "react";
 
 interface NavProps{
   user?: SafeUser | null;
 }
 
 const Nav = ({user}: NavProps)=>{
+  useEffect(()=>{
+    user = user;
+  },[user])
+  
   return (
     <div className="w-full bg-purple-500 shadow-lg py-5">
         <div className="px-4">

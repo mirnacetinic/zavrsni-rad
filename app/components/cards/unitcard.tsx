@@ -6,30 +6,19 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ReservationModal from "../inputs/reservationmodal";
 import { IoIosHeartEmpty, IoIosHeart } from "react-icons/io";
-import { SafeUser } from "@/app/types/type";
+import { SafeUnit, SafeUser } from "@/app/types/type";
 
 interface UnitCardProps {
   key: number;
-  unit: {
-    amenities: string[];
-    id: number;
-    title: string;
-    type: $Enums.AccommodationType;
-    description: string;
-    capacity: number;
-    accommodationId: number;
-    images: string[];
-    reservations: [];
-    prices: { price: number; from: Date; to: Date; }[];
-  };
+  unit: SafeUnit;
   user: SafeUser | null;
 }
 
 const UnitCard = ({ unit, user }: UnitCardProps) => {
-  const searchParams = new URLSearchParams(useSearchParams());
-  const [checkIn, setCheckIn] = useState(searchParams.get("checkIn") || "");
-  const [checkOut, setCheckOut] = useState(searchParams.get("checkOut") || "");
-  const [guests, setGuests] = useState(searchParams.get("guests") || "");
+  const searchParams = useSearchParams();
+  const [checkIn, setCheckIn] = useState<Date | null>(searchParams.get('checkIn') ? new Date(searchParams.get('checkIn')!) : null);
+  const [checkOut, setCheckOut] = useState<Date | null>(searchParams.get('checkOut') ? new Date(searchParams.get('checkOut')!) : null);
+  const [guests, setGuests] = useState(searchParams?.get("guests") || "");
   const [checkInHidden, setCheckInHidden] = useState(true);
   const [checkOutHidden, setCheckOutHidden] = useState(true);
   const [reservationRequested, setReservationRequested] = useState(false);
@@ -38,8 +27,30 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
   const router = useRouter();
 
   useEffect(() => {
+    if (searchParams) {
+      if (parseInt(guests) > unit.capacity) {
+        setGuests("");
+      }
+
+      if (unit.reservations?.some(r => {
+        const newCheckIn = checkIn ? new Date(checkIn) : null;
+        const newCheckOut = checkOut ? new Date(checkOut) : null;
+
+        return (
+          (newCheckIn && newCheckOut && newCheckIn >= new Date(r.checkIn) && newCheckIn < new Date(r.checkOut)) ||
+          (newCheckOut && newCheckOut > new Date(r.checkIn) && newCheckOut <= new Date(r.checkOut)) ||
+          (newCheckIn && newCheckIn <= new Date(r.checkIn) && newCheckOut && newCheckOut >= new Date(r.checkOut))
+        );
+      })) {
+        setCheckIn(null);
+        setCheckOut(null);
+      }
+    }
+  }, [checkIn, checkOut, guests, unit.capacity, unit.reservations]);
+
+  useEffect(() => {
     calculatePrice();
-  }, [checkIn, checkOut, guests]);
+  }, [checkIn, checkOut]);
 
   const handleReserveClick = () => {
     if (!user) {
@@ -56,6 +67,10 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
     }
     if (parseInt(guests) > unit.capacity) {
       toast.error("Guests exceed capacity!");
+      return;
+    }
+    if (parseInt(guests) < 1) {
+      toast.error("Minimum guests is 1!");
       return;
     }
     setReserveOpen(true);
@@ -78,8 +93,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
       toast.success(action === 'DELETE' ? "Unliked" : "Liked");
       router.refresh();
     } else {
-      const errorMessage = await response.text();
-      toast.error(errorMessage);
+      toast.error(response.headers.get("message"));
     }
   };
 
@@ -93,8 +107,8 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
     setCheckInHidden(true);
   };
 
-  const handleDateSelect = (date: Date, setDate: (date: string) => void, hideCalendar: () => void) => {
-    setDate(date ? date.toDateString() : "");
+  const handleDateSelect = (date: Date | null, setDate: (date: Date | null) => void, hideCalendar: () => void) => {
+    setDate(date);
     hideCalendar();
   };
 
@@ -109,8 +123,8 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
     const endDate = new Date(checkOut);
 
     while (currentDate < endDate) {
-      const applicablePrice = unit.prices.find(price =>
-        price.from.getDate() <= currentDate.getDate() && price.to >= currentDate
+      const applicablePrice = unit.priceLists.find(price =>
+        price.from <= currentDate && price.to >= currentDate
       );
       if (applicablePrice) {
         total += applicablePrice.price;
@@ -123,7 +137,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
   return (
     <div className="rounded-lg shadow-md border border-gray-200 p-4">
       {user && (
-        user.favourites.find(fav=>fav===unit.id) 
+        user.favourites.find(fav => fav === unit.id) 
           ? <IoIosHeart onClick={() => handleFavourite('DELETE')} className="left-2 h-8 w-6 cursor-pointer" />
           : <IoIosHeartEmpty onClick={() => handleFavourite('POST')} className="left-2 h-8 w-6 cursor-pointer" />
       )}
@@ -137,7 +151,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
       <p className="text-gray-600 mb-2">Max. guests: {unit.capacity}</p>
       <p className="text-gray-600 mb-2">Amenities:</p>
       <ul>
-        {unit.amenities.map((amenity, index) => (
+        {unit.amenitiesName?.map((amenity, index) => (
           <li key={index}>{amenity}</li>
         ))}
       </ul>
@@ -146,41 +160,41 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
           <div className="flex-1">
             <label htmlFor="checkIn" className="block mb-2">Check in:</label>
             <input
+              readOnly
               id="checkIn"
               type="text"
               placeholder="Select date"
-              value={checkIn}
+              value={checkIn ? checkIn.toDateString() : ""}
               onClick={showCheckIn}
-              onChange={(e) => setCheckIn(e.target.value)}
               className="form-input"
             />
             <CustomCalendar
-            prices={unit.prices}
+              prices={unit.priceLists}
               reservations={unit.reservations}
               selected={checkIn}
               onSelect={(date) => handleDateSelect(date, setCheckIn, () => setCheckInHidden(true))}
               hidden={checkInHidden}
-              disabledAfter={checkOut ? new Date(checkOut) : undefined}
+              disabledAfter={checkOut || undefined}
             />
           </div>
           <div className="flex-1">
             <label htmlFor="checkOut" className="block mb-2">Check out:</label>
             <input
+              readOnly
               id="checkOut"
               type="text"
               placeholder="Select date"
-              value={checkOut}
+              value={checkOut ? checkOut.toDateString() : ""}
               onClick={showCheckOut}
-              onChange={(e) => setCheckOut(e.target.value)}
               className="form-input"
             />
             <CustomCalendar
-            prices={unit.prices}
+              prices={unit.priceLists}
               reservations={unit.reservations}
               selected={checkOut}
               onSelect={(date) => handleDateSelect(date, setCheckOut, () => setCheckOutHidden(true))}
               hidden={checkOutHidden}
-              disabledBefore={checkIn ? new Date(checkIn) : undefined}
+              disabledBefore={checkIn || undefined}
             />
           </div>
           <div className="flex-1">
@@ -196,22 +210,23 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
               className="form-input"
             />
           </div>
-            <p className="text-gray-600 mb-2">Total Price: €{calculatedPrice}</p>
+          <p className="text-gray-600 mb-2">Total Price: €{calculatedPrice}</p>
+          {unit.inquiry && <p>This is inquiry based</p>}
         </div>
       )}
       <button onClick={handleReserveClick} className="form_button">
-        {reservationRequested ? "Confirm Reservation" : "Reserve"}
+        {reservationRequested ? (unit.inquiry ? "Confirm inquiry" : "Confirm Reservation") : (unit.inquiry ? "Send inquiry" : "Reserve")}
       </button>
-      {user &&(
+      {user && (
         <ReservationModal
           email={user.email}
-          unitId={unit.id}
-          checkIn={checkIn}
-          checkOut={checkOut}
+          unit={unit}
+          checkIn={checkIn ? checkIn.toDateString() : ""}
+          checkOut={checkOut ? checkOut.toDateString() : ""}
           guests={guests}
           price={calculatedPrice}
           isOpen={reserveOpen}
-          onClose={() => { setReserveOpen(false); setReservationRequested(false) }}
+          onClose={() => setReserveOpen(false)}
         />
       )}
     </div>

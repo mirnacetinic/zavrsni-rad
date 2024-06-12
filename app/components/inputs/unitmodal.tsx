@@ -1,60 +1,109 @@
-import { UploadButton } from "@/app/utils/uploadthing";
-import { Amenity } from "@prisma/client";
+import { useForm, FieldValues } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { FieldValues, useForm } from "react-hook-form";
-import { AiOutlineClose } from "react-icons/ai";
-import PriceList from "./pricelist";
+import { Amenity } from "@prisma/client";
 import toast from "react-hot-toast";
+import { UploadButton } from "@/app/utils/uploadthing";
+import PriceListForm from "./pricelist";
+import ModalBase from "../cards/modalbase";
 
-interface ModalProps {
+interface UnitModalProps {
   isOpen: boolean;
-  onAddUnit: (data: FieldValues) => void;
   onClose: () => void;
+  onAddUnit: (unitData: FieldValues) => void;
+  unit?: FieldValues | null;
+  amenities? : Amenity[];
 }
 
 enum Steps {
   INFO,
+  ROOMS,
   AMENITY,
   IMAGES,
   PRICES,
   FINISH,
 }
 
-const UnitModal = ({ isOpen, onClose, onAddUnit }: ModalProps) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    trigger,
-    reset,
-  } = useForm({
-    mode: "onChange",
-    defaultValues: {
-      type: "",
-      amenities: [],
+const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalProps) => {
+  const { register, handleSubmit, reset, setValue, trigger, formState:{errors} } = useForm({
+    defaultValues: unit || {
       capacity: "",
-      description: "",
-      title: "",
-      images: [],
+      amenities: [],
+      inquiry : "",
       priceLists: [],
+      type: "",
+      title: "",
+      description: "",
+      bedrooms : "",
+      bathrooms : "",
+      beds : "",
+      images: [],
+      imagesKeys : [],
     },
   });
 
+  useEffect(() => {
+    if (unit) {
+      setValue("id", unit.id);
+      setValue("type", unit.type);
+      setValue("title", unit.title);
+      setValue("description", unit.description);
+      setValue("capacity", unit.capacity);
+      setValue("bedrooms", unit.bedrooms);
+      setValue("bathrooms", unit.bathrooms);
+      setValue("beds", unit.beds);
+      setValue("inquiry", unit.inquiry ? "true" : "");
+      setValue("amenities", unit.amenities?.map((a:any)=>a.toString()) || []);
+      setValue("priceLists", unit.priceLists);
+      setPriceList(unit.priceLists || []);
+      setuploadedImages(unit.images.map((url: string, index: number) => ({ url, key: unit?.imagesKeys[index] })));
+  
+    } else {
+      reset({
+        type: "",
+        title: "",
+        description: "",
+        inquiry: "",
+        capacity: "",
+        beds : "",
+        bathrooms :"",
+        bedrooms :"",
+        images: [],
+        imagesKeys: [],
+        amenities: [],
+        priceLists: [],
+      });
+    }
+  }, [unit, setValue, reset]);
+  
+  const onSubmit = (data: FieldValues) => {
+    data.priceLists = priceList;
+    data.images = uploadedImages.map(img => img.url);
+    data.imagesKeys = uploadedImages.map(img=> img.key);
+    onAddUnit(data);
+    reset();
+    setuploadedImages([])
+    setPriceList([]);
+    setStep(Steps.INFO);
+  };
+
   const [step, setStep] = useState(Steps.INFO);
-  const [amenities, setAmenities] = useState<Amenity[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<{ url: string, key: string }[]>([]);
-  const [priceList, setPriceList] = useState<{ from: Date; to: Date; price: number }[]>([]);
+  const [amenitiesAll, setAmenities] = useState<Amenity[]>(amenities || []);
+  const [uploadedImages, setuploadedImages] = useState<{ url: string, key: string }[]>([]);
+  const [priceList, setPriceList] = useState<{ id?: number ,from: Date; to: Date; price: number }[]>(unit?.priceLists || []);
+
 
   useEffect(() => {
+    if(amenitiesAll.length==0 && isOpen){
     fetch("/api/amenity")
       .then((res) => res.json())
       .then((data) => {
         setAmenities(data.amenities);
       })
       .catch((error) => {
-        console.error("Error fetching amenities:", error);
+        toast.error("Error fetching amenities:", error);
       });
-  }, []);
+    }
+  }, [isOpen]);
 
   const back = () => {
     if (step > Steps.INFO) {
@@ -66,21 +115,11 @@ const UnitModal = ({ isOpen, onClose, onAddUnit }: ModalProps) => {
     const isValid = await trigger();
     if (isValid && step < Steps.FINISH) {
       if(step==Steps.PRICES){
-        if(priceList!){
-          toast('If you do not set prices, your unit will be Inactive', {
-            duration: 4000,
-            position: 'top-center',
-          
-            icon: '!'});
-
-        }
-        else{
         toast('Please note that the dates you have not set rates from will not be bookable', {
-          duration: 4000,
+          duration: 3000,
           position: 'top-center',
-        
           icon: '!'});
-      }}
+      }
       setStep((value) => value + 1);
     }
   };
@@ -94,175 +133,169 @@ const UnitModal = ({ isOpen, onClose, onAddUnit }: ModalProps) => {
       });
 
       if (response.ok) {
-        setUploadedImages((prevImages) => prevImages.filter(image => image.key !== key));
+        setuploadedImages((prevImages) => prevImages.filter(image => image.key !== key));
       } else {
-        console.log(
-          response.headers.get("message") || "Error deleting instance"
-        );
+        toast.error(response.headers.get("message") || "Error deleting image");
       }
     } catch (error: any) {
-      console.log(error);
+      toast.error(error.message || "Something went wrong");
     }
   }
 
-  const handleSubmitUnit = (data: FieldValues) => {
-    data.images = uploadedImages.map(img => img.url);
-    data.priceLists = priceList;
-    onAddUnit(data);
-    reset();
-    setUploadedImages([]);
-    setPriceList([]);
-    setStep(Steps.INFO);
-  };
-
   return (
+    <ModalBase isOpen={isOpen} onClose={onClose} height="h-[80vh]">
     <div>
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-70 z-50 animate-fadeIn">
-            <div className="fixed inset-0 flex items-center justify-center z-50">
-              <div className="px-6 py-2 border h-[80vh] w-96 shadow-lg rounded-md bg-white relative">
-                <div className="absolute text-black top-2 right-2 cursor-pointer" onClick={onClose}>
-                  <AiOutlineClose />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900">{Steps[step]}</h3>
-                </div>
-                {step === Steps.AMENITY && (
-                  <div className="text-black">
-                    <p>What amenities does your unit have?</p>
-                    <ul className="m-6 grid grid-cols-2 gap-2">
-                      {amenities.map((amenity) => (
-                        <li key={amenity.id} className="flex items-center">
-                          <label htmlFor={amenity.name}>
-                            <input id={amenity.name} type="checkbox" value={amenity.id} {...register("amenities")} />
-                            {amenity.name}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {step === Steps.INFO && (
-                  <div className="text-black">
-                    <select id="type" {...register("type", { required: "Select type" })} className="form-input">
-                      <option value="" hidden>
-                        What kind of unit?
-                      </option>
-                      <option value="House">House</option>
-                      <option value="Villa">Villa</option>
-                      <option value="Apartment">Apartment</option>
-                      <option value="Room">Room</option>
-                    </select>
-                    <p className="error">{errors?.type?.message}</p>
-                    <input
-                      {...register("title", {
-                        required: "Title is required",
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="text-center">
+            <h3 className="text-xl font-bold text-gray-900">{Steps[step]}</h3>
+        </div>
+        {step === Steps.AMENITY && (
+        <div className="text-black">
+            <p>What amenities does your unit have?</p>
+              <ul className="m-6 grid grid-cols-2 gap-2">
+              {amenitiesAll.map((amenity) => (
+                <li key={amenity.id} className="flex items-center">
+                  <label htmlFor={amenity.name}>
+                  <input id={amenity.name} type="checkbox" value={amenity.id} {...register("amenities")}/>
+                      {amenity.name}
+                  </label>
+                </li>
+                ))}
+              </ul>
+          </div>
+        )}
+        {step === Steps.INFO && (
+          <div className="text-black">
+            <select id="type" {...register("type", { required: "Select type" })} className="form-input">
+              <option value="" hidden>What kind of unit?</option>
+              <option value="House">House</option>
+              <option value="Villa">Villa</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Room">Room</option>
+            </select>
+            <p className="error">{errors?.type?.message?.toString()}</p>
+            <input
+              {...register("title", {
+                required: "Title is required",
+                minLength: {
+                value: 2,
+                message: "Title must be at least 2 characters"}})}
+                type="text"
+                name="title"
+                placeholder="Title"
+                className="form-input"/>
+            <p className="error">{errors?.title?.message?.toString()}</p>
+            <textarea {...register("description", {
+                        required: "Description is required",
                         minLength: {
                           value: 2,
-                          message: "Title must be at least 2 characters",
+                          message: "Description must be at least 2 characters",
                         },
-                      })}
-                      type="text"
-                      name="title"
-                      placeholder="Title"
-                      className="form-input"
-                    />
-                    <p className="error">{errors?.title?.message}</p>
-                    <textarea {...register("description", {
-                      required: "Description is required",
-                      minLength: {
-                        value: 2,
-                        message: "Description must be at least 2 characters",
-                      },
-                      maxLength: {
-                        value: 200,
-                        message: "Description is limited to 200 characters"
-                      }
-                    })}
-                      name="description" placeholder="Description" className="form-input" />
-                    {errors?.description && (
-                      <p className="error">{errors?.description.message}</p>)}
-                    <input
-                      {...register("capacity", {
-                        required: "Capacity is required",
-                        min: {
-                          value: 1,
-                          message: "Capacity minimum is 1!",
-                        },
-                      })}
-                      type="number"
-                      name="capacity"
-                      placeholder="Capacity"
-                      className="form-input"
-                    />
-                    <p className="error">{errors?.capacity?.message}</p>
-                  </div>
-                )}
-                {step === Steps.IMAGES && (
-                  <div>
-                    <UploadButton className={`${uploadedImages.length === 4 ? 'hidden' : ''}`}
-                      appearance={{
-                        button({ ready, isUploading }) {
-                          return {
-                            background: "#6b46c1",
-                            ...(ready && { color: "#ecfdf5" }),
-                            ...(isUploading && { color: 'lightgreen' }),
-                          };
-                        }
-                      }}
-                      endpoint="imageUnit"
-                      onClientUploadComplete={(res) => {
-                        const imageFiles = res.map((file) => ({ url: file.url, key: file.key }));
-                        setUploadedImages((prev) => [...prev, ...imageFiles]);
-                      }}
-                      onUploadError={(error: Error) => {
-                        alert(`ERROR! ${error.message}`);
-                      }}
-                    />
-                    <div className="uploaded-images">
-                      {uploadedImages?.map((image, index) => (
-                        <div key={index} className="items-center">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteImage(image.key)}
-                            className="relative right-1 top-3 bg-red-500 text-white rounded-full py-1 px-2"
-                          >
-                            x
-                          </button>
-                          <div>
-                            <img key={index} src={image.url} alt={`Uploaded ${index + 1}`} className="uploaded-image" />
-                          </div>
-                        </div>
-                      ))}
+                        maxLength: {
+                          value: 200,
+                          message: "Description is limited to 200 characters"
+                        }})}
+                        name="description" placeholder="Description" className="form-input" />
+            <p className="error">{errors?.description?.message?.toString()}</p>
+            <input {...register("capacity", {
+                      required: "Capacity is required",
+                      min: {
+                        value: 1,
+                        message: "Capacity minimum is 1!"}})}
+                      type="number" name="capacity" placeholder="Capacity" className="form-input"/>
+            <p className="error">{errors?.capacity?.message?.toString()}</p>
+            <p className="m-2"> Inquiry based reservations?</p>
+            <input  {...register("inquiry", {
+                      required: "Choose option" })}
+                      className="m-2" type="radio" id="yes" value="true" />
+            <label htmlFor="yes">Yes</label>
+            <input {...register("inquiry",{
+                      required :"Choose option"})}
+                      className="m-2" type="radio" id="no" value=''/>
+            <label htmlFor="no">No</label>
+            <p className="error">{errors?.inquiry?.message?.toString()}</p>
+          </div>
+        )}
+        {step === Steps.ROOMS && (
+          <div className="text-black">
+            <input {...register("bedrooms", {
+                      required: "Bedroom count is required",
+                      min:{
+                        value:0,
+                        message: "Minimum count is 0!"}})}
+                      type="number" min={0} name="bedrooms" placeholder="Bedrooms" className="form-input"/>
+            <p className="error">{errors?.bedrooms?.message?.toString()}</p>
+            <input {...register("beds", {
+                    required: "Bed count is required",
+                    min:{
+                      value:0,
+                      message: "Minimum count is 0!"}})}
+                      type="number" min={0} name="beds" placeholder="Beds" className="form-input"/>
+            <p className="error">{errors?.beds?.message?.toString()}</p>
+            <input {...register("bathrooms", {
+                      required: "Bathroom count is required", 
+                      min:{
+                        value:0,
+                        message: "Minimum count is 0!"}})}
+                      type="number" min={0} name="bathrooms" placeholder="Bathrooms" className="form-input"/>
+            <p className="error">{errors?.bathrooms?.message?.toString()}</p>
+          </div>
+        )}
+        {step === Steps.IMAGES && (
+          <div>
+            <UploadButton className={`${uploadedImages.length === 4 ? 'hidden' : ''}`}
+              appearance={{
+                  button({ ready, isUploading }) {
+                    return {
+                      background: "#6b46c1",
+                      ...(ready && { color: "#ecfdf5" }),
+                      ...(isUploading && { color: 'lightgreen' }),
+                    };
+                  }
+                }}
+              endpoint={uploadedImages.length>0? "imageAcc":"imageUnit"}
+              onClientUploadComplete={(res) => {
+                const imageFiles = res.map((file) => ({ url: file.url, key: file.key }));
+                setuploadedImages((prev) => [...prev, ...imageFiles]);
+              }}
+              onUploadError={(error: Error) => {
+                alert(`ERROR! ${error.message}`);
+              }}/>
+            <div className="uploaded-images">
+                {uploadedImages?.map((image, index) => (
+                  <div key={index} className="items-center">
+                    <button type="button" onClick={() => handleDeleteImage(image.key)}
+                      className="relative right-1 top-3 bg-red-500 text-white rounded-full py-1 px-2">
+                      x
+                    </button>
+                    <div>
+                      <img key={index} src={image.url} alt={`Uploaded ${index + 1}`} className="uploaded-image" />
                     </div>
                   </div>
-                )}
-                {step === Steps.PRICES && (
-                  <div className="flex flex-col justify-center text-black items-center">
-                    <p>Set your nightly rates</p>
-                    <PriceList priceList={priceList} setPriceList={setPriceList} />
-                  </div>
-                )}
-                <div className="absolute bottom-3 left-0 w-full flex justify-center">
-                  <button onClick={back} className={`form_button ${step === Steps.INFO ? "hidden" : ""}`}>
-                    Back
-                  </button>
-                  <button onClick={next} className={`form_button ${step === Steps.FINISH ? "hidden" : ""}`}>
-                    Next
-                  </button>
-                  {step === Steps.FINISH && (
-                    <button onClick={handleSubmit(handleSubmitUnit)} className="form_button">
-                      Confirm
-                    </button>
-                  )}
-                </div>
-              </div>
+                ))}
             </div>
           </div>
-        </>
-      )}
-    </div>
+        )}
+        {step === Steps.PRICES && (
+          <div className="flex flex-col justify-center text-black items-center">
+              <p>Set your nightly rates</p>
+              <PriceListForm priceList={priceList} setPriceList={setPriceList} />
+          </div>
+        )}
+        <div className="absolute bottom-3 left-0 w-full flex justify-center">
+          <button type="button" onClick={back} className={`form_button ${step === Steps.INFO ? "hidden" : ""}`}>
+            Back
+          </button>
+          <button type="button" onClick={next} className={`form_button ${step === Steps.FINISH ? "hidden" : ""}`}>
+            Next
+          </button>
+        {step === Steps.FINISH && (
+          <button type="submit" className="form_button mt-4">Save</button>
+        )}
+      </div>
+    </form>
+  </div>
+  </ModalBase>
   );
 };
 

@@ -3,10 +3,10 @@ import toast from "react-hot-toast";
 
 interface PriceListProps {
   priceList: { from: Date; to: Date; price: number }[];
-  setPriceList: React.Dispatch<React.SetStateAction<{ from: Date; to: Date; price: number }[]>>;
+  setPriceList: React.Dispatch<React.SetStateAction<{ id?: number; from: Date; to: Date; price: number }[]>>;
 }
 
-const PriceList = ({ priceList, setPriceList }: PriceListProps) => {
+const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [price, setPrice] = useState(0);
@@ -48,53 +48,86 @@ const PriceList = ({ priceList, setPriceList }: PriceListProps) => {
     setShowForm(false);
   };
 
-  return (
-    <div>
-      <h3>Prices:</h3>
-      {!showForm && (
-        <button onClick={() => setShowForm(true)} className="form_button">
-          Add New
-        </button>
-      )}
-      {showForm && (
-        <div className="flex flex-col">
-          <label>From:</label>
-          <input
-            type="date"
-            className="form-input"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-          <label>To:</label>
-          <input
-            type="date"
-            required
-            className="form-input"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-          <label>Rate:</label>
-          <input
-            type="number"
-            min={0}
-            required
-            className="form-input"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-          />
-          <button onClick={handleAddPrice} className="form_button">
-            Add
-          </button>
-        </div>
-      )}
+  const handleDeletePrice = (index: number) => {
+    setPriceList((prevPriceList) => prevPriceList.filter((_, idx) => idx !== index));
+  };
 
-      {priceList.length > 0 && (
-        <div className="mt-4">
-          <h4>Price List:</h4>
+  const handleEditPrice = (index: number) => {
+    const priceItem = priceList[index];
+    if (!priceItem) return;
+
+    setFrom(priceItem.from.toISOString().split("T")[0]);
+    setTo(priceItem.to.toISOString().split("T")[0]);
+    setPrice(priceItem.price);
+    setShowForm(true);
+
+    setPriceList((prevPriceList) => prevPriceList.filter((_, idx) => idx !== index));
+  };
+
+  return (
+    <div className="mt-2">
+      <div className="flex flex-col">
+        {!showForm && (
+          <button onClick={() => setShowForm(true)} className="form_button">
+            Add New
+          </button>
+        )}
+        {showForm && (
+          <div className="flex flex-col">
+            <label>From</label>
+            <input
+              type="date"
+              className="form-input"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+            <label>To</label>
+            <input
+              type="date"
+              required
+              className="form-input"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
+            <label>Rate</label>
+            <input
+              type="number"
+              min={0}
+              required
+              className="form-input"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+            />
+            <button type="button" onClick={handleAddPrice} className="form_button">
+              Save
+            </button>
+          </div>
+        )}
+      </div>
+
+      {priceList.length > 0 && !showForm && (
+        <div className="m-2 overflow-auto max-h-48">
+          <h4>Price List</h4>
           <ul>
             {priceList.map((priceItem, index) => (
-              <li key={index}>
-                {priceItem.from.toDateString()} - {priceItem.to.toDateString()} : €{priceItem.price}
+              <li key={index} className="flex justify-between items-center border-b py-2">
+                <div>
+                  {priceItem.from.toDateString()} - {priceItem.to.toDateString()} : €{priceItem.price}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleEditPrice(index)}
+                    className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition duration-300"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeletePrice(index)}
+                    className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition duration-300"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -104,4 +137,4 @@ const PriceList = ({ priceList, setPriceList }: PriceListProps) => {
   );
 };
 
-export default PriceList;
+export default PriceListForm;

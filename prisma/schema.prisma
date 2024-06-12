@@ -20,15 +20,22 @@ enum Role {
 }
 
 enum Status {
-  Canceled
-  Finished
   Active
+  Canceled
+  Inquiry
+  Declined
+  Accepted
 }
 
 enum ActiveStatus {
   Active
   Suspended
   Inactive
+}
+
+enum Report {
+  Declined
+  Reported
 }
 
 enum AccommodationType {
@@ -43,11 +50,12 @@ model User {
   name           String
   surname        String
   email          String          @unique
+  country        String          @default("Croatia")
   hashPassword   String
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   role           Role            @default(USER)
-  status         ActiveStatus  @default(Active)
+  status         ActiveStatus    @default(Active)
   accommodations Accommodation[]
   reservations   Reservation[]
   favourites     UserFavorites[]
@@ -65,7 +73,7 @@ model Accommodation {
   id          Int               @id @default(autoincrement())
   title       String
   type        AccommodationType
-  status      ActiveStatus  @default(Active)
+  status      ActiveStatus      @default(Active)
   description String
   locationId  Int
   location    Location          @relation(fields: [locationId], references: [id])
@@ -82,10 +90,15 @@ model Unit {
   type            AccommodationType
   description     String
   capacity        Int
+  inquiry         Boolean
+  bedrooms        Int
+  bathrooms       Int      
+  beds            Int    
   amenities       UnitAmenity[]
   accommodationId Int
   accommodation   Accommodation     @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
-  images          String[]          @default([])
+  images          String[]          @default([])       
+  imagesKeys      String[]          @default([])   
   likedBy         UserFavorites[]
   reservations    Reservation[]
   priceLists      PriceList[]
@@ -128,21 +141,29 @@ model Reservation {
   createdAt DateTime @default(now())
   price     Float
   paymentId String   @unique
+  wasInquiry  Boolean @default(false)
   review    Review?
+  guestReview   Int?
 }
 
 model Review {
   reservationId Int @id @unique
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   rating Int
+  hostRating  Int
+  experience  String
   createdAt DateTime  @default(now())
+  status    Report? 
 }
 
 model PriceList {
   id        Int      @id @default(autoincrement())
   unitId    Int
   unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  from DateTime
-  to   DateTime
+  from      DateTime
+  to        DateTime
   price     Float
+  closed    Boolean  @default(false)
+  deal      Int?
 }
+

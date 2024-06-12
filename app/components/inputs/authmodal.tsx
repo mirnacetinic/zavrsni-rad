@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, FieldValues } from "react-hook-form";
 import toast from "react-hot-toast";
 import ModalBase from "../cards/modalbase";
+import { countries } from "@/app/types/type";
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
       surname: "",
       email: "",
       password: "",
+      country : "",
     },
   });
   const router = useRouter();
@@ -101,6 +103,24 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
                 className="form-input"
               />
               <p className="error">{errors?.surname?.message}</p>
+              <select {...register("country", {
+                        required: "Please select a country",
+                      })}
+                      className="form-input"
+                      name="country">
+                      <option className="text-gray-400" value="">
+                        Select Country
+                      </option>
+                      {countries.map((country, index) => (
+                        <option
+                          className="text-black"
+                          key={index}
+                          value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+              <p className="error">{errors?.country?.message}</p>
             </>
           )}
 
@@ -134,16 +154,13 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
             <>
               <button
                 onClick={handleSubmit(handleLogin)}
-                className="mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:bg-purple-600"
-              >
+                className="mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:bg-purple-600">
                 Login
               </button>
               <p className="mt-1 text-gray-600">
                 Don&apos;t have an account?{" "}
                 <span
-                  className="text-purple-800 cursor-pointer"
-                  onClick={() => onOpen("signup")}
-                >
+                  className="text-purple-800 cursor-pointer" onClick={() => onOpen("signup")}>
                   Sign up
                 </span>
               </p>
@@ -152,16 +169,12 @@ const AuthModal = ({ isOpen, onClose, onOpen, content }: ModalProps) => {
             <>
               <button
                 onClick={handleSubmit(handleRegister)}
-                className="mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:bg-purple-600"
-              >
+                className="mt-4 px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:bg-purple-600">
                 Sign up
               </button>
               <p className="mt-1 text-gray-600">
                 Already have an account?{" "}
-                <span
-                  className="text-purple-800 cursor-pointer"
-                  onClick={() => onOpen("login")}
-                >
+                <span className="text-purple-800 cursor-pointer" onClick={() => onOpen("login")}>
                   Log in
                 </span>
               </p>

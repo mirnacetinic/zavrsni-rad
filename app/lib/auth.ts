@@ -15,6 +15,7 @@ export const authOptions : NextAuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
     session: {
         strategy: "jwt",
+        maxAge: 60*60*4,
     },
     pages: {
         signIn:'/',
@@ -39,6 +40,9 @@ export const authOptions : NextAuthOptions = {
 
             if(!user){
                 throw new Error("User does not exist");
+            }
+            if(user.status!=="Active"){
+                throw new Error("Your account is " + user.status + ", contact administrator")
             }
 
             else{

@@ -1,58 +1,108 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import React, { useEffect, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import {
+  FaSort,
+  FaSortDown,
+  FaSortUp,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 import Form from "../inputs/form";
 import { SafeUser } from "@/app/types/type";
 import { Location } from "@prisma/client";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface InfoCardProps<T> {
   data: T[];
   type: string;
-  users? : SafeUser[];
-  locations? : Location[];
+  users?: SafeUser[];
+  locations?: Location[];
 }
 
-const InfoCard = <T extends { id: number }>({
+const InfoCard = <T extends { id: number; status?: string }>({
   data,
   type,
   users,
-  locations
+  locations,
 }: InfoCardProps<T>) => {
   const router = useRouter();
   const [filteredData, setFilteredData] = useState(data);
-  const [sortParametars, setSortParametars] = useState<{key: keyof T; direction: "asc" | "desc";} | null>(null);
+  const [expandedCells, setExpandedCells] = useState<{
+    [key: number]: { [key: string]: boolean };
+  }>({});
+  const [slidableCells, setSlidableCells] = useState<{
+    [key: number]: { [key: string]: number | undefined };
+  }>({});
+  const [sortParameters, setSortParameters] = useState<{
+    key: keyof T;
+    direction: "asc" | "desc";
+  } | null>(null);
 
   useEffect(() => {
     setFilteredData(data);
   }, [data]);
 
-  const sortData = (key: keyof T) => {
-    const direction = sortParametars?.key === key && sortParametars.direction === "asc" ? "desc" : "asc";
-    const sorted = [...filteredData].sort((a, b) => {
-      const valueA = String(a[key]).toLowerCase();
-      const valueB = String(b[key]).toLowerCase();
-
-      if (valueA < valueB) return direction === "asc" ? -1 : 1;
-      if (valueA > valueB) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
-    setFilteredData(sorted);
-    setSortParametars({ key, direction });
+  const toggleExpandCell = (rowId: number, cellKey: string) => {
+    setExpandedCells((prev) => ({
+      ...prev,
+      [rowId]: {
+        ...prev[rowId],
+        [cellKey]: !prev[rowId]?.[cellKey],
+      },
+    }));
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof T) => {
+  const toggleSlideCell = (rowId: number, cellKey: string) => {
+    setSlidableCells((prev) => {
+      const newRowState = { ...prev[rowId] };
+      if (newRowState[cellKey] !== undefined) {
+        delete newRowState[cellKey];
+      } else {
+        newRowState[cellKey] = 0;
+      }
+      return {
+        ...prev,
+        [rowId]: newRowState,
+      };
+    });
+  };
+
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: keyof T
+  ) => {
     const { value } = e.target;
-    const filtered = data.filter((item) =>
-      String(item[key]).toLowerCase().includes(value.toLowerCase())
-    );
+    const filtered = data.filter((item) => filterItem(item, key, value));
     setFilteredData(filtered);
   };
 
-  const deleteInstance = async (id: number) => {
-    const route = type === "user" ? "/api/register" : `/api/${type}`;
+  const filterItem = (item: T, key: keyof T, value: string): boolean => {
+    const itemValue = item[key];
+    if (typeof itemValue === "object" && itemValue !== null) {
+      if (Array.isArray(itemValue)) {
+        return itemValue.some((arrayItem) =>
+          arrayItem != null
+            ? Object.values(arrayItem).some((subValue) =>
+              String(subValue).toLowerCase().includes(value.toLowerCase())
+            )
+            : value === "None"
+              ? true
+              : false
+        );
+      } else {
+        return Object.values(itemValue).some((objectValue) =>
+          String(objectValue).toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    }
+    return String(itemValue).toLowerCase().includes(value.toLowerCase());
+  };
+
+  const deleteInstance = async (id: number, r?: string) => {
+    let route = type === "user" ? "/api/register" : `/api/${type}`;
+    if (r) route = r;
     try {
       const response = await fetch(route, {
         method: "DELETE",
@@ -61,7 +111,9 @@ const InfoCard = <T extends { id: number }>({
       });
 
       if (response.ok) {
-        toast.success(`Deleted ${type} successfully`);
+        toast.success(
+          response.headers.get("message") || `Deleted ${type} successfully`
+        );
         router.refresh();
       } else {
         toast.error(
@@ -73,6 +125,74 @@ const InfoCard = <T extends { id: number }>({
     }
   };
 
+  const updateInstance = async (id: number, status: string, route: string) => {
+    try {
+      const response = await fetch(route, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id, status: status }),
+      });
+
+      if (response.ok) {
+        toast.success(`${status} successfully`);
+        router.refresh();
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error: any) {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const sortData = (key: keyof T) => {
+    const direction =
+      sortParameters?.key === key && sortParameters.direction === "asc"
+        ? "desc"
+        : "asc";
+    const sorted = [...filteredData].sort((a, b) => {
+      const valueA = String(a[key]).toLowerCase();
+      const valueB = String(b[key]).toLowerCase();
+
+      if (valueA < valueB) return direction === "asc" ? -1 : 1;
+      if (valueA > valueB) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    setFilteredData(sorted);
+    setSortParameters({ key, direction });
+  };
+
+  const handlePrevious = (rowId: number, cellKey: string) => {
+    setSlidableCells((prev) => {
+      const newRowState = { ...prev[rowId] };
+      if (newRowState[cellKey] !== undefined) {
+        newRowState[cellKey] =
+          newRowState[cellKey]! > 0
+            ? newRowState[cellKey]! - 1
+            : newRowState[cellKey];
+      }
+      return {
+        ...prev,
+        [rowId]: newRowState,
+      };
+    });
+  };
+
+  const handleNext = (rowId: number, cellKey: string, length: number) => {
+    setSlidableCells((prev) => {
+      const newRowState = { ...prev[rowId] };
+      if (newRowState[cellKey] !== undefined) {
+        newRowState[cellKey] =
+          newRowState[cellKey]! < length - 1
+            ? newRowState[cellKey]! + 1
+            : newRowState[cellKey];
+      }
+      return {
+        ...prev,
+        [rowId]: newRowState,
+      };
+    });
+  };
+
   return (
     <div className="flex flex-col">
       <div className="min-w-full overflow-visible">
@@ -80,47 +200,172 @@ const InfoCard = <T extends { id: number }>({
           <table className="border min-w-full text-left text-sm font-light text-surface">
             <thead className="bg-purple-700 border-b border-neutral-200 font-medium">
               <tr className="mx-1 border-b border-neutral-200">
-                {Object.keys(data[0]).map((key) => (
-                  <th key={key} className="p-2">
-                    <div onClick={() => sortData(key as keyof T)}
-                      className="cursor-pointer flex flex-row text-center text-white font-light">
-                      {sortParametars?.key === key ? (
-                        <>
-                          {sortParametars.direction === "asc" ? (
-                            <FaSortUp className="mr-1" />
+                {data.length > 0 &&
+                  Object.keys(data[0])
+                    .filter((key) => !key.toLowerCase().includes("id"))
+                    .map((key) => (
+                      <th key={key} className="p-2">
+                        <div onClick={() => sortData(key as keyof T)}
+                          className="cursor-pointer flex flex-row text-center text-white font-light">
+                          {sortParameters?.key === key ? (
+                            <>
+                              {sortParameters.direction === "asc" ? (
+                                <FaSortUp className="mr-1" />
+                              ) : (
+                                <FaSortDown className="mr-1" />
+                              )}
+                            </>
                           ) : (
-                            <FaSortDown className="mr-1" />
+                            <FaSort className="mr-1" />
                           )}
-                        </>
-                      ) : (
-                        <FaSort className="mr-1" />
-                      )}
-                      {key.toUpperCase()} <AiOutlineSearch className="mx-1" />
-                    </div>
-                    <input type="text" onChange={(e) => handleFilterChange(e, key as keyof T)}
-                      className="cursor-pointer m-1 block w-full p-1 pr-8 border border-gray-300 rounded-md text-sm"
-                      placeholder="Filter" />
-                  </th>))}
+                            {key.toUpperCase()}{" "}
+                            <AiOutlineSearch className="mx-1" />
+                        </div>
+                        <input type="text" onChange={(e) => handleFilterChange(e, key as keyof T)}
+                          className="cursor-pointer m-1 block w-full p-1 pr-8 border border-gray-300 rounded-md text-sm"
+                          placeholder="Filter"/>
+                      </th>
+                    ))}
                 <th className="p-2"></th>
               </tr>
             </thead>
+
             <tbody className="text-center">
-              {filteredData.map((item) => (
-                <tr key={item.id} className="bg-white cursor-pointer">
-                  {Object.values(item).map((value, index) => (
-                    <td key={index} className="p-2">
-                      {value}
-                    </td>
-                  ))}
-                  <td className="flex flex-row justify-center p-2">
-                    <Form type={type} initialData={item} users={users} locations={locations}/>
-                    <button onClick={(e) => {e.stopPropagation(); deleteInstance(item.id);}}
-                      className="form_button">
-                      Delete
-                    </button>
+              {filteredData.length === 0 ? (
+                <tr>
+                  <td colSpan={Object.keys(data[0]).length + 1} className="text-center py-4">
+                    No data found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredData.map((item) => (
+                  <React.Fragment key={item.id}>
+                    <tr className="bg-white cursor-pointer">
+                      {Object.entries(item).filter(([key]) => !key.toLowerCase().includes("id")).map(([key, value]) => (
+                          <td key={key} className="p-2">
+                            {typeof value === "object" &&
+                              !Array.isArray(value) ? (
+                              <div>
+                                <span className="text-2xl font-semibold" onClick={(e) => {e.stopPropagation(); toggleExpandCell(item.id, key);}}>
+                                  {expandedCells[item.id]?.[key] ? "-" : "+"}
+                                </span>
+                                {expandedCells[item.id]?.[key] && (
+                                  <div className="flex flex-col mt-2 p-4 border rounded">
+                                    {Object.entries(value).map(([objectKey, objectValue]) => (
+                                        <div className="flex flex-col" key={objectKey}>
+                                          <p>
+                                            <strong>{objectKey.toUpperCase()}:{" "}</strong>
+                                              {String(objectValue)}
+                                          </p>
+                                          {objectKey === "status" &&
+                                            (type === "reservation" ? (
+                                              <button onClick={() => deleteInstance(item.id, "/api/review")}
+                                                className="form_button">
+                                                Remove
+                                              </button>
+                                            ) : (
+                                              type === "host" && objectValue === "None" && (
+                                                <button onClick={() => updateInstance(item.id,"Reported","/api/review")}
+                                                  className="form_button">
+                                                  Report
+                                                </button>
+                                              )
+                                            ))}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ) : Array.isArray(value) ? (
+                              <div>
+                                <span className="text-2xl font-semibold" onClick={(e) => { e.stopPropagation(); toggleSlideCell(item.id, key);}}>
+                                  {slidableCells[item.id]?.[key] !== undefined? "-" : "+"}
+                                </span>
+                                {slidableCells[item.id]?.[key] !==
+                                  undefined && (
+                                    <div className="flex flex-col mt-2 p-4 border rounded">
+                                      <div className="flex flex-row items-center justify-between">
+                                        <FaChevronLeft className={`cursor-pointer ${slidableCells[item.id][key] === 0? "text-gray-300" : "text-black"}`}
+                                          onClick={(e) => { e.stopPropagation(); handlePrevious(item.id, key); }}/>
+                                        <div className="flex flex-col mx-4">
+                                          {Object.entries(
+                                            value[slidableCells[item.id][key] || 0]).map(([subKey, subValue]) => (
+                                            <div key={subKey} className="flex flex-col">
+                                              <p>
+                                                <strong>{subKey.toUpperCase()}:</strong>{" "}
+                                                        {String(subValue)}
+                                              </p>
+                                              {subKey === "reservationId" && type === "user" && (
+                                                  <button onClick={() =>
+                                                      deleteInstance(
+                                                        subValue as number,
+                                                        "/api/review")}
+                                                    className="form_button">
+                                                    Remove
+                                                  </button>
+                                                )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <FaChevronRight onClick={(e) => {e.stopPropagation(); handleNext(item.id,key,value.length);}}
+                                          className={`cursor-pointer ${slidableCells[item.id][key] ===value.length - 1? "text-gray-300" : "text-black"}`}/>
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
+                            ) : (
+                              value
+                            )}
+                          </td>
+                        ))}
+                      {type === "host" && item.status === "Inquiry" ? (
+                        <td className="flex flex-row justify-center p-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateInstance(
+                                item.id,
+                                "Accepted",
+                                "/api/reservation"
+                              );
+                            }}
+                            className="form_button">
+                            Accept
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateInstance(
+                                item.id,
+                                "Declined",
+                                "/api/reservation"
+                              );
+                            }}
+                            className="form_button">
+                            Decline
+                          </button>
+                        </td>
+                      ) : (
+                        <td className="flex flex-row justify-center p-2">
+                          {type === "review" ? 
+                          <button onClick={(e) => { e.stopPropagation(); updateInstance(item.id, "Declined", "/api/review");}} className="form_button">
+                            Decline
+                          </button>
+                          :
+                          <Form type={type} initialData={item} users={users} locations={locations}/>
+                      }
+                          {type !== "host" && (
+                            <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id);}} className="form_button">
+                              Delete
+                            </button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  </React.Fragment>
+                ))
+              )}
             </tbody>
           </table>
         </div>
