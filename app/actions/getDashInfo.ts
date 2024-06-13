@@ -125,14 +125,14 @@ export async function getDashReservations() {
       status : reservation.status,
       wasInquiry : reservation.wasInquiry,
       revenue : reservation.price,
-      review : reservation.review
-      ? {
+      review : reservation.review? {
           rating: reservation.review.rating,
           hostRating: reservation.review.hostRating,
           experience: reservation.review.experience,
           status: reservation.review.status ?? 'None',
-        }
-      : 'None'
+        } : 'None',
+      guestRating : reservation.guestReview || 'None',
+      past : reservation.checkIn > new Date()? false : true
     }));
   
     return safeReservations;

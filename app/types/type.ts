@@ -64,9 +64,6 @@ export interface SafeUnit {
   closedDates? : {id:number, start : Date, end : Date}[]
 }
 
-export interface SafeAmenitiy{
-    'name': string;
-}
 
 export interface safeReservation{
     id: number,

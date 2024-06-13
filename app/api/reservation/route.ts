@@ -99,9 +99,10 @@ export async function PUT(req:Request){
     const body = await req.json();
     const {id,...data} = body;
 
-    if(data.checkIn) {data.checkIn= new Date(data.checkIn)};
-    if(data.checkOut){ data.checkOut= new Date(data.checkOut)};
-    if(data.userId) {data.userId= parseInt(data.userId)};
+    if(data.checkIn) data.checkIn= new Date(data.checkIn);
+    if(data.checkOut) data.checkOut= new Date(data.checkOut);
+    if(data.userId) data.userId= parseInt(data.userId);
+    if(data.guestReview) data.guestReview = parseInt(data.guestReview);
 
 
     try{
@@ -116,6 +117,7 @@ export async function PUT(req:Request){
         }
 
     }catch(error){
+        console.log(error);
         return NextResponse.json({ reservation: null }, { status: 500, headers: { "message": "Error updating reservation" } });
 
     }

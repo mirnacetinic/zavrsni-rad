@@ -41,7 +41,7 @@ export async function DELETE(req:Request){
 export async function PUT(req:Request){
     try{
         const body = await req.json();
-        const {id, data} = body;
+        const {id, ...data} = body;
         const review = await prisma.review.update({
             where: { reservationId : id},
             data
