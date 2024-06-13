@@ -28,47 +28,25 @@ const AccommodationsPage = async () => {
         typeData[a.type]++;
     });
 
-    const createChartData = (data: { [key: string]: number }, label: string, colors: string[]) => ({
+    const createChartData = (data: { [key: string]: number }, colors: string[]) => ({
         labels: Object.keys(data),
         datasets: [
             {
-                label,
+                label : "Count",
                 data: Object.values(data),
                 backgroundColor: colors,
-                hoverBackgroundColor: colors
             }
         ]
     });
 
-    const cityColors = ['#36A2EB',  '#FFCE56', '#4BC0C0', '#9966FF','#FF6384', '#FF9F40'];
-    const typeColors = ['#FFCE56', '#FF6384', '#36A2EB', '#4BC0C0', '#9966FF'];
-    const statusColors = ['#FF6384', '#FFCE56', '#36A2EB'];
+    const cityColors = ['crimson','orchid','gold','bisque','darkblue','coral', 'darkcyan', 'magenta'];
+    const typeColors = ['mediumpurple', 'lightpink', 'darkcyan', 'lightblue'];
+    const statusColors = ['lightgreen', 'coral', 'crimson'];
 
-    const cityChartData = createChartData(cityData, 'Number of Accommodations', cityColors);
-    const typeChartData = createChartData(typeData, 'Type of Accommodations', typeColors);
-    const statusChartData = createChartData(statusData, 'Status of Accommodations', statusColors);
+    const cityChartData = createChartData(cityData, cityColors);
+    const typeChartData = createChartData(typeData, typeColors);
+    const statusChartData = createChartData(statusData,statusColors);
 
-    const createChartOptions = (title: string) => ({
-        maintainAspectRatio: false,
-        plugins: {
-            title: {
-                display: true,
-                text: title,
-                font: {
-                    size: 10
-                }
-            },
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    font: {
-                        size: 8
-                    }
-                }
-            }
-        }
-    });
 
     return (
         <div className="main-div">
@@ -81,9 +59,9 @@ const AccommodationsPage = async () => {
                         <InfoCard data={accommodations} type='accommodation' users={users} locations={locations} />
                     </div>
                     <div className="charts">
-                        <Chart type="bar" data={cityChartData} options={createChartOptions('Accommodations by City')} />
-                        <Chart type="pie" data={typeChartData} options={createChartOptions('Accommodations by Type')} />
-                        <Chart type="pie" data={statusChartData} options={createChartOptions('Accommodations by Status')} />
+                        <Chart type="bar" data={cityChartData} title="Accommodations by City"  showLegend={false} />
+                        <Chart type="pie" data={typeChartData} title="Accommodations by Type" showLegend={true} />
+                        <Chart type="pie" data={statusChartData} title="Accommodations by Status" showLegend={true}/>
                     </div>
                 </>
             )}

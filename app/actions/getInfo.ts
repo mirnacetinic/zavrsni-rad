@@ -292,14 +292,28 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
     const avgRating = ratings.length > 0 ? totalRating / ratings.length : 0;
 
     let price = 0;
-    if (startDate && endDate) {
-      const days = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-      const prices = accommodation.units?.flatMap((unit) =>
-        unit?.priceLists.filter(priceList => priceList.from <= startDate && priceList.to >= endDate && !priceList.closed)?.map(priceList => priceList.price)
-      );
 
-      price = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length * days : 0;
-    }
+if (startDate && endDate) {
+  const days = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+  const prices = accommodation.units?.flatMap((unit) =>
+    unit?.priceLists.filter(priceList => 
+      priceList.from <= startDate && 
+      priceList.to >= endDate && 
+      !priceList.closed
+    ).map(priceList => {
+      let unitPrice = priceList.price;
+      if (priceList.deal) {
+        const discount = priceList.deal / 100;
+        unitPrice -= unitPrice * discount;
+      }
+      return unitPrice;
+    })
+  );
+
+  price = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length * days : 0;
+}
+
 
     return {
       id: accommodation.id,

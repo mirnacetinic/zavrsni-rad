@@ -29,7 +29,7 @@ const UsersPage = async () => {
         return hostData;
     });
     const allUsers = users.map(user => {
-        const { accommodations, hostedReservations,revenue, ...data } = user;
+        const { accommodations, hostedReservations, revenue, ...data } = user;
         return data;
     });
 

@@ -120,18 +120,24 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
 
     let total = 0;
     let currentDate = new Date(checkIn);
-    const endDate = new Date(checkOut);
 
-    while (currentDate < endDate) {
-      const applicablePrice = unit.priceLists.find(price =>
-        price.from <= currentDate && price.to >= currentDate
-      );
-      if (applicablePrice) {
-        total += applicablePrice.price;
+      while (currentDate < checkOut) {
+        const applicablePrice = unit.priceLists.find(price =>
+          price.from <= currentDate && price.to >= currentDate
+        );
+        if (applicablePrice) {
+          let price = applicablePrice.price;
+          if (applicablePrice.deal) {
+            const discount = applicablePrice.deal / 100; 
+            price -= price * discount;
+          }
+          total += price;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
       }
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    setCalculatedPrice(total);
+
+      setCalculatedPrice(total);
+
   };
 
   return (
