@@ -45,7 +45,7 @@ const AccommodationsPage = async () => {
 
     const cityChartData = createChartData(cityData, cityColors);
     const typeChartData = createChartData(typeData, typeColors);
-    const statusChartData = createChartData(statusData,statusColors);
+    const statusChartData = createChartData(statusData, statusColors);
 
 
     return (

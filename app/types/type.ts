@@ -88,6 +88,13 @@ export const status = [
   "Accepted"
 ];
 
+export const accommodationType = [
+  "Villa",
+  "House",
+  "Apartment",
+  "Room"
+]
+
 export const countries = [
   "Afghanistan",
   "Albania",

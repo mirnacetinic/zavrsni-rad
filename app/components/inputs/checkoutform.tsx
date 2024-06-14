@@ -102,7 +102,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret, onSuccess, em
   };
 
   return (
-    <form id="payment-form" className="p-4 flex flex-col justify-center" onSubmit={handleSubmit}>
+    <form id="payment-form" className="p-4 mt-4 flex flex-col justify-center" onSubmit={handleSubmit}>
       <div className="mb-4">
         <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
           First Name

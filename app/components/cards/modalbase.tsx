@@ -29,13 +29,10 @@ const ModalBase = ({ isOpen, onClose, children, width, height }: ModalBaseProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-70 animate-fadeIn" onClick={()=>{onClose(); router.refresh();}}></div>
-      <div className="fixed inset-0 flex items-center justify-center mt-4 mb-4 animate-slideInDown">
-        <div
-          className={`p-8 border shadow-lg rounded-md bg-white relative overflow-auto ${width ? width : 'min-w-96'} ${height ? height : 'h-auto'}`}>
-          <button
-            className="absolute top-0 right-0 m-4 text-gray-600 hover:text-gray-800 focus:outline-none"
-            onClick={onClose}>
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-70 animate-fadeIn"></div>
+      <div className="fixed inset-0 flex items-center justify-center animate-slideInDown">
+        <div className={`p-8 border shadow-lg rounded-md bg-white relative overflow-auto ${width ? width : 'min-w-96'} ${height ? height : 'h-auto'}`}>
+          <button className="absolute top-0 right-0 m-4 text-gray-600 hover:text-gray-800 focus:outline-none" onClick={onClose}>
             <AiOutlineClose size={24} />
           </button>
           {children}

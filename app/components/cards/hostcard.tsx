@@ -77,7 +77,14 @@ const HostCard: React.FC<HostProps> = ({
     }
   };
 
-  const handleCloseDates = async (id: number) => {
+  const handleCloseDates = async (id: number, closedDates? : {id: number, start:Date, end:Date}[]) => {
+    if(!startDate || !endDate) return;
+
+    if(closedDates){
+      closedDates.filter(e=>e.start>startDate && e.end<endDate).map(e=> handleDelete(e.id, "/api/prices"));
+
+    }
+
     const response = await fetch("/api/prices", {
       method: "POST",
       body: JSON.stringify({ data: { unitId: id, from: startDate, to: endDate, closed: "true", price: 0 } }),
@@ -87,13 +94,14 @@ const HostCard: React.FC<HostProps> = ({
     });
 
     if (response.ok) {
-      toast.success(response.headers.get("message") || "Success");
+      toast.success("Closed");
+      setStartDate(null);
+      setEndDate(null);
       router.refresh();
-      setUnitAdd(false);
-      setUnitEdit(false);
     } else {
       toast.error(response.headers.get("message") || "Error");
     }
+  
   };
 
   const handleDeals = async (ids: number[]) => {
@@ -106,10 +114,8 @@ const HostCard: React.FC<HostProps> = ({
     });
 
     if (response.ok) {
-      toast.success(response.headers.get("message") || "Success");
+      toast.success("Success");
       router.refresh();
-      setUnitAdd(false);
-      setUnitEdit(false);
     } else {
       toast.error(response.headers.get("message") || "Error");
     }
@@ -173,9 +179,7 @@ const HostCard: React.FC<HostProps> = ({
         />
       </div>
       {filteredAccommodations.map((accommodation, index) => (
-        <div
-          key={index}
-          className="p-6 bg-white border border-gray-200 rounded-lg shadow-md mb-4">
+        <div key={index} className="p-6 bg-white border border-gray-200 rounded-lg shadow-md mb-4">
           <UnitModal
             amenities={amenities}
             isOpen={unitAdd}
@@ -189,7 +193,6 @@ const HostCard: React.FC<HostProps> = ({
             isOpen={selectedAccommodationId === accommodation.id}
             onClose={() => setSelectedAccommodationId(null)}
           />
-
           <div className="flex justify-between items-center m-2">
             <div>
               {accommodation.image && (<img src={accommodation.image} width={400} height={300} />)}
@@ -201,43 +204,34 @@ const HostCard: React.FC<HostProps> = ({
               </p>
             </div>
             <div className="flex space-x-2">
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => setSelectedAccommodationId(accommodation.id)}
-              >
+              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={() => setSelectedAccommodationId(accommodation.id)}>
                 Edit
               </button>
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                onClick={() => setUnitAdd(true)}
-              >
+              <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                onClick={() => setUnitAdd(true)}>
                 Add Unit
               </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() =>
-                  handleDelete(accommodation.id, "/api/accommodation")
-                }
-              >
+                  handleDelete(accommodation.id, "/api/accommodation")} >
                 Delete
               </button>
               {accommodation.units && (
                 <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(accommodation.units?.map(u => u.id) || [])}>
                   Add deals
-                </button>)}
+                </button>
+              )}
             </div>
           </div>
-
           <p className="text-gray-800 mb-4">{accommodation.description}</p>
           <p className="text-gray-600 mb-4">Status: {accommodation.status}</p>
-
           {accommodation.units && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Units:</h3>
               {accommodation.units.map((unit) => (
                 <div key={unit.id} className="mb-4">
-                  <div
-                    className="flex justify-between items-center bg-gray-100 p-3 rounded-lg cursor-pointer"
+                  <div className="flex justify-between items-center bg-gray-100 p-3 rounded-lg cursor-pointer"
                     onClick={() => toggleExpandUnit(unit.id)}>
                     <p className="font-semibold">{unit.title}</p>
                     <p>{expandedUnitId === unit.id ? "-" : "+"}</p>
@@ -254,7 +248,6 @@ const HostCard: React.FC<HostProps> = ({
                       <p>Capacity: {unit.capacity}</p>
                       <p>Amenities: {unit?.amenitiesName?.join(", ")}</p>
                       <p>Inquiry: {unit.inquiry.toString()}</p>
-
                       {unit.priceLists.length > 0 && (
                         <div className="mt-4">
                           <div
@@ -267,8 +260,8 @@ const HostCard: React.FC<HostProps> = ({
                             <div className="mt-2">
                               {unit.priceLists.map((price) => (
                                 <div key={price.id} className="p-2 mt-1 border bg-gray-200 rounded">
-                                  <p>From: {new Date(price.from).toLocaleDateString()}</p>
-                                  <p>To: {new Date(price.to).toLocaleDateString()}</p>
+                                  <p>From: {price.from.toLocaleDateString()}</p>
+                                  <p>To: {price.to.toLocaleDateString()}</p>
                                   <p>Price: €{price.price} </p>
                                   <p>Active deals:{price.deal ? price.deal + '%' : "None"}</p>
                                 </div>
@@ -278,8 +271,7 @@ const HostCard: React.FC<HostProps> = ({
                         </div>
                       )}
                       <div className="mt-4">
-                        <div
-                          className="flex justify-between items-center bg-gray-100 p-3 rounded-lg cursor-pointer"
+                        <div className="flex justify-between items-center bg-gray-100 p-3 rounded-lg cursor-pointer"
                           onClick={() => toggleExpandDates(unit.id)}>
                           <p className="font-semibold">Dates</p>
                           <p>{expandedDatesId === unit.id ? "-" : "+"}</p>
@@ -287,23 +279,25 @@ const HostCard: React.FC<HostProps> = ({
                         {expandedDatesId === unit.id && (
                           <div className="flex flex-row mt-2">
                             <div className="text-center">
-                              <CustomCalendar
-                                reservations={unit.reservations}
-                                hidden={false}
-                                closedDates={unit?.closedDates}
-                                selected={startDate || undefined}
-                                secondSelected={endDate || undefined}
-                                onTwoSelect={handleDates} />
-                              {startDate && endDate && (
-                                <button onClick={() => handleCloseDates(unit.id)} className="bg-red-200"> Close {startDate?.toDateString() || ""} - {endDate?.toDateString() || ""}</button>
-                              )}
+                              <CustomCalendar reservations={unit.reservations} hidden={false} closedDates={unit.closedDates}
+                                selected={startDate || undefined} secondSelected={endDate || undefined} onTwoSelect={handleDates} 
+                              />
+                              <div className="text-left">
+                                <p className="text-red-500">Reservations</p>
+                                <p className="text-purple-500">Closed</p>
+                              </div>
                             </div>
                             <div className="mx-2 ">
-                              <p className="text-red-500">Reservations</p>
-                              <p className="text-purple-500">Closed</p>
-                              Closed Dates: {unit.closedDates?.map(c =>( 
-                              <p key={c.id}>{ c.start.toDateString() + '-' + c.end.toDateString() } <span onClick={()=>handleDelete(c.id, "/api/prices")}>X</span></p>
-                              ))}
+                              {unit.closedDates && unit.closedDates.length >0 && (
+                                <div><b>Closed Dates:</b>
+                                {unit.closedDates?.map((c) =>
+                                  <p key={c.id}>{ c.start.toDateString() + '-' + c.end.toDateString() } <span onClick={()=>handleDelete(c.id, "/api/prices")}>X</span></p>
+                                )}
+                                </div> 
+                              )}
+                              {startDate && endDate && (
+                                  <button onClick={() => handleCloseDates(unit.id, unit.closedDates)} className="bg-red-200 rounded mt-1 p-1"> Close {startDate?.toDateString() || ""} - {endDate?.toDateString() || ""}</button>
+                              )}
                             </div>
                           </div>
                         )}

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   
 
     const existingAccommodation = await prisma.accommodation.findUnique({
-      where: { id: accommodationId }
+      where: { id: parseInt(accommodationId) }
     });
 
     if (!existingAccommodation) {
@@ -24,23 +24,23 @@ export async function POST(req: Request) {
         bedrooms : parseInt(bedrooms),
         inquiry: Boolean(inquiry),
         accommodationId : existingAccommodation.id,
-        priceLists: {
+        ...(priceLists && {priceLists: {
           create: priceLists.map((priceList: any) => ({
             from: new Date(priceList.from),
             to: new Date(priceList.to),
             price: parseFloat(priceList.price),
           })),
-        },
-        amenities: {
+        }}),
+        ...(amenities && {amenities: {
           create: amenities.map((amenity: any) => ({
-            amenity: { connect: { id: parseInt(amenity) } },
-          })),
-        },
+            amenity: { connect: { id: parseInt(amenity) } }}))
+          }}),
       },
     });
 
-    return NextResponse.json({newUnit}, {status:200, headers:{"message":"Unit created successfully!"}});
+    return NextResponse.json({newUnit}, {status:200, headers:{ "message" : "Unit created successfully!"}});
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ unit: null }, { status: 500, headers: { "message": "Error creating unit" } });
   }
 }
@@ -74,7 +74,7 @@ export async function PUT(req: Request) {
       const { id, capacity, beds, bathrooms, bedrooms, amenities, inquiry, priceLists, accommodationId, ...data } = body;
   
       const amenityIds = amenities? amenities.map((a: string) => parseInt(a)) : [];
-      const existingPriceLists = priceLists?.filter((priceList: any) => priceList.id);
+      const existingPriceLists = priceLists?.filter((priceList: any) => parseInt(priceList.id));
   
       const updatedUnit = await prisma.unit.update({
         where: { id: id },
@@ -88,7 +88,8 @@ export async function PUT(req: Request) {
           inquiry: Boolean(inquiry),
           ...(priceLists && {priceLists: {
             deleteMany: {
-              id: { notIn: existingPriceLists?.map((p: any) => parseInt(p.id)) }
+              id: { notIn: existingPriceLists?.map((p: any) => parseInt(p.id)) },
+              closed: false
             },
             upsert: priceLists?.map((priceList: any) => ({
               where: { id: priceList.id || 0 }, 
@@ -121,7 +122,6 @@ export async function PUT(req: Request) {
   
       return NextResponse.json({ updatedUnit},{status: 200, headers: { "message": "Unit updated successfully!" } });
     } catch (error) {
-      console.log(error);
       return NextResponse.json({ updatedUnit: null }, { status: 500, headers: { "message": "Error updating unit" } });
     }
   }

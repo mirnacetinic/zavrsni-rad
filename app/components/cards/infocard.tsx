@@ -324,18 +324,25 @@ const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ 
                           </button>
                         </td>
                       ) : (
-                        <td className="flex flex-row justify-center p-2">
+                        <td className="text-center p-1">
                           {type === "review" ? (
+                            <>
                             <button onClick={(e) => { e.stopPropagation(); updateInstance(item.id, "Declined", "/api/review"); }} className="form_button">
                               Decline
                             </button>
-                          ) : (
-                            <Form type={type} initialData={item} users={users} locations={locations} />
-                          )}
-                          {type !== "host" && (
-                            <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id); }} className="form_button">
+                              <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id); }} className="form_button">
                               Delete
                             </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-row justify-center items-center">
+                            <Form type={type} initialData={item} users={users} locations={locations} />
+                            {type !== "host" && (
+                              <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id); }} className="form_button">
+                                Delete
+                              </button>
+                            )}
+                            </div>
                           )}
                         </td>
                       )}

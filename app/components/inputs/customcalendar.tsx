@@ -97,7 +97,7 @@ const CustomCalendar = ({ hidden, onSelect, onTwoSelect, selected, secondSelecte
                     onTwoSelect([clickedDate, secondSelectedDate]);
                 } else if (selectedDate && !secondSelectedDate) {
                     setSecondSelectedDate(clickedDate);
-                    onTwoSelect([selectedDate, clickedDate]);
+                    clickedDate > selectedDate? onTwoSelect([selectedDate, clickedDate]) : onTwoSelect([clickedDate, selectedDate])
                 } else {
                     setSelectedDate(clickedDate);
                     setSecondSelectedDate(null);

@@ -53,7 +53,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
   const router = useRouter();
 
   const [step, setStep] = useState(
-    user.role === "HOST" ? Steps.TYPE : Steps.AGREEMENT
+    user.role !== "USER" ? Steps.TYPE : Steps.AGREEMENT
   );
   const [locations, setLocations] = useState<Location[]>(locationsList || []);
   const [units, setUnits] = useState<FieldValues[]>(accommodation?.units || []);

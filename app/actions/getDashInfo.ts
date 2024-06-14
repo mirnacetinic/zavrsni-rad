@@ -277,7 +277,7 @@ export async function getDashAccommodation() {
     address : accommodation.address,
     reviews: accommodation.units.flatMap(u => u.reservations.flatMap(r => r.review || []))?.length > 0 
       ? accommodation.units.flatMap(u => u.reservations.flatMap(r => r.review || []))
-      : "None"
+      : "None",
   }));
 
   return safeAccommodations;

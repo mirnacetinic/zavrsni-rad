@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import ModalBase from "../cards/modalbase";
 import { SafeUser } from "@/app/types/type";
-import { countries, status } from "@/app/types/type";
+import { countries, status, accommodationType} from "@/app/types/type";
 
 interface FormProps {
   type: string;
@@ -109,21 +109,21 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
       );
 
       customFields = [
-        { label: "Type", type: "select", name: "type", options: [
-          { value: "Villa", label: "Villa" },
-          { value: "House", label: "House" },
-          { value: "Apartment", label: "Apartment" },
-          { value: "Room", label: "Room" },
-        ] },
+        { label: "Type", type: "select", name: "type", options: accommodationType.map((type)=>(
+          { value: type, label: type }))
+        },
         { label: "Status", type: "select", name: "status", options: [
           { value: "Active", label: "Active" },
           { value: "Suspended", label: "Suspended" },
           { value: "Inactive", label: "Inactive" },
         ] },
         { label: "Location", type: "select", name: "locationId", options: locations?.map((location) => (
-            { value: location.id.toString(), label: `${location.city}, ${location.country}` })) || [] },
+            { value: location.id.toString(), label: `${location.city}, ${location.country}` })) || [] 
+        },
+
         { label: "Owner", type: "select", name: "ownerId", options: users?.map((user) => (
-            { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || [] }
+            { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || [] 
+        }
       ];
       break;
 
@@ -132,10 +132,11 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
         { label: "City", type: "text", name: "city" },
         { label: "ZIP", type: "text", name: "zip" }
       );
-
-      customFields = [{ label: "Country", type: "select", name: "country", options: countries.map((country) => (
-        { value: country, label: country }
-      ))}];
+      customFields = [
+        { label: "Country", type: "select", name: "country", options: countries.map((country) => (
+          { value: country, label: country }))
+        }
+      ];
       break;
 
     case "amenity":
@@ -143,25 +144,33 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
       break;
 
     case "unit":
+      formFields.push(
+        { label: "Accommodation", type: "number", name: "accommodationId" },
+        { label: "Title", type: "text", name: "title" },
+        { label: "Description", type: "text", name: "description" },
+        { label: "Capacity", type: "number", name: "capacity" },
+        { label: "Bedrooms", type: "number", name: "bedrooms" },
+        { label: "Beds", type: "number", name: "beds" },
+        { label: "Bathrooms", type: "number", name: "bathrooms" }
+      );
       customFields = [
-        { label: "Unit", type: "text", name: "unit" },
-        { label: "Price", type: "number", name: "price" },
-        { label: "Availability", type: "select", name: "availability", options: [
-          { value: "Available", label: "Available" },
-          { value: "Unavailable", label: "Unavailable" }
-        ]}
+        { label: "Type", type: "select", name: "type", options: accommodationType.map((type)=>(
+          { value: type, label: type }))
+        },
       ];
       break;
 
     case "reservation":
       customFields = [
         { label: "Guest", type: "select", name: "userId", options: users?.map((user) => (
-            { value: user.id.toString(), label: `${user.name} ${user.surname}` }
-          )) || [] },
+          { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || []
+        },
         { label: "Check In", type: "text", name: "checkIn" },
         { label: "Check Out", type: "text", name: "checkOut" },
+        { label: "Guests", type: "number", name: "guests" },
         { label: "Status", type: "select", name: "status", options: status.map((status) => (
-        { value: status, label: status }))}
+          { value: status, label: status }))
+        }
 
       ];
       break;
@@ -172,7 +181,7 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
 
   if (!isOpen) {
     return (
-      <div className="m-2">
+      <div className="my-2">
         <button onClick={() => { setIsOpen(true) }} className="form_button">
           {initialData ? 'Edit' : `Add ${type}`}
         </button>

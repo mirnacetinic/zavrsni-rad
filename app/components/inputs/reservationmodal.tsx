@@ -66,26 +66,22 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
          <div><p>Address: ${unit.address}</p><p> Check-in: ${checkIn} Check-out: ${checkOut}</p> <p>Guests: ${guests}</p> </div>
           <p>We look forward to your stay.</p>
         </div>`,
-        success: "Reservation confirmation email sent!",
       },
       inq: {
         subject: "Inquiry Confirmation",
         message: `<p>Dear Guest,</p><p>Thank you for your inquiry. We will notify you once the host reviews your request.</p>`,
-        success: "Inquiry confirmation email sent!",
       },
     };
 
     try {
-      const { subject, message, success } = messages[type];
+      const { subject, message } = messages[type];
       const response = await fetch("/api/mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, subject, message }),
       });
-      if (response.ok) {
-        toast.success(success);
-      } else {
-        toast.error("Something went wrong");
+      if (!response.ok) {
+         toast.error("Something went wrong");
       }
     } catch (error) {
       toast.error("Something went wrong");
@@ -155,7 +151,8 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
   };
 
   return (
-    <ModalBase isOpen={isOpen} onClose={() => { onClose(); setStep(Steps.SUMMARY); }}>
+    <ModalBase isOpen={isOpen} onClose={() => { onClose(); setStep(Steps.SUMMARY); }} width="w-96">
+      <div>
       <div className="text-center">
         <h3 className="text-2xl font-bold text-gray-900">{Steps[step]}</h3>
       </div>
@@ -209,6 +206,8 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
         {!loading && step !== Steps.SUMMARY && <button onClick={back} className="form_button">Back</button>}
         {!loading && step !== Steps.FINISH && <button onClick={next} className="form_button">Next</button>}
         {step === Steps.FINISH && !loading && <button onClick={() =>{ onClose(); router.push("/reservations")}} className="form_button">Finish</button>}
+      </div>
+
       </div>
     </ModalBase>
   );

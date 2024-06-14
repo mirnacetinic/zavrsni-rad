@@ -30,13 +30,11 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     const body = await req.json();
-    const { ids, deal } = body;
+    const { ids, id, ...data } = body;
     try {
       const updated = await prisma.priceList.updateMany({
-        where: {unitId : {in : ids}},
-        data : {
-            deal: deal,
-        }
+        where: {unitId : {in : ids}} || {id:id},
+        data
       });
       if (!updated) {
         return NextResponse.json({ priceList: null },{ status: 404, headers: { message: "PriceList not found!" } }
@@ -46,6 +44,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ updated },{ status: 200, headers: { message: "Pricelist updated successfully!" } }
       );
     } catch (error) {
+      console.log(error);
       return NextResponse.json({ priceList: null },{ status: 500, headers: { message: "Error updating priceList"} }
       );
     }
@@ -54,7 +53,7 @@ export async function PUT(req: Request) {
   export async function DELETE(req: Request) {
     const body = await req.json();
     const { id } = body;
-    console.log(id);
+
     try {
       const deleted = await prisma.priceList.delete({
         where: {id: id}
@@ -64,7 +63,7 @@ export async function PUT(req: Request) {
         );
       }
   
-      return NextResponse.json({ deleted },{ status: 200, headers: { message: "Pricelist deleed successfully!" } }
+      return NextResponse.json({ deleted },{ status: 200, headers: { message: "Pricelist deleted successfully!" } }
       );
     } catch (error) {
       return NextResponse.json({ priceList: null },{ status: 500, headers: { message: "Error deleting priceList"} }

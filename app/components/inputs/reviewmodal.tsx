@@ -51,23 +51,15 @@ const ReviewModal: React.FC<ModalProps> = ({ reservationId }) => {
   return (
     <div>
       <div>
-        <button
-          onClick={() => {
-            setIsOpen(true);
-          }}
-          className="form_button"
-        >
+        <button onClick={() => { setIsOpen(true); }} className="form_button">
           Leave a review
         </button>
       </div>
       <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <div className="text-center">
           <label>Tell us about your experience</label>
-          <textarea
-            className="form-input"
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-          ></textarea>
+          <textarea className="form-input" value={experience} onChange={(e) => setExperience(e.target.value)}>
+          </textarea>
           <label>Rate the unit</label>
           <div className="flex justify-center mt-4">
             {[1, 2, 3, 4, 5].map((value) => (

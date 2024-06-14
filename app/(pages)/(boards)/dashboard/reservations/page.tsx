@@ -32,38 +32,38 @@ const ReservationsPage = async () => {
   const cityData: { [key: string]: number } = {};
 
   reservationsAll.forEach((reservation) => {
-    const { status, checkIn, price, wasInquiry, city } = reservation;
-    const checkInDate = new Date(checkIn);
+    const { wasInquiry, ...data } = reservation;
+    const checkInDate = new Date(reservation.checkIn);
     const checkInYear = checkInDate.getFullYear();
     const checkInMonth = checkInDate.getMonth();
 
-    countByStatus[status]++;
+    countByStatus[reservation.status]++;
 
-    if (status === 'Active') {
+    if (reservation.status === 'Active') {
       if (checkInYear === currentYear) {
         const monthData = months[checkInMonth];
         monthData.reservations++;
-        monthData.revenue += price;
+        monthData.revenue += reservation.price;
       }
-      years[checkInYear] += price;
-      totalRevenue += price;
-      cityData[city] = (cityData[city] || 0) + 1;
-      reservations.push(reservation);
+      years[checkInYear] += data.price;
+      totalRevenue += data.price;
+      cityData[reservation.city] = (cityData[reservation.city] || 0) + 1;
+      reservations.push(data);
       if (wasInquiry && checkInYear === currentYear) {
         months[checkInMonth].inquiries++;
         inquiriesToReservations++;
-        inquiriesToReservationsRevenue += price;
+        inquiriesToReservationsRevenue += reservation.price;
       }
-    } else if (status !== 'Canceled') {
-      inquiries.push(reservation);
+    } else if (reservation.status !== 'Canceled') {
+      inquiries.push(data);
       if (wasInquiry && checkInYear === currentYear) {
         months[checkInMonth].inquiries++;
       }
-      if (status !== 'Declined') {
-        potentialRevenue += price;
+      if (reservation.status !== 'Declined') {
+        potentialRevenue += reservation.price;
       }
     } else {
-      reservations.push(reservation);
+      reservations.push(data);
     }
   });
 

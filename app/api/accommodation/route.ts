@@ -142,6 +142,7 @@ export async function PUT(req: Request) {
           priceLists: {
             deleteMany: {
               id: { notIn: unit.priceLists?.map((priceList: any) => priceList.id).filter((id: any) => id !== undefined) },
+              closed : false
             },
             upsert: unit.priceLists?.map((priceList: any) => ({
               where: { id: priceList.id || 0 },
@@ -149,13 +150,11 @@ export async function PUT(req: Request) {
                 from: new Date(priceList.from),
                 to: new Date(priceList.to),
                 price: parseFloat(priceList.price),
-                closed: priceList.closed,
               },
               create: {
                 from: new Date(priceList.from),
                 to: new Date(priceList.to),
                 price: parseFloat(priceList.price),
-                closed: priceList.closed,
               }
             })),
           },
@@ -185,7 +184,6 @@ export async function PUT(req: Request) {
               from: new Date(priceList.from),
               to: new Date(priceList.to),
               price: parseFloat(priceList.price),
-              closed: priceList.closed,
             })),
           },
           amenities: {
