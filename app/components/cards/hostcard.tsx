@@ -104,10 +104,10 @@ const HostCard: React.FC<HostProps> = ({
   
   };
 
-  const handleDeals = async (ids: number[]) => {
+  const handleDeals = async ( deal: number, ids?: number[], id?: number) => {
     const response = await fetch("/api/prices", {
       method: "PUT",
-      body: JSON.stringify({ ids: ids, deal: 10 }),
+      body: JSON.stringify({ ids: ids, id: id, deal: deal }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -213,13 +213,12 @@ const HostCard: React.FC<HostProps> = ({
                 Add Unit
               </button>
               <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                onClick={() =>
-                  handleDelete(accommodation.id, "/api/accommodation")} >
+                onClick={() => handleDelete(accommodation.id, "/api/accommodation")} >
                 Delete
               </button>
               {accommodation.units && (
-                <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(accommodation.units?.map(u => u.id) || [])}>
-                  Add deals
+                <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(10,accommodation.units?.map(u => u.id) || [])}>
+                  Add 10% off
                 </button>
               )}
             </div>
@@ -240,7 +239,7 @@ const HostCard: React.FC<HostProps> = ({
                     <div className="border rounded-lg p-4 bg-white mt-2">
                       <div className="flex flex-row justify-center">
                         {unit.images?.map((i) => (
-                          <img key={i} className="m-1" src={i} height={200} width={200}></img>
+                          <img key={i} className="m-1" alt="Pic" src={i} height={200} width={200}></img>
                         ))}
                       </div>
                       <p>Type: {unit.type}</p>
@@ -263,7 +262,14 @@ const HostCard: React.FC<HostProps> = ({
                                   <p>From: {price.from.toLocaleDateString()}</p>
                                   <p>To: {price.to.toLocaleDateString()}</p>
                                   <p>Price: €{price.price} </p>
-                                  <p>Active deals:{price.deal ? price.deal + '%' : "None"}</p>
+                                  <p>Active deals: {price.deal ? (
+                                    <>
+                                      {price.deal}% <button className="px-2 bg-red-500 rounded text-white" onClick={() => handleDeals(0,undefined,price.id)}>X</button>
+                                    </>
+                                  ) : (
+                                    "None"
+                                  )}
+                                  </p>
                                 </div>
                               ))}
                             </div>
@@ -291,7 +297,7 @@ const HostCard: React.FC<HostProps> = ({
                               {unit.closedDates && unit.closedDates.length >0 && (
                                 <div><b>Closed Dates:</b>
                                 {unit.closedDates?.map((c) =>
-                                  <p key={c.id}>{ c.start.toDateString() + '-' + c.end.toDateString() } <span onClick={()=>handleDelete(c.id, "/api/prices")}>X</span></p>
+                                  <p key={c.id}>{ c.start.toDateString() + '-' + c.end.toDateString() } <button className="px-2 bg-red-500 rounded text-white" onClick={()=>handleDelete(c.id, "/api/prices")}>X</button></p>
                                 )}
                                 </div> 
                               )}
@@ -303,19 +309,17 @@ const HostCard: React.FC<HostProps> = ({
                         )}
                       </div>
                       <div className="flex space-x-2 mt-4">
-                        <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals([unit.id])}>
-                          Add deals
+                        <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(10, [unit.id])}>
+                          Add 10% off
                         </button>
                         <button
                           className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          onClick={() => setUnitEdit(true)}
-                        >
+                          onClick={() => setUnitEdit(true)}>
                           Edit
                         </button>
                         <button
                           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                          onClick={() => handleDelete(unit.id, "/api/unit")}
-                        >
+                          onClick={() => handleDelete(unit.id, "/api/unit")}>
                           Remove
                         </button>
                         <UnitModal

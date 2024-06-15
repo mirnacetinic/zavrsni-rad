@@ -354,7 +354,11 @@ export async function getDashAccommodation(host?:number) {
       },
       units : {
         include:{
-          priceLists:true,
+          priceLists:{
+            orderBy:{
+              from: 'desc'
+            }
+          },
           reservations: {
             where:{
               status: { notIn : ['Canceled', 'Declined']}
@@ -365,6 +369,9 @@ export async function getDashAccommodation(host?:number) {
               amenity: true
               }
             }
+          },
+          orderBy:{
+            title: 'asc'
           }
         },
      },

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
 
 interface PriceListProps {
   priceList: { from: Date; to: Date; price: number }[];
@@ -115,18 +116,8 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
                   {priceItem.from.toDateString()} - {priceItem.to.toDateString()} : €{priceItem.price}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleEditPrice(index)}
-                    className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition duration-300"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeletePrice(index)}
-                    className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition duration-300"
-                  >
-                    Delete
-                  </button>
+                <MdOutlineModeEdit className="m-2 cursor-pointer" onClick={()  => handleEditPrice(index)}/>
+                <MdDelete className="cursor-pointer" onClick={() => handleDeletePrice(index)}/>
                 </div>
               </li>
             ))}

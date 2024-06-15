@@ -1,8 +1,7 @@
 import { useForm, FieldValues } from "react-hook-form";
 import { useState, useEffect } from "react";
-import { AiOutlineClose } from "react-icons/ai";
 import UnitModal from "./unitmodal";
-import { MdOutlineHouse, MdOutlineVilla, MdOutlineApartment, MdOutlineBedroomParent, MdOutlineModeEdit } from "react-icons/md";
+import { MdOutlineHouse, MdOutlineVilla, MdOutlineApartment, MdOutlineBedroomParent, MdOutlineModeEdit, MdDelete } from "react-icons/md";
 import { SafeAccommodation, SafeUser } from "@/app/types/type";
 import { useRouter } from "next/navigation";
 import { Location } from "@prisma/client";
@@ -334,7 +333,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
               <span className="font-semibold">Unit {index + 1}: {unit.type} {unit.title}</span>
               <div className="flex items-center">
                 <MdOutlineModeEdit className="mr-2 cursor-pointer" onClick={() => openUnit(unit)}/>
-                <AiOutlineClose className="cursor-pointer" onClick={() => removeUnit(index)} />
+                <MdDelete className="cursor-pointer" onClick={() => removeUnit(index)} />
               </div>
             </div>
           ))}

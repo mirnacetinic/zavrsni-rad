@@ -31,9 +31,10 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
     const body = await req.json();
     const { ids, id, ...data } = body;
+    if(data.deal === 0) data.deal= null;
     try {
       const updated = await prisma.priceList.updateMany({
-        where: {unitId : {in : ids}} || {id:id},
+        where: (ids && {unitId : {in : ids}}) || {id:id},
         data
       });
       if (!updated) {
@@ -44,7 +45,6 @@ export async function PUT(req: Request) {
       return NextResponse.json({ updated },{ status: 200, headers: { message: "Pricelist updated successfully!" } }
       );
     } catch (error) {
-      console.log(error);
       return NextResponse.json({ priceList: null },{ status: 500, headers: { message: "Error updating priceList"} }
       );
     }
