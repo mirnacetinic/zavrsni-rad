@@ -1,10 +1,9 @@
-"use client";
+'use client';
 import { useEffect, useState, useRef, useCallback } from "react";
-import { FaSort, FaFilter } from "react-icons/fa";
+import { FaSort, FaFilter, FaSortDown, FaSortUp } from "react-icons/fa";
 import AccomodationCard from "./accomodationcard";
 import { SearchAccommodation } from "@/app/types/type";
 
-// Custom hook to detect clicks outside an element
 function useOutsideClick(ref: any, callback: any) {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -117,40 +116,57 @@ const ViewList = ({ accommodations }: ViewProps) => {
   const amenitiesList = Array.from(new Set(accommodations.flatMap((a) => a.amenities)));
 
   return (
-    <div>
-      <div className="mt-2 sticky p-2 z-10 justify-center items-center flex flex-row text-gray-600">
-        <div ref={sortRef} onClick={() => setSortOpen(!sortOpen)} className="flex flex-row cursor-pointer mx-5 z-20 relative">
-          <FaSort className="mr-2" /> Sort
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex justify-center items-center text-gray-600 mb-4 space-x-8">
+        <div ref={sortRef} className="relative">
+          <button onClick={() => setSortOpen(!sortOpen)}
+            className="flex items-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 focus:outline-none focus:ring"
+          >
+            <FaSort className="mr-2" /> Sort
+          </button>
           {sortOpen && (
-            <div className="rounded p-2 absolute top-full mt-2 right-0 flex-col bg-white shadow-md z-20">
-              <p className="cursor-pointer flex justify-between" onClick={() => handleSort("price")}>
-                Price {sortOptions.sortBy === "price" && (sortOptions.sortOrder === "asc" ? "▲" : "▼")}
-              </p>
-              <p className="cursor-pointer flex justify-between" onClick={() => handleSort("rating")}>
-                Rating {sortOptions.sortBy === "rating" && (sortOptions.sortOrder === "asc" ? "▲" : "▼")}
-              </p>
-              <p className="cursor-pointer flex justify-between" onClick={() => handleSort("popularity")}>
-                Popularity {sortOptions.sortBy === "popularity" && (sortOptions.sortOrder === "asc" ? "▲" : "▼")}
-              </p>
+            <div className="absolute top-full mt-2 right-0 w-40 bg-white rounded shadow-lg z-20">
+              {(["price", "rating", "popularity"] as Array<"price" | "rating" | "popularity">).map((sortOption) => (
+                <p key={sortOption} onClick={() => handleSort(sortOption)}
+                  className="cursor-pointer px-4 py-2 hover:bg-gray-100 flex" 
+                >
+                  {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}{" "}
+                  {sortOptions.sortBy === sortOption && (sortOptions.sortOrder === "asc" ? <FaSortUp/> : <FaSortDown/>)}
+                </p>
+              ))}
             </div>
           )}
         </div>
-        <div ref={filterRef} className="cursor-pointer mx-5 relative z-50">
-          <span className="flex flex-row" onClick={() => setFilterOpen(!filterOpen)}><FaFilter className="mr-2" /> Filter</span>
+        <div ref={filterRef} className="relative">
+          <button
+            onClick={() => setFilterOpen(!filterOpen)}
+            className="flex items-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 focus:outline-none focus:ring"
+          >
+            <FaFilter className="mr-2" /> Filter
+          </button>
           {filterOpen && (
-            <div className="rounded p-2 absolute top-full mt-2 left-0 flex-col bg-white shadow-md">
-              <div className="flex flex-col mb-2">
+            <div className="absolute top-full mt-2 left-0 w-64 bg-white rounded shadow-lg p-4 z-20 space-y-4">
+              <div className="space-y-2">
                 <p className="font-bold">Amenities:</p>
                 {amenitiesList.map((amenity, index) => (
                   <label key={index} className="flex items-center">
-                    <input type="checkbox" onChange={() => handleFilter("amenities", amenity)} />
-                    <span className="ml-2">{amenity}</span>
+                    <input
+                      type="checkbox"
+                      checked={filters.amenities.includes(amenity)}
+                      onChange={() => handleFilter("amenities", amenity)}
+                      className="mr-2"
+                    />
+                    {amenity}
                   </label>
                 ))}
               </div>
-              <div className="flex flex-col mb-2">
+              <div className="space-y-2">
                 <p className="font-bold">Type:</p>
-                <select className="p-1 border rounded" onChange={(e) => handleFilter("type", e.target.value)}>
+                <select
+                  className="w-full p-2 border rounded"
+                  value={filters.type}
+                  onChange={(e) => handleFilter("type", e.target.value)}
+                >
                   <option value="">All</option>
                   <option value="House">House</option>
                   <option value="Villa">Villa</option>
@@ -158,9 +174,10 @@ const ViewList = ({ accommodations }: ViewProps) => {
                   <option value="Room">Room</option>
                 </select>
               </div>
-              <div className="flex flex-col mb-2">
+              <div className="space-y-2">
                 <p className="font-bold">Price:</p>
                 <input
+                  className="w-full"
                   type="range"
                   min="0"
                   max="1000"
@@ -168,32 +185,49 @@ const ViewList = ({ accommodations }: ViewProps) => {
                   value={filters.price[1]}
                   onChange={(e) => handleFilter("price", [0, parseInt(e.target.value)])}
                 />
-                <span>${filters.price[1]}</span>
+                <span>€{filters.price[1]}</span>
               </div>
-              <div className="flex flex-col">
+              <div className="space-y-2">
                 <p className="font-bold">Rating:</p>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={filters.rating}
-                  onChange={(e) => handleFilter("rating", parseFloat(e.target.value))}
-                />
-                <span>{filters.rating} Stars</span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="px-2 py-1 border rounded"
+                    onClick={() => handleFilter("rating", Math.max(filters.rating - 0.5, 0))}
+                  >
+                    -
+                  </button>
+                  <input
+                    className="w-full p-2 border rounded text-center"
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.5"
+                    value={filters.rating}
+                    readOnly
+                  />
+                  <button
+                    className="px-2 py-1 border rounded"
+                    onClick={() => handleFilter("rating", Math.min(filters.rating + 0.5, 5))}
+                  >
+                    +
+                  </button>
+                </div>
+                <span>{filters.rating.toString()} Stars</span>
               </div>
             </div>
           )}
         </div>
       </div>
       {filteredData.length > 0 ? (
-        <div className="grid md:grid-cols-3 gap-4 mt-6 z-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filteredData.map((accommodation) => (
             <AccomodationCard key={accommodation.id} data={accommodation} />
           ))}
         </div>
       ) : (
-        <div className="text-xl flex justify-center">Sorry, no matches found :/</div>
+        <div className="text-xl flex justify-center items-center mt-10">
+          Sorry, no matches found :/
+        </div>
       )}
     </div>
   );

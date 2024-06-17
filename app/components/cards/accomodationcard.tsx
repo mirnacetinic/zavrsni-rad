@@ -27,7 +27,7 @@ const AccomodationCard = ({ data }: AccommodationCardProps) => {
                 <div className="p-4">
                     <p className="text-gray-600 mb-2">{data.description}</p>
                     <div className="flex items-center mb-2 text-gray-500">
-                        <MdLocationPin/>{data.address} - {data.city}, {data.country}
+                        <MdLocationPin/> {data.city}, {data.country}
                     </div>
                     <div className="flex flex-col text-gray-600 m-1">
                         {data.price>0 && (<p>Average price :  €{data.price}</p>)}   

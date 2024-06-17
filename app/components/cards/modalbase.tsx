@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 
@@ -12,7 +11,6 @@ interface ModalBaseProps {
 }
 
 const ModalBase = ({ isOpen, onClose, children, width, height }: ModalBaseProps) => {
-  const router = useRouter();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

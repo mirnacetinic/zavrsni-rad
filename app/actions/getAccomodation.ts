@@ -11,12 +11,32 @@ export default async function getAccommodation(id: string) {
                     select:{
                         reservations:{
                             select:{
-                                review:{
+                                review: {
                                     select:{
-                                        experience:true
+                                        rating:true,
+                                        hostRating:true,
+                                        experience:true,
+                                        createdAt: true,
+                                        reservation:{
+                                            select:{
+                                                unit:{
+                                                    select:{
+                                                        title:true,
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
+                                
                                 }
-                            }
+                            },
+                            orderBy:{
+                                review:{
+                                    createdAt: 'desc'
+                                }
+                            },
+                            take:3
+                            
                         }
                     }
                 }
@@ -44,7 +64,22 @@ export default async function getAccommodation(id: string) {
                 country: accommodation.location.country,
                 city: accommodation.location.city,
                 rating : avgRating._avg.rating,
-                reviews : accommodation.units?.flatMap(u=>u.reservations?.flatMap(r=>r.review?.experience).filter(e=>e!==undefined))
+                reviews: accommodation.units?.flatMap(unit => 
+                    unit.reservations.flatMap(reservation => {
+                        const review = reservation?.review;
+                        return review ? {
+                            rating: review.rating,
+                            hostRating: review.hostRating,
+                            experience: review.experience,
+                            unit: review.reservation?.unit?.title ?? null
+                        } : null;
+                    })
+                ).filter(review => review != null) as {
+                    rating: number | null;
+                    hostRating: number | null;
+                    experience: string | null;
+                    unit: string | null;
+                }[]
             }
 
             return safeAccommodation;

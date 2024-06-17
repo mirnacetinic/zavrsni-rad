@@ -65,11 +65,21 @@ const ReservationCard = ( { reservation, email } : ReservationCardProps) => {
                 <p className="text-gray-700"><strong>Guest :</strong> {reservation.guest}</p>
             </div>
             {reservation.review && (
-            <div className="flex justify-end">
-                <strong>Your rating:</strong>
-                {[...Array(reservation.review)].map((_, index) => (
+            <div className="flex flex-col p-1 w-fit border border-lg rounded">
+                <p><strong>Your review:</strong></p>
+                <div className="flex flex-row">
+                <p>Rating:</p>
+                {[...Array(reservation.review.rating)].map((_, index) => (
                 <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
                 ))}
+                </div>
+                <div className="flex flex-row">
+                <p>Host Rating:</p>
+                {[...Array(reservation.review.hostRating)].map((_, index) => (
+                <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
+                ))} 
+                </div>
+                <p>{reservation.review.experience}</p>
             </div>
             )}
             {reservation.status !=='Canceled' &&  new Date(reservation.checkIn) >= now &&(

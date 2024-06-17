@@ -419,11 +419,7 @@ export async function getReservations(guest? : number, unit? : number) {
     { where,
       include:{
       user : {select:{ name:true, surname:true}},
-      review: {
-        select:{
-          rating:true
-        }
-      },
+      review: true,
       unit : {
         select:{
           title:true,
@@ -449,7 +445,7 @@ export async function getReservations(guest? : number, unit? : number) {
     price : reservation.price,
     paymentId : reservation.paymentId,
     wasInquiry : reservation.wasInquiry,
-    review : reservation.review?.rating
+    review : { rating : reservation.review?.rating, hostRating: reservation.review?.hostRating, experience : reservation.review?.experience} 
   }));
 
   return safeReservations;

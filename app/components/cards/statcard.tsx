@@ -5,7 +5,7 @@ interface StatCardProps {
 
 const StatCard = ({ title, body }: StatCardProps) => {
     return (
-        <div className="flex flex-col justify-center items-center max-w-md h-auto my-4 mx-auto p-6 border border-gray-200 rounded-lg shadow-lg bg-white">
+        <div className="flex flex-col justify-center items-center w-fit h-auto my-4 mx-auto p-6 border border-gray-200 rounded-lg shadow-lg bg-white">
             {title && <div className="text-lg font-semibold text-gray-800 mb-4">{title}</div>}
             <div className="text-gray-700 border border-lg shadow-lg rounded p-2">
                 {body.map((item, index) => (

@@ -154,8 +154,8 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
       </div>
       <h3 className="text-lg font-semibold mb-4">{unit.type} {unit.title}</h3>
       <p className="text-gray-600 mb-2">{unit.description}</p>
-      <p className="text-gray-600 mb-2">Max. guests: {unit.capacity}</p>
-      <p className="text-gray-600 mb-2">Amenities:</p>
+      <p className="text-gray-600 mb-2">Maximum guests: {unit.capacity}</p>
+      {unit.amenitiesName && unit.amenitiesName.length >0 && ( <p className="text-gray-600 mb-2">Amenities:</p> )}
       <ul>
         {unit.amenitiesName?.map((amenity, index) => (
           <li key={index}>{amenity}</li>
@@ -165,55 +165,28 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
         <div className="w-80 flex flex-col gap-4">
           <div className="flex-1">
             <label htmlFor="checkIn" className="block mb-2">Check in:</label>
-            <input
-              readOnly
-              id="checkIn"
-              type="text"
-              placeholder="Select date"
-              value={checkIn ? checkIn.toDateString() : ""}
-              onClick={showCheckIn}
-              className="form-input"
+            <input readOnly id="checkIn" type="text" placeholder="Select date"
+              value={checkIn ? checkIn.toDateString() : ""} onClick={showCheckIn} className="form-input"
             />
-            <CustomCalendar
-              prices={unit.priceLists}
-              reservations={unit.reservations}
-              selected={checkIn}
-              onSelect={(date) => handleDateSelect(date, setCheckIn, () => setCheckInHidden(true))}
-              hidden={checkInHidden}
-              disabledAfter={checkOut || undefined}
+            <CustomCalendar prices={unit.priceLists} reservations={unit.reservations}
+              selected={checkIn} onSelect={(date) => handleDateSelect(date, setCheckIn, () => setCheckInHidden(true))}
+              hidden={checkInHidden} disabledAfter={checkOut || undefined}
             />
           </div>
           <div className="flex-1">
             <label htmlFor="checkOut" className="block mb-2">Check out:</label>
-            <input
-              readOnly
-              id="checkOut"
-              type="text"
-              placeholder="Select date"
-              value={checkOut ? checkOut.toDateString() : ""}
-              onClick={showCheckOut}
-              className="form-input"
+            <input readOnly id="checkOut" type="text" placeholder="Select date"
+              value={checkOut ? checkOut.toDateString() : ""} onClick={showCheckOut} className="form-input"
             />
-            <CustomCalendar
-              prices={unit.priceLists}
-              reservations={unit.reservations}
-              selected={checkOut}
-              onSelect={(date) => handleDateSelect(date, setCheckOut, () => setCheckOutHidden(true))}
-              hidden={checkOutHidden}
-              disabledBefore={checkIn || undefined}
+            <CustomCalendar prices={unit.priceLists} reservations={unit.reservations}
+              selected={checkOut} onSelect={(date) => handleDateSelect(date, setCheckOut, () => setCheckOutHidden(true))}
+              hidden={checkOutHidden} disabledBefore={checkIn || undefined}
             />
           </div>
           <div className="flex-1">
             <label htmlFor="guests" className="block mb-2">Guests:</label>
-            <input
-              id="guests"
-              type="number"
-              min={1}
-              max={unit.capacity}
-              placeholder="Number of guests"
-              value={guests}
-              onChange={(e) => setGuests(e.target.value)}
-              className="form-input"
+            <input id="guests" type="number" min={1} max={unit.capacity} placeholder="Number of guests"
+              value={guests} onChange={(e) => setGuests(e.target.value)} className="form-input"
             />
           </div>
           <p className="text-gray-600 mb-2">Total Price: €{calculatedPrice}</p>
@@ -224,15 +197,9 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
         {reservationRequested ? (unit.inquiry ? "Confirm inquiry" : "Confirm Reservation") : (unit.inquiry ? "Send inquiry" : "Reserve")}
       </button>
       {user && (
-        <ReservationModal
-          email={user.email}
-          unit={unit}
-          checkIn={checkIn ? checkIn.toDateString() : ""}
-          checkOut={checkOut ? checkOut.toDateString() : ""}
-          guests={guests}
-          price={calculatedPrice}
-          isOpen={reserveOpen}
-          onClose={() => setReserveOpen(false)}
+        <ReservationModal email={user.email} unit={unit} checkIn={checkIn ? checkIn.toDateString() : ""} checkOut={checkOut ? checkOut.toDateString() : ""}
+          guests={guests} price={calculatedPrice}
+          isOpen={reserveOpen} onClose={() => setReserveOpen(false)}
         />
       )}
     </div>

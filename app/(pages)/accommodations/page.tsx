@@ -5,7 +5,7 @@ import ViewList from "@/app/components/cards/viewlist";
 const Accommodations = async ({ searchParams }:{ searchParams?: { whereTo?: string; checkIn?: string; checkOut?: string; guests?: string } }) => {
   const accommodations = await getAccommodations(searchParams);
     return (
-      <div className="flex bg-gray-300">
+      <div className="flex bg-gray-200">
         <div className="w-full container mx-auto px-4 py-8">
           <div className="flex justify-center">
             <Searchbar searchParams={searchParams} />

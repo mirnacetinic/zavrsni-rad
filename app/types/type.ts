@@ -77,7 +77,7 @@ export interface safeReservation{
     status : string,
     price : number,
     paymentId : string,
-    review : number | undefined
+    review? : { rating : number | undefined, hostRating : number | undefined, experience : string | undefined}
 }
 
 export const status = [

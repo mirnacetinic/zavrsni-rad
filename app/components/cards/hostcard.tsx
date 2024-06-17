@@ -322,13 +322,7 @@ const HostCard: React.FC<HostProps> = ({
                           onClick={() => handleDelete(unit.id, "/api/unit")}>
                           Remove
                         </button>
-                        <UnitModal
-                          isOpen={unitEdit}
-                          unit={safeUnit(unit)}
-                          amenities={amenities}
-                          onClose={() => setUnitEdit(false)}
-                          onAddUnit={handleUnit}
-                        />
+                        <UnitModal isOpen={unitEdit} unit={safeUnit(unit)} amenities={amenities} onClose={() => setUnitEdit(false)} onAddUnit={handleUnit}/>
                       </div>
                     </div>
                   )}

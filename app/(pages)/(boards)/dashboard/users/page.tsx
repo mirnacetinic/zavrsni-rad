@@ -44,7 +44,7 @@ const UsersPage = async () => {
 
     let hostReservations = 0;
     hosts.forEach(host => {
-        hostReservations += host.hostedReservations.length;
+        if(host.hostedReservations!=="None")hostReservations += host.hostedReservations.length;
     });
 
     const chartData = {
@@ -90,14 +90,14 @@ const UsersPage = async () => {
                         {hosts.length !== 0 && (
                         <div className="mt-4">
                            <h1 className="text-xl"> Hosts</h1>
-                        <InfoCard data={hosts} type='user' />
-                        <StatCard title="Hosts statistics:"
-                            body={[
-                                { label: 'Total hosts:', data: hosts.length },
-                                { label: 'Total reservations:', data: hostReservations },
-                                { label: 'Avg. reservations per host:', data: hostReservations / hosts.length }
-                            ]} />
-                            </div>
+                            <InfoCard data={hosts} type='user' />
+                            <StatCard title="Hosts statistics:"
+                                body={[
+                                    { label: 'Total hosts:', data: hosts.length },
+                                    { label: 'Total reservations:', data: hostReservations },
+                                    { label: 'Avg. reservations per host:', data: hostReservations / hosts.length }
+                                ]} />
+                        </div>
                         )}
                         <StatCard title="Users statistics:"
                             body={[
