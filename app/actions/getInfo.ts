@@ -132,6 +132,16 @@ export async function getAccommodationUnits(accommodationId: number, searchParam
       reservations : {
         where:{
           status: {notIn: ['Canceled', 'Declined']}
+        },
+        include:{
+          review:{
+            where:{
+              rating:{
+                not: undefined
+              }
+              
+            }
+          }
         }
       },
       amenities: {
@@ -150,7 +160,8 @@ export async function getAccommodationUnits(accommodationId: number, searchParam
     reservations : unit.reservations.map(r=>({
       checkIn: r.checkIn,
       checkOut : r.checkOut})),
-    priceLists : unit.priceLists
+    priceLists : unit.priceLists,
+    reviews : unit.reservations.map(r=>r.review).filter(r=>r!==null)
 }));
 
 const rest = await prisma.unit.findMany({
@@ -164,6 +175,13 @@ const rest = await prisma.unit.findMany({
     reservations : {
       where:{
         status: {notIn: ['Canceled', 'Declined']}
+      },
+      include:{
+        review:{
+          where:{
+            rating: {not: undefined}
+          }
+        }
       }
     },
     amenities: {
@@ -180,7 +198,8 @@ const theRest = rest.map((unit)=>({
   reservations : unit.reservations.map(r=>({
     checkIn: r.checkIn,
     checkOut : r.checkOut})),
-  priceLists : unit.priceLists
+  priceLists : unit.priceLists,
+  reviews : unit.reservations.map(r=>r.review).filter(r=>r!==null)
 }));
     
   return {safeUnits, theRest};
@@ -445,7 +464,7 @@ export async function getReservations(guest? : number, unit? : number) {
     price : reservation.price,
     paymentId : reservation.paymentId,
     wasInquiry : reservation.wasInquiry,
-    review : { rating : reservation.review?.rating, hostRating: reservation.review?.hostRating, experience : reservation.review?.experience} 
+    review : reservation.review
   }));
 
   return safeReservations;

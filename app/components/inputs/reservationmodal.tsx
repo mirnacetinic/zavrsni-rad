@@ -14,6 +14,7 @@ interface ModalProps {
   checkOut: string;
   guests: string;
   email: string;
+  ownerEmail: string,
   unit : SafeUnit;
   price: number;
 }
@@ -27,7 +28,7 @@ enum Steps {
 
 const stripePromise = loadStripe('pk_test_51PJFg4AhLSjHhMlaHrxJpEw3HlsfoweBNfevwd57QzE6ASI6OCKS6Ay2wWxE4pcPUjySADaUiipELB1XBpCiVrDW00FtviylsL');
 
-const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, checkOut, guests, email, unit, price }) => {
+const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, checkOut, guests, email, ownerEmail, unit, price }) => {
   const [step, setStep] = useState(Steps.SUMMARY);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [intentPrice, setIntentPrice] = useState<number | null>(null);
@@ -57,28 +58,64 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
     }
   };
 
-  const sendConfirmation = async (type: "res"| "inq") => {
+  const sendConfirmation = async (type: "res" | "resOwn" | "inq" | "inqOwn" ) => {
     const messages = {
       res: {
         subject: "Reservation Confirmation",
         message: `<p>Dear Guest,</p>
-        <div>Your reservation at ${unit.type+' '+ unit.title} is confirmed.
-         <div><p>Address: ${unit.address}</p><p> Check-in: ${checkIn} Check-out: ${checkOut}</p> <p>Guests: ${guests}</p> </div>
+        <div>Your reservation at ${unit.type + ' ' + unit.title} is confirmed.
+          <div> 
+            <p> Address: ${unit.address}</p>
+            <p> Check-in: ${checkIn}</p> 
+            <p> Check-out: ${checkOut}</p>  
+            <p> Guests: ${guests}</p> 
+          </div>
+          <p>If you have any additional questions, feel free to contact you host at: ${ownerEmail}</p>
           <p>We look forward to your stay.</p>
+          <p>Best regards,</p>
+          <p>Your StayAway</p>
         </div>`,
+      },
+      resOwn: {
+        subject: "New Reservation",
+        message: `<p>Dear Host,</p>
+        <div>You have a new confirmed reservation at ${unit.type+' '+ unit.title}. Please see the details below;
+         <div>
+          <p>Check-in: ${checkIn}</p> 
+          <p>Check-out: ${checkOut}</p> 
+          <p>Guests: ${guests}</p> </div>
+          <p>Total Revenue: €${price}</p>
+          <p>If you have any additional information or questions for you guest, you can contact them at ${email}</p>
+          <p>Best regards,</p>
+          <p>Your StayAway</p>
+        </div>`
       },
       inq: {
         subject: "Inquiry Confirmation",
-        message: `<p>Dear Guest,</p><p>Thank you for your inquiry. We will notify you once the host reviews your request.</p>`,
+        message: `<p>Dear Guest,</p>
+        <p>Thank you for your inquiry. We will notify you once the host reviews your request.</p>
+        <p>Best regards,</p>
+        <p>Your StayAway</p>`
+        
+      },
+      inqOwn: {
+        subject: "New Inquiry",
+        message: `<p>Dear Host,</p>
+        <p>You have recieved a new inquiry for ${unit.type} ${unit.title} for dates: ${checkIn} - ${checkOut}.</p>
+        <p>Please sign-in onto StayAway Hostboard and let your guest know if they will be spending their vacation at your lovely accommodation!</p>
+        <p>Best regards,</p>
+        <p>Your StayAway</p>`
       },
     };
+
+    let to = type.includes("Own")? ownerEmail : email
 
     try {
       const { subject, message } = messages[type];
       const response = await fetch("/api/mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, subject, message }),
+        body: JSON.stringify({ email: to, subject, message }),
       });
       if (!response.ok) {
          toast.error("Something went wrong");
@@ -90,7 +127,7 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
 
   const handleSubmitReservation = async (id?: string) => {
     setLoading(true);
-    toast.loading("Submitting your reservation...");
+    toast.loading("Working on it...");
 
     const data = {
       checkIn,
@@ -118,8 +155,8 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
       });
 
       if (response.ok) {
-        toast.success("Reservation successful");
         sendConfirmation(unit.inquiry ? "inq" : "res");
+        sendConfirmation(unit.inquiry ? "inqOwn" : "resOwn");
       } else {
         toast.error(response.headers.get("message") || "Something went wrong");
       }

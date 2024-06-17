@@ -222,7 +222,7 @@ export async function getDashReservations() {
                 checkOut: r.checkOut.toLocaleDateString(),
                 price: r.price,
             })) : "None",
-            guestRatings: user.reservations.map(r=>r.guestReview).filter(r=>r!=null).length>0? user.reservations.map(r=>r.guestReview).filter(r=>r!=null) : "None",
+            guestRatings: user.reservations.map(r=>r.guestReview).filter(r=>r!=null).length>0? user.reservations.flatMap(r=>({rating:r?.guestReview})).filter(r=>r.rating!=null) : "None",
             writtenReviews: user.reservations.map(r => r.review).filter(rev => rev != null).length > 0 ? user.reservations.map(r => r.review).filter(rev => rev != null) : "None",
             accommodations: user.accommodations.length > 0 ? user.accommodations.map(a=>({Accommodation: a.type+' '+a.title})) : "None",
             hostedReservations: hostedReservations.length > 0 ? hostedReservations : "None",

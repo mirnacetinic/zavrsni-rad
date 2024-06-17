@@ -19,22 +19,22 @@ const ReservationsPage = async () =>{
     const countByStatus = { Active: 0, Inquiry: 0, Declined: 0, Accepted: 0, Canceled: 0 };
 
     reservationsAll.forEach((reservation) => {
-        const { status,revenue, wasInquiry } = reservation;
-        countByStatus[status]++;
+        const { wasInquiry, ...data } = reservation;
+        countByStatus[data.status]++;
 
-        if (status === 'Active') {
-            totalRevenue += revenue;
-            reservations.push(reservation);
+        if (data.status === 'Active') {
+            totalRevenue += data.revenue;
+            reservations.push(data);
             if (wasInquiry) {
                 inquiriesToReservations++;
-                inquiriesToReservationsRevenue += revenue;
+                inquiriesToReservationsRevenue += data.revenue;
             }
-        } else if (status !== 'Canceled') {
-            inquiries.push(reservation);
-            if (status !== 'Declined') potentialRevenue += revenue;
+        } else if (data.status !== 'Canceled') {
+            inquiries.push(data);
+            if (data.status !== 'Declined') potentialRevenue += data.revenue;
         }
         else{
-            reservations.push(reservation);
+            reservations.push(data);
         }
     });
 

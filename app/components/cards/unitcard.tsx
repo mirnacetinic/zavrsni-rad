@@ -7,14 +7,16 @@ import toast from "react-hot-toast";
 import ReservationModal from "../inputs/reservationmodal";
 import { IoIosHeartEmpty, IoIosHeart } from "react-icons/io";
 import { SafeUnit, SafeUser } from "@/app/types/type";
+import { MdOutlineStar } from "react-icons/md";
 
 interface UnitCardProps {
   key: number;
   unit: SafeUnit;
+  ownerEmail : string;
   user: SafeUser | null;
 }
 
-const UnitCard = ({ unit, user }: UnitCardProps) => {
+const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
   const searchParams = useSearchParams();
   const [checkIn, setCheckIn] = useState<Date | null>(searchParams.get('checkIn') ? new Date(searchParams.get('checkIn')!) : null);
   const [checkOut, setCheckOut] = useState<Date | null>(searchParams.get('checkOut') ? new Date(searchParams.get('checkOut')!) : null);
@@ -24,6 +26,15 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
   const [reservationRequested, setReservationRequested] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
   const [calculatedPrice, setCalculatedPrice] = useState(0);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  const handleNextReview = () => {
+    setReviewIndex((prevIndex) => prevIndex + 1);
+  };
+
+  const handlePrevReview = () => {
+    setReviewIndex((prevIndex) => prevIndex - 1);
+  };
   const router = useRouter();
 
   useEffect(() => {
@@ -161,6 +172,33 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
           <li key={index}>{amenity}</li>
         ))}
       </ul>
+      {unit.reviews && unit.reviews.length > 0 && (
+        <div className="my-4 flex justfy-center">
+          <p className="font-semibold left-0">Reviews:</p>
+          <div className="flex justfy-center items-center mt-2">
+            {reviewIndex > 0 && (
+              <button onClick={handlePrevReview} className="px-2 py-1 border border-gray-300 rounded-md">
+                &lt;
+              </button>
+            )}
+            <div className="flex flex-row space-x-2 overflow-x-auto">
+              {unit.reviews.slice(reviewIndex, reviewIndex + 4).map((review, index) => (
+                <div className="mx-1 w-56 p-2 border border-gray-300 rounded-lg" key={index}>
+                  <p className="font-semibold text-gray-800 mb-1">Unit: {review.rating} <MdOutlineStar/></p>
+                  <p className="text-gray-600 mb-1">Host: {review.hostRating} <MdOutlineStar/></p>
+                  <p className="italic text-gray-500">{review.experience}</p>
+                </div>
+              ))}
+            </div>
+            {reviewIndex + 4 < unit.reviews.length && (
+              <button onClick={handleNextReview} className="px-2 py-1 border border-gray-300 rounded-md">
+                &gt;
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {reservationRequested && (
         <div className="w-80 flex flex-col gap-4">
           <div className="flex-1">
@@ -197,7 +235,7 @@ const UnitCard = ({ unit, user }: UnitCardProps) => {
         {reservationRequested ? (unit.inquiry ? "Confirm inquiry" : "Confirm Reservation") : (unit.inquiry ? "Send inquiry" : "Reserve")}
       </button>
       {user && (
-        <ReservationModal email={user.email} unit={unit} checkIn={checkIn ? checkIn.toDateString() : ""} checkOut={checkOut ? checkOut.toDateString() : ""}
+        <ReservationModal ownerEmail={ownerEmail} email={user.email} unit={unit} checkIn={checkIn ? checkIn.toDateString() : ""} checkOut={checkOut ? checkOut.toDateString() : ""}
           guests={guests} price={calculatedPrice}
           isOpen={reserveOpen} onClose={() => setReserveOpen(false)}
         />

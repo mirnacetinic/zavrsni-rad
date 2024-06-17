@@ -8,10 +8,9 @@ interface CheckoutFormProps {
   email: string;
   unit: string;
   price: number;
-  image?: string;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret, onSuccess, email, unit, price, image }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret, onSuccess, email, unit, price }) => {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -22,10 +21,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret, onSuccess, em
   const sendConfirmation = async () => {
     const message = `
       <p>Dear ${firstName} ${lastName},</p>
-      <p>Thank you for your payment of €${price} for your reservation at ${unit}.</p>
-      <p>We are pleased to confirm your booking. Below are the details:</p>
+      <p>Thank you! We have recieved your payment.</p>
+      <p>Below are the details:</p>
       <ul>
-        <li><strong>Unit:</strong> ${unit}</li>
+        <li><strong>Reservation at:</strong> ${unit}</li>
         <li><strong>Amount Paid:</strong> €${price}</li>
       </ul>
       <p>We look forward to your stay with us!</p>

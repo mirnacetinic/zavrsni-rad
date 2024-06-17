@@ -10,6 +10,7 @@ export default async function getAccommodation(id: string) {
                 units:{
                     select:{
                         reservations:{
+                            where:{ review: {isNot: null}},
                             select:{
                                 review: {
                                     select:{
@@ -34,11 +35,12 @@ export default async function getAccommodation(id: string) {
                                 review:{
                                     createdAt: 'desc'
                                 }
-                            },
-                            take:3
+
+                            }
                             
                         }
                     }
+
                 }
             }
         });
@@ -61,6 +63,7 @@ export default async function getAccommodation(id: string) {
             const safeAccommodation = {
                 ...accommodation,
                 user : accommodation.user.name + ' ' + accommodation.user.surname,
+                ownerEmail : accommodation.user.email,
                 country: accommodation.location.country,
                 city: accommodation.location.city,
                 rating : avgRating._avg.rating,

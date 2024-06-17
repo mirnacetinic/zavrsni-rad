@@ -1,4 +1,4 @@
-import { PriceList, Reservation } from "@prisma/client";
+import { PriceList, Reservation, Review } from "@prisma/client";
 
 export type SafeUser = {
     id : number,
@@ -60,6 +60,7 @@ export interface SafeUnit {
   amenities: number[],
   amenitiesName? : string[],
   reservations? : Reservation[],
+  reviews? : Review[],
   priceLists : PriceList[];
   closedDates? : {id:number, start : Date, end : Date}[]
 }
