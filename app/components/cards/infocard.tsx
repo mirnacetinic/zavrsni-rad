@@ -4,7 +4,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaSort, FaSortDown, FaSortUp, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Form from "../inputs/form";
 import { SafeUser } from "@/app/types/type";
-import { Location } from "@prisma/client";
+import { Amenity, Location } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -13,9 +13,10 @@ interface InfoCardProps<T> {
   type: string;
   users?: SafeUser[];
   locations?: Location[];
+  amenities? : Amenity[];
 }
 
-const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ data, type, users, locations }: InfoCardProps<T>) => {
+const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ data, type, users, locations, amenities }: InfoCardProps<T>) => {
   const router = useRouter();
   const [filteredData, setFilteredData] = useState(data);
   const [expandedCells, setExpandedCells] = useState<{ [key: number]: { [key: string]: boolean } }>({});
@@ -336,7 +337,7 @@ const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ 
                             </>
                           ) : (
                             <div className="flex flex-row justify-center items-center">
-                            <Form type={type} initialData={item} users={users} locations={locations} />
+                            <Form type={type} initialData={item} users={users} locations={locations} amenities={amenities} />
                             {type !== "host" && (
                               <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id); }} className="form_button">
                                 Delete

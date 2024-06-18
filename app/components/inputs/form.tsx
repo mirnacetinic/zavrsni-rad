@@ -1,5 +1,5 @@
 "use client";
-import { Location } from "@prisma/client";
+import { Amenity, Location } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -12,11 +12,11 @@ interface FormProps {
   initialData?: any;
   users?: SafeUser[];
   locations?: Location[];
+  amenities? : Amenity[];
 }
 
-const Form = ({ type, initialData, locations, users }: FormProps) => {
+const Form = ({ type, initialData, locations, users, amenities }: FormProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [unitOpen, setUnitOpen] = useState(false);
   const formFields: { label: string; type: string; name: string }[] = [];
   let customFields: { label: string; type: string; name: string; options?: { value: string; label: string }[] }[] = [];
   const router = useRouter();
@@ -27,14 +27,30 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
 
   useEffect(() => {
     if (initialData) {
+      if(initialData.amenities) {
+        const [{id}] = initialData.amenities; 
+        initialData.amenities=id;
+      }
       setFormData({ ...initialData });
     }
   }, [initialData]);
 
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox" && e.target instanceof HTMLInputElement) {
+      const checked = e.target.checked;
+      setFormData((prevData) => {
+        const selectedValues = new Set(prevData[name] || []);
+        if (checked) {
+          selectedValues.add(value);
+        } else {
+          selectedValues.delete(value);
+        }
+        return { ...prevData, [name]: Array.from(selectedValues) };
+      });
+    } else {
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -43,15 +59,14 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
         ...formFields.map((field) => field.name),
         ...customFields.map((field) => field.name),
       ];
-      let filteredData = Object.keys(formData)
-        .filter((key) => allowedFields.includes(key))
-        .reduce((obj, key) => {
+      let filteredData = Object.keys(formData).filter((key) => allowedFields.includes(key)).reduce((obj, key) => {
           obj[key] = formData[key];
           return obj;
         }, {} as { [key: string]: any });
 
       if (initialData) {
         filteredData.id = initialData.id;
+        if(filteredData.inquiry && filteredData.inquiry === "false") filteredData.inquiry = '';
       }
 
       const response = await fetch(route, {
@@ -73,7 +88,6 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
       toast.error(`Error ${initialData ? "updating" : "creating"} ${type}. ${error.message}`);
     }
   };
-
 
   switch (type) {
     case "user":
@@ -157,6 +171,13 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
         { label: "Type", type: "select", name: "type", options: accommodationType.map((type)=>(
           { value: type, label: type }))
         },
+        { label: "Inquiry", type: "radio", name: "inquiry", options: [
+          { value: "true", label: "Yes" },
+          { value: "false", label: "No" }
+        ]},
+        { label: "Amenities", type: "checkbox", name: "amenities", options: amenities?.map((a) => (
+          { value: a.id.toString(), label: a.name })) || [] 
+        }
       ];
       break;
 
@@ -190,7 +211,7 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
   }
 
   return (
-    <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)} height="max-h-[90vh]" width="w-[30vw]">
+    <ModalBase isOpen={isOpen} onClose={() => setIsOpen(false)} height="max-h-[90vh]" width="sd:w-[100vw] w-[30vw]">
       <div className="w-full flex flex-col items-center">
         {formFields.map((field, index) => (
           <div key={index} className="mb-2 w-full">
@@ -226,6 +247,32 @@ const Form = ({ type, initialData, locations, users }: FormProps) => {
                   <option key={idx} value={option.value}>{option.label}</option>
                 ))}
               </select>
+            ) : field.type === "radio" ? (
+              field.options?.map((option, idx) => (
+                <div key={idx} className="flex items-center">
+                  <input
+                    type="radio"
+                    name={field.name}
+                    value={option.value}
+                    checked={formData[field.name] === option.value}
+                    onChange={handleInputChange}
+                  />
+                  <label className="ml-2">{option.label}</label>
+                </div>
+              ))
+            ) : field.type === "checkbox" ? (
+              field.options?.map((option, idx) => (
+                <div key={idx} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name={field.name}
+                    value={option.value}
+                    checked={formData[field.name]?.includes(option.value) || false}
+                    onChange={handleInputChange}
+                  />
+                  <label className="ml-2">{option.label}</label>
+                </div>
+              ))
             ) : (
               <input
                 className="form-input"

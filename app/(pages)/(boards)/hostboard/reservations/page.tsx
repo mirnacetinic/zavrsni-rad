@@ -30,7 +30,8 @@ const ReservationsPage = async () =>{
                 inquiriesToReservationsRevenue += data.revenue;
             }
         } else if (data.status !== 'Canceled') {
-            inquiries.push(data);
+            const {review, guestRating, ... inquiryData} = data;
+            inquiries.push(inquiryData);
             if (data.status !== 'Declined') potentialRevenue += data.revenue;
         }
         else{
@@ -61,9 +62,6 @@ const ReservationsPage = async () =>{
         </div>
         {reservations.length>0 && (
         <>
-            <div className="info">
-                <InfoCard data={reservations} type='host' />
-            </div>
             <div className="charts">
                 <StatCard title="Reservations statistics:"
                     body={[
@@ -73,13 +71,14 @@ const ReservationsPage = async () =>{
                         { label: 'Revenue from realised inquiries:', data: '€' + inquiriesToReservationsRevenue }]} />
                 <Chart type="pie" data={chartData} title="Reservations by Status" showLegend={true} />
             </div>
+            <div className="info">
+                <InfoCard data={reservations} type='host' />
+            </div>
         </> )}
 
         {inquiries.length>0 && (
         <>
-            <div className="info">
-                <InfoCard data={inquiries} type='host' />
-            </div>
+        <div className="title mt-4">Inquiries</div>
             <div className="charts">
                 <StatCard title="Inquiries statistics:"
                     body={[
@@ -87,6 +86,9 @@ const ReservationsPage = async () =>{
                         { label: 'Total inquiries:', data: countByStatus['Inquiry'] + countByStatus['Accepted'] + countByStatus['Declined'] },
                         { label: 'Inquiries to reservations:', data: inquiriesToReservations },]} />
                 <Chart type="pie" data={inquiryChartData} showLegend={true} title="Inquiries by Status" />
+            </div>
+            <div className="info">
+                <InfoCard data={inquiries} type='host' />
             </div>
         </> )}
     </div>

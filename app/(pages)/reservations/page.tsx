@@ -5,7 +5,9 @@ import ReservationCard from "../../components/cards/reservationcard";
 const ReservationsPage = async () => {
     const user = await getUser();
     if(!user){
-        return (<div>You need to login to see reservations</div>)
+        return (
+            <div>You need to login to see reservations</div>
+        );
     }
     const reservations = await getReservations(user.id);
     return(

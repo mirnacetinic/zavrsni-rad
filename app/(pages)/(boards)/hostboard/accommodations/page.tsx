@@ -1,12 +1,13 @@
-import { getAmenities, getDashAccommodation, getLocations } from '@/app/actions/getInfo';
+import { getAmenities, getLocations } from '@/app/actions/getInfo';
 import '../../dashboard/style.css';
 import getUser from "@/app/actions/getUser";
 import HostCard from '@/app/components/cards/hostcard';
+import { getHostAccommodation } from '@/app/actions/getDashInfo';
 
 const AccommodationsPage = async () =>{
     const user = await getUser();
     if(user && user.role=="HOST") {
-    const accommodations = await getDashAccommodation(user.id);
+    const accommodations = await getHostAccommodation(user.id);
     const amenities = await getAmenities();
     const locations = await getLocations();
     return(

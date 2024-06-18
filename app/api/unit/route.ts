@@ -122,6 +122,7 @@ export async function PUT(req: Request) {
   
       return NextResponse.json({ updatedUnit},{status: 200, headers: { "message": "Unit updated successfully!" } });
     } catch (error) {
+      console.log(error);
       return NextResponse.json({ updatedUnit: null }, { status: 500, headers: { "message": "Error updating unit" } });
     }
   }

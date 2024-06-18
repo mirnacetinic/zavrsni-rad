@@ -8,7 +8,7 @@ const AccommodationView = async ({ params, searchParams}: {params: { accommodati
   if (params) {
     const accommodation = await getAccommodation(params.accommodationid);
     const user = await getUser();
-    if (accommodation) {
+    if (accommodation && accommodation.status === 'Active') {
       const renderStars = (rating: number | null): JSX.Element | string => {
         if (rating === null) {
           return "No reviews yet";
