@@ -11,14 +11,14 @@
 
 }
 
-.title{
-    font-size:large;
+.title {
+    font-size: large;
     display: flex;
     flex-direction: row;
-    justify-items: center;
     align-items: center;
     text-align: center;
 }
+
 
 .layout{
     display: flex;

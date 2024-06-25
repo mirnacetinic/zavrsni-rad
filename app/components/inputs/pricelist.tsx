@@ -99,7 +99,7 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
             />
-            <button type="button" onClick={handleAddPrice} className="form_button">
+            <button type="button" onClick={handleAddPrice} className="mt-2 form_button">
               Save
             </button>
           </div>

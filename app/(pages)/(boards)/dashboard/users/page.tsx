@@ -35,7 +35,6 @@ const UsersPage = async () => {
 
 
     allUsers.forEach(user => {
-        console.log(user);
         countByCountry[user.country] = (countByCountry[user.country] || 0) + 1;
         countByRole[user.role]++;
         countByStatus[user.status]++;

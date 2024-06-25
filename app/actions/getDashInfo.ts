@@ -37,7 +37,7 @@ export async function getDashReservations() {
     id: reservation.id,
     guest: `${reservation.user.name} ${reservation.user.surname}`,
     userId: reservation.userId,
-    unit: reservation.unitId,
+    unitId: reservation.unitId,
     unitTitle: `${reservation.unit.type} ${reservation.unit.title}`,
     accommodation: reservation.unit.accommodation.id,
     city: reservation.unit.accommodation.location.city,

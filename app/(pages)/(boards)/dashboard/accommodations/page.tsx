@@ -1,8 +1,10 @@
 import {getLocations, getUsers } from "@/app/actions/getInfo";
 import { getDashAccommodation} from "@/app/actions/getDashInfo"
+import { FaEye } from "react-icons/fa";
 import InfoCard from "@/app/components/cards/infocard";
 import Form from "@/app/components/inputs/form";
 import Chart from "@/app/components/cards/chart";
+import Link from "next/link";
 
 const AccommodationsPage = async () => {
     const accommodations = await getDashAccommodation();
@@ -51,7 +53,9 @@ const AccommodationsPage = async () => {
     return (
         <div className="main-div">
             <div className="title">
-                Accommodations <Form type='accommodation' users={users} locations={locations} />
+                Accommodations 
+                <Form type='accommodation' users={users} locations={locations} />
+                <Link href={"/dashboard/accommodations/detailed"} className="flex flex-row items-center">Detailed view <FaEye className="ml-1"/></Link>
             </div>
             {accommodations.length !== 0 && (
                 <>

@@ -40,6 +40,12 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
       imagesKeys : [],
     },
   });
+  
+  const [step, setStep] = useState(Steps.INFO);
+  const [amenitiesAll, setAmenities] = useState<Amenity[]>(amenities || []);
+  const [uploadedImages, setuploadedImages] = useState<{ url: string, key: string }[]>([]);
+  const [priceList, setPriceList] = useState<{ id?: number ,from: Date; to: Date; price: number }[]>([]);
+
 
   useEffect(() => {
     if (unit) {
@@ -58,6 +64,8 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
       setuploadedImages(unit.images.map((url: string, index: number) => ({ url, key: unit?.imagesKeys[index] })));
   
     } else {
+      setPriceList([]);
+      setuploadedImages([]);
       reset({
         type: "",
         title: "",
@@ -86,11 +94,6 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
     setStep(Steps.INFO);
   };
 
-  const [step, setStep] = useState(Steps.INFO);
-  const [amenitiesAll, setAmenities] = useState<Amenity[]>(amenities || []);
-  const [uploadedImages, setuploadedImages] = useState<{ url: string, key: string }[]>([]);
-  const [priceList, setPriceList] = useState<{ id?: number ,from: Date; to: Date; price: number }[]>(unit?.priceLists || []);
-
 
   useEffect(() => {
     if(amenitiesAll.length==0 && isOpen){
@@ -103,7 +106,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
         toast.error("Error fetching amenities:", error);
       });
     }
-  }, [isOpen]);
+  }, [isOpen, amenitiesAll.length]);
 
   const back = () => {
     if (step > Steps.INFO) {
@@ -143,7 +146,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
   }
 
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} height="h-[80vh]">
+    <ModalBase isOpen={isOpen} onClose={()=>{onClose(); reset(); setStep(Steps.INFO)}} height="h-[80vh]">
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="text-center">
@@ -282,6 +285,13 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
               <PriceListForm priceList={priceList} setPriceList={setPriceList} />
           </div>
         )}
+        {step === Steps.FINISH && (
+          <div className="flex flex-col items-center mt-6">
+            <p>Click <strong className="text-purple-800">Save</strong> to save the unit</p>
+            <p className="mt-4">No need to worry, you can always change </p>
+            <p>anything you are not pleased with</p>
+          </div>
+        )}
         <div className="absolute bottom-3 left-0 w-full flex justify-center">
           <button type="button" onClick={back} className={`form_button ${step === Steps.INFO ? "hidden" : ""}`}>
             Back
@@ -290,7 +300,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
             Next
           </button>
         {step === Steps.FINISH && (
-          <button type="submit" className="form_button mt-4">Save</button>
+          <button type="submit" className="form_button">Save</button>
         )}
       </div>
     </form>

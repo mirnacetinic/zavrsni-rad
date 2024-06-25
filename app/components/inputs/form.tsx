@@ -27,11 +27,11 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
 
   useEffect(() => {
     if (initialData) {
-      if(initialData.amenities) {
-        const [{id}] = initialData.amenities; 
-        initialData.amenities=id;
-      }
       setFormData({ ...initialData });
+      if (initialData.amenities && initialData.amenities !== "None") {
+        const amenityIds = initialData.amenities.map((amenity: Amenity) => amenity.id);
+        setFormData((prevData) => ({ ...prevData, amenities: amenityIds }));
+      }
     }
   }, [initialData]);
 
@@ -165,7 +165,8 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
         { label: "Capacity", type: "number", name: "capacity" },
         { label: "Bedrooms", type: "number", name: "bedrooms" },
         { label: "Beds", type: "number", name: "beds" },
-        { label: "Bathrooms", type: "number", name: "bathrooms" }
+        { label: "Bathrooms", type: "number", name: "bathrooms" },
+
       );
       customFields = [
         { label: "Type", type: "select", name: "type", options: accommodationType.map((type)=>(
@@ -182,13 +183,16 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
       break;
 
     case "reservation":
+      formFields.push(
+        { label: "Unit", type: "number", name: "unitId" },
+        { label: "Check In", type: "text", name: "checkIn" },
+        { label: "Check Out", type: "text", name: "checkOut" },
+        { label: "Guests", type: "number", name: "guests" },
+      );
       customFields = [
         { label: "Guest", type: "select", name: "userId", options: users?.map((user) => (
           { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || []
         },
-        { label: "Check In", type: "text", name: "checkIn" },
-        { label: "Check Out", type: "text", name: "checkOut" },
-        { label: "Guests", type: "number", name: "guests" },
         { label: "Status", type: "select", name: "status", options: status.map((status) => (
           { value: status, label: status }))
         }
@@ -267,7 +271,7 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
                     type="checkbox"
                     name={field.name}
                     value={option.value}
-                    checked={formData[field.name]?.includes(option.value) || false}
+                    checked={Array.isArray(formData[field.name]) && formData[field.name].includes(option.value)}
                     onChange={handleInputChange}
                   />
                   <label className="ml-2">{option.label}</label>

@@ -20,7 +20,7 @@ const Menu = ({ user }: MenuProps) => {
 
   const toggleMenu = useCallback(() => {
     setMenuOpen((prev) => !prev);
-  }, [menuOpen]);
+  }, []);
 
   const hostModal = useCallback(() => {
     sethostModalOpen((prev) => !prev);

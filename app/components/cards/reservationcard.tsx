@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ReviewModal from "../inputs/reviewmodal";
-import { MdOutlineStarPurple500 } from "react-icons/md";
 import CheckoutForm from "../inputs/checkoutform";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import ModalBase from "./modalbase";
+import { MdOutlineStarPurple500 } from "react-icons/md";
 
 interface ReservationCardProps{
     reservation : safeReservation;
@@ -27,7 +27,7 @@ const ReservationCard = ( { reservation, email } : ReservationCardProps) => {
 
     const handleStatus = async (status: string, paymentId? : string) => {
         const data = {
-            id : reservation.id,
+            id: reservation.id,
             status : status,
             paymentId : paymentId || reservation.paymentId
         };
@@ -59,30 +59,32 @@ const ReservationCard = ( { reservation, email } : ReservationCardProps) => {
                 <span className="text-lg font-semibold">€{reservation.price}</span>
                 </div>
             </div>
-            <div className="mb-4">
-                <p className="text-gray-700"><strong>Guests:</strong> {reservation.guests}</p>
-                <p className="text-gray-700"><strong>Status :</strong> {reservation.status}</p>
-                <p className="text-gray-700"><strong>Guest :</strong> {reservation.guest}</p>
-            </div>
-            {reservation.review && (
-            <div className="flex flex-col p-1 w-fit border border-lg rounded">
-                <p><strong>Your review:</strong></p>
-                <div className="flex flex-row">
-                <p>Rating:</p>
-                {[...Array(reservation.review.rating)].map((_, index) => (
-                <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
-                ))}
+            <div className="mb-4 flex flex-row justify-between">
+                <div className="flex flex-col text-gray-700">
+                    <p><strong>Guests:</strong> {reservation.guests}</p>
+                    <p><strong>Status :</strong> {reservation.status}</p>
+                    <p><strong>Guest :</strong> {reservation.guest}</p>
                 </div>
-                <div className="flex flex-row">
-                <p>Host Rating:</p>
-                {[...Array(reservation.review.hostRating)].map((_, index) => (
-                <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
-                ))} 
-                </div>
-                <p>{reservation.review.experience}</p>
+                {reservation.review && (
+                    <div className="flex flex-col p-1 w-fit justify-end border border-lg rounded">
+                        <p><strong>Your review:</strong></p>
+                        <div className="flex flex-row">
+                        <p>Rating:</p>
+                        {[...Array(reservation.review.rating)].map((_, index) => (
+                        <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
+                        ))}
+                        </div>
+                        <div className="flex flex-row">
+                        <p>Host Rating:</p>
+                        {[...Array(reservation.review.hostRating)].map((_, index) => (
+                        <MdOutlineStarPurple500 key={index} className="text-purple-500" size={25} />
+                        ))} 
+                        </div>
+                        <p>{reservation.review.experience}</p>
+                    </div>
+                )}
             </div>
-            )}
-            {reservation.status !=='Canceled' &&  new Date(reservation.checkIn) >= now &&(
+            {reservation.status !=='Canceled' &&  new Date(reservation.checkIn) > now &&(
             <div className="flex justify-center mt-4">
                 <button onClick={()=>handleStatus('Canceled')} className="form_button">Cancel</button>
                 {reservation.status === "Accepted" && (

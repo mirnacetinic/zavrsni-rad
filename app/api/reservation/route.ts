@@ -95,29 +95,69 @@ export async function DELETE(req: Request) {
     }
 }
 
-export async function PUT(req:Request){
+export async function PUT(req: Request) {
     const body = await req.json();
-    const {id,...data} = body;
+    const { id, ...data } = body;
 
-    if(data.checkIn) data.checkIn= new Date(data.checkIn);
-    if(data.checkOut) data.checkOut= new Date(data.checkOut);
-    if(data.userId) data.userId = parseInt(data.userId);
-    if(data.guestReview) data.guestReview = parseInt(data.guestReview);
+ 
+    if (data.checkIn) data.checkIn = new Date(data.checkIn);
+    if (data.checkOut) data.checkOut = new Date(data.checkOut);
+    if (data.userId) data.userId = parseInt(data.userId);
+    if (data.guestReview) data.guestReview = parseInt(data.guestReview);
 
+    if (data.checkIn && data.checkOut && data.checkOut < data.checkIn) {
+        return NextResponse.json({ reservation: null }, { status: 400, headers: { "message": "Wrong dates" } });
+    }
 
-    try{
-        const updatedReservation = await prisma.reservation.update({
-            where:{id:id},
-            data
-            
-        })
+ 
+    if (data.unitId) {
+        const existingUnit = await prisma.unit.findUnique({
+            where: { id: data.unitId }
+        });
 
-        if(updatedReservation){
-            return NextResponse.json({updatedReservation}, { status: 200, headers: { "message": "Reservation updated successfully!" } })
+        if (!existingUnit) {
+            return NextResponse.json({ reservation: null }, { status: 400, headers: { "message": "Unknown unit!" } });
         }
 
-    }catch(error){
-        return NextResponse.json({ reservation: null }, { status: 500, headers: { "message": "Error updating reservation" } });
+        if (data.guests) {
+            data.guests = parseInt(data.guests);
+            if(data.guests > existingUnit.capacity)
+                return NextResponse.json({ reservation: null }, { status: 400, headers: { "message": "Guests exceed unit's capacity!" } });
+        }
 
+        if (data.checkIn && data.checkOut) {
+            const conflictingReservation = await prisma.reservation.findFirst({
+                where: {
+                    id: { not: id },
+                    unitId: data.unitId,
+                    status: { notIn: ['Canceled', 'Declined'] },
+                    AND: [
+                        {
+                            checkIn: { lte: data.checkOut },
+                            checkOut: { gte: data.checkIn }
+                        }
+                    ]
+                }
+            });
+
+            if (conflictingReservation) {
+                console.log(conflictingReservation);
+                return NextResponse.json({ reservation: null }, { status: 400, headers: { "message": "Unit is already booked for the selected dates" } });
+            }
+        }
+    }
+
+    try {
+        const updatedReservation = await prisma.reservation.update({
+            where: { id: id },
+            data
+        });
+
+        if (updatedReservation) {
+            return NextResponse.json({ updatedReservation }, { status: 200, headers: { "message": "Reservation updated successfully!" } });
+        }
+    } catch (error) {
+        console.error("Error updating reservation:", error);
+        return NextResponse.json({ reservation: null }, { status: 500, headers: { "message": "Error updating reservation" } });
     }
 }

@@ -24,8 +24,9 @@ const HostCard: React.FC<HostProps> = ({
 }) => {
   const router = useRouter();
   const [selectedAccommodationId, setSelectedAccommodationId] = useState<number | null>(null);
-  const [unitEdit, setUnitEdit] = useState(false);
-  const [unitAdd, setUnitAdd] = useState(false);
+  const [unitModalOpen, setUnitModalOpen] = useState(false);
+  const [unitToEdit, setUnitToEdit] = useState<SafeUnit | null>(null);
+  const [selectedAccommodationForUnit, setSelectedAccommodationForUnit] = useState<number | undefined>(undefined);
   const [expandedUnitId, setExpandedUnitId] = useState<number | null>(null);
   const [expandedPriceListId, setExpandedPriceListId] = useState<number | null>(null);
   const [expandedDatesId, setExpandedDatesId] = useState<number | null>(null);
@@ -39,9 +40,11 @@ const HostCard: React.FC<HostProps> = ({
     setEndDate(date2);
   };
 
-  const handleUnit = async (data: FieldValues, acc?: number) => {
-    if (acc) data.accommodationId = acc;
-    const method = unitEdit ? "PUT" : "POST";
+  const handleUnit = async (data: FieldValues, accommodationId?: number) => {
+    if (accommodationId) {
+      data.accommodationId = accommodationId;
+    }
+    const method = unitToEdit ? "PUT" : "POST";
     const response = await fetch("/api/unit", {
       method,
       body: JSON.stringify(data),
@@ -53,8 +56,9 @@ const HostCard: React.FC<HostProps> = ({
     if (response.ok) {
       toast.success(response.headers.get("message") || "Success");
       router.refresh();
-      setUnitAdd(false);
-      setUnitEdit(false);
+      setUnitModalOpen(false);
+      setUnitToEdit(null);
+      setSelectedAccommodationForUnit(undefined);
     } else {
       toast.error(response.headers.get("message") || "Error");
     }
@@ -77,12 +81,11 @@ const HostCard: React.FC<HostProps> = ({
     }
   };
 
-  const handleCloseDates = async (id: number, closedDates? : {id: number, start:Date, end:Date}[]) => {
-    if(!startDate || !endDate) return;
+  const handleCloseDates = async (id: number, closedDates?: { id: number, start: Date, end: Date }[]) => {
+    if (!startDate || !endDate) return;
 
-    if(closedDates){
-      closedDates.filter(e=>e.start>startDate && e.end<endDate).map(e=> handleDelete(e.id, "/api/prices"));
-
+    if (closedDates) {
+      closedDates.filter(e => e.start > startDate && e.end < endDate).map(e => handleDelete(e.id, "/api/prices"));
     }
 
     const response = await fetch("/api/prices", {
@@ -101,10 +104,9 @@ const HostCard: React.FC<HostProps> = ({
     } else {
       toast.error(response.headers.get("message") || "Error");
     }
-  
   };
 
-  const handleDeals = async ( deal: number, ids?: number[], id?: number) => {
+  const handleDeals = async (deal: number, ids?: number[], id?: number) => {
     const response = await fetch("/api/prices", {
       method: "PUT",
       body: JSON.stringify({ ids: ids, id: id, deal: deal }),
@@ -147,8 +149,13 @@ const HostCard: React.FC<HostProps> = ({
   };
 
   useEffect(() => {
+    if (search === '') {
+      setFilteredAccommodations(accommodations);
+      return;
+    }
+
+    const searchTerm = search.toLowerCase();
     const filtered = accommodations.filter((accommodation) => {
-      const searchTerm = search.toLowerCase();
       const matchAccommodation = accommodation.title.toLowerCase().includes(searchTerm) ||
         accommodation.type.toLowerCase().includes(searchTerm) ||
         accommodation.address.toLowerCase().includes(searchTerm) ||
@@ -182,9 +189,10 @@ const HostCard: React.FC<HostProps> = ({
         <div key={index} className="p-6 bg-white border border-gray-200 rounded-lg shadow-md mb-4">
           <UnitModal
             amenities={amenities}
-            isOpen={unitAdd}
-            onClose={() => setUnitAdd(false)}
-            onAddUnit={(data) => handleUnit(data, accommodation.id)}
+            isOpen={unitModalOpen}
+            onClose={() => setUnitModalOpen(false)}
+            onAddUnit={(data) => handleUnit(data, selectedAccommodationForUnit)}
+            unit={unitToEdit}
           />
           <HostModal
             user={user}
@@ -209,22 +217,27 @@ const HostCard: React.FC<HostProps> = ({
                 Edit
               </button>
               <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                onClick={() => setUnitAdd(true)}>
+                onClick={() => {
+                  setSelectedAccommodationForUnit(accommodation.id);
+                  setUnitToEdit(null);
+                  setUnitModalOpen(true);
+                }}>
                 Add Unit
               </button>
               <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                onClick={() => handleDelete(accommodation.id, "/api/accommodation")} >
+                onClick={() => handleDelete(accommodation.id, "/api/accommodation")}>
                 Delete
               </button>
               {accommodation.units && (
-                <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(10,accommodation.units?.map(u => u.id) || [])}>
+                <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600" onClick={() => handleDeals(10, accommodation.units?.map(u => u.id) || [])}>
                   Add 10% off
                 </button>
               )}
             </div>
           </div>
           <p className="text-gray-800 mb-4">{accommodation.description}</p>
-          <p className="text-gray-600 mb-4">Status: {accommodation.status}</p>
+          <p className="text-gray-800 mb-2">Status: {accommodation.status}</p>
+          {user.role === 'ADMIN' && (<p className="text-gray-800 mb-2">Owner : {accommodation.owner}</p>)}
           {accommodation.units && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Units:</h3>
@@ -259,12 +272,12 @@ const HostCard: React.FC<HostProps> = ({
                             <div className="mt-2">
                               {unit.priceLists.map((price) => (
                                 <div key={price.id} className="p-2 mt-1 border bg-gray-200 rounded">
-                                  <p>From: {price.from.toLocaleDateString()}</p>
-                                  <p>To: {price.to.toLocaleDateString()}</p>
+                                  <p>From: {new Date(price.from).toLocaleDateString()}</p>
+                                  <p>To: {new Date(price.to).toLocaleDateString()}</p>
                                   <p>Price: €{price.price} </p>
                                   <p>Active deals: {price.deal ? (
                                     <>
-                                      {price.deal}% <button className="px-2 bg-red-500 rounded text-white" onClick={() => handleDeals(0,undefined,price.id)}>X</button>
+                                      {price.deal}% <button className="px-2 bg-red-500 rounded text-white" onClick={() => handleDeals(0, undefined, price.id)}>X</button>
                                     </>
                                   ) : (
                                     "None"
@@ -294,12 +307,12 @@ const HostCard: React.FC<HostProps> = ({
                               </div>
                             </div>
                             <div className="mx-2 ">
-                              {unit.closedDates && unit.closedDates.length >0 && (
+                              {unit.closedDates && unit.closedDates.length > 0 && (
                                 <div><b>Closed Dates:</b>
                                 {unit.closedDates?.map((c) =>
-                                  <p key={c.id}>{ c.start.toDateString() + '-' + c.end.toDateString() } <button className="px-2 bg-red-500 rounded text-white" onClick={()=>handleDelete(c.id, "/api/prices")}>X</button></p>
+                                  <p key={c.id}>{ new Date(c.start).toDateString() + '-' + new Date(c.end).toDateString() } <button className="px-2 bg-red-500 rounded text-white" onClick={() => handleDelete(c.id, "/api/prices")}>X</button></p>
                                 )}
-                                </div> 
+                                </div>
                               )}
                               {startDate && endDate && (
                                   <button onClick={() => handleCloseDates(unit.id, unit.closedDates)} className="bg-red-200 rounded mt-1 p-1"> Close {startDate?.toDateString() || ""} - {endDate?.toDateString() || ""}</button>
@@ -314,7 +327,11 @@ const HostCard: React.FC<HostProps> = ({
                         </button>
                         <button
                           className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          onClick={() => setUnitEdit(true)}>
+                          onClick={() => {
+                            setUnitToEdit(safeUnit(unit));
+                            setSelectedAccommodationForUnit(accommodation.id);
+                            setUnitModalOpen(true);
+                          }}>
                           Edit
                         </button>
                         <button
@@ -322,7 +339,6 @@ const HostCard: React.FC<HostProps> = ({
                           onClick={() => handleDelete(unit.id, "/api/unit")}>
                           Remove
                         </button>
-                        <UnitModal isOpen={unitEdit} unit={safeUnit(unit)} amenities={amenities} onClose={() => setUnitEdit(false)} onAddUnit={handleUnit}/>
                       </div>
                     </div>
                   )}

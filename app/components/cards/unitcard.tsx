@@ -38,7 +38,7 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (searchParams) {
+    if (guests) {
       if (parseInt(guests) > unit.capacity) {
         setGuests("");
       }
@@ -174,8 +174,8 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
       </ul>
       {unit.reviews && unit.reviews.length > 0 && (
         <div className="my-4 flex justfy-center">
-          <p className="font-semibold left-0">Reviews:</p>
-          <div className="flex justfy-center items-center mt-2">
+          <p className="font-semibold mr-2">Reviews:</p>
+          <div className="flex justfy-center items-center">
             {reviewIndex > 0 && (
               <button onClick={handlePrevReview} className="px-2 py-1 border border-gray-300 rounded-md">
                 &lt;

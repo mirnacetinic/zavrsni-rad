@@ -51,14 +51,12 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
 
   const router = useRouter();
 
-  const [step, setStep] = useState(
-    user.role !== "USER" ? Steps.TYPE : Steps.AGREEMENT
-  );
+  const [step, setStep] = useState(user.role !== "USER" ? Steps.TYPE : Steps.AGREEMENT);
   const [locations, setLocations] = useState<Location[]>(locationsList || []);
-  const [units, setUnits] = useState<FieldValues[]>(accommodation?.units || []);
+  const [units, setUnits] = useState<FieldValues[]>([]);
   const [unitOpen, setUnitOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<FieldValues | null>(null);
-  const [image, setImage] = useState<{ url: string; key: string }>({url: accommodation?.image || "", key:accommodation?.imageKey || ""});
+  const [image, setImage] = useState<{ url: string; key: string }>({url:"", key:""});
   const [type, setType] = useState<string>(accommodation?.type || "");
 
   const handleAddUnit = (unitData: FieldValues) => {
@@ -88,6 +86,25 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
     setUnitOpen((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (accommodation) {
+      setValue("type", accommodation.type);
+      setValue("title", accommodation.title);
+      setValue("description", accommodation.description);
+      setUnits(accommodation.units || []);
+      setImage({ url: accommodation.image || "", key: accommodation.imageKey || "" });
+  
+    } else {
+      setUnits([]);
+      setImage({url:"", key:""});
+      reset({
+        type: "",
+        title: "",
+        description: "",
+     
+      });
+    }
+  }, [accommodation, setValue, reset]);
 
   useEffect(() => {
     if(locations.length==0 && isOpen){
@@ -100,7 +117,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
         toast.error("Error fetching locations:", error);
       });
     }
-  }, [isOpen]);
+  }, [isOpen, locations.length]);
 
   const back = () => {
     if (step > Steps.AGREEMENT) {
@@ -150,6 +167,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
     if(accommodation){
       method = "PUT";
       data.id = accommodation.id;
+      data.ownerId = accommodation.ownerId;
     }
     const response = await fetch("/api/accommodation", {
       method: method,
@@ -164,6 +182,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
       toast.success(response.headers.get("message") || "Success!");
       setUnits([]);
       setType("");
+      setImage({url:"", key:""});
       setStep(Steps.TYPE);
       onClose();
       reset();
@@ -177,7 +196,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
   };
 
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} height="h-96">
+    <ModalBase isOpen={isOpen} onClose={onClose} height="h-[80vh]">
       <div className="text-center">
         <h3 className="text-2xl font-bold text-gray-900">{Steps[step]}</h3>
       </div>
@@ -252,7 +271,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
         </div>
       )}
       {step === Steps.INFO && (
-        <div className="text-black mt-6">
+        <div className="text-black">
           <input {...register("title", {
                     required: "Title is required",
                     minLength: {
@@ -271,7 +290,6 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
                         message: "Description is limited to 200 characters",
                       }})}
                       name="description" placeholder="Tell us about your property" className="form-input"/>
-                    
           <p className="error">{errors?.description?.message}</p>
           <select {...register("locationId", {
                     required: "Location is required"})}
@@ -343,9 +361,16 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
           <UnitModal isOpen={unitOpen} onClose={openUnit} onAddUnit={handleAddUnit} unit={selectedUnit}/>
         </div>
       )}
-      <div className="absolute bottom-3 left-0 w-full flex justify-center">
+      {step === Steps.FINISH && (
+          <div className="flex flex-col items-center mt-6 text-black">
+            <p>Click <strong className="text-purple-800">Save</strong> to save the accommodation</p>
+            <p className="mt-4">No need to worry, you can always change </p>
+            <p>anything you are not pleased with</p>
+          </div>
+        )}
+      <div className="absolute bottom-3 left-0 mt-4 w-full flex justify-center">
         <button onClick={back}
-          className={`form_button ${step === Steps.AGREEMENT ||(step === Steps.TYPE && user.role == "HOST")? "hidden": ""}`}>
+          className={`form_button ${step === Steps.AGREEMENT || (step === Steps.TYPE && user.role == "HOST")? "hidden": ""}`}>
           Back
         </button>
         <button onClick={next} className={`form_button ${step === Steps.FINISH ? "hidden" : ""}`}>
