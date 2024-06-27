@@ -40,8 +40,8 @@ const CustomCalendar = ({ hidden, onSelect, onTwoSelect, selected, secondSelecte
         return days;
     };
 
-    const [selectedDate, setSelectedDate] = useState<Date | null>(selected || null);
-    const [secondSelectedDate, setSecondSelectedDate] = useState<Date | null>(secondSelected || null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [secondSelectedDate, setSecondSelectedDate] = useState<Date | null>(null);
     const [currentDate, setCurrentDate] = useState(selectedDate || now);
     const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
     const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
@@ -49,8 +49,7 @@ const CustomCalendar = ({ hidden, onSelect, onTwoSelect, selected, secondSelecte
 
     useEffect(() => {
         if (selected && !selectedDate) {
-            setSelectedDate(selected);
-            handleDayClick(selectedDate);
+            handleDayClick(selected.getDate());
         }
         if (secondSelected && !secondSelectedDate) {
             setSecondSelectedDate(secondSelected);
@@ -75,7 +74,12 @@ const CustomCalendar = ({ hidden, onSelect, onTwoSelect, selected, secondSelecte
     };
 
     const handleDayClick = (day: number | null) => {
-        if (day === null || isDisabled(day) || isClosed(day) || isReserved(day)) return;
+        if (day === null || isDisabled(day) || isClosed(day) || isReserved(day)){
+            if(!selectedDate){
+                onSelect?.(null);
+            }
+            return;
+        }
         const clickedDate = new Date(currentYear, currentMonth, day);
 
         if (onSelect) {
@@ -125,7 +129,6 @@ const CustomCalendar = ({ hidden, onSelect, onTwoSelect, selected, secondSelecte
             if (setPrice.length !== 1 || setPrice.find(p=>p.closed)) return true;
             for (const price of prices) {
                 if (price.closed) {
-
                     if (date >= price.from && date <= price.to) return true;
                     if (disabledBefore && price.from > disabledBefore && date > price.to) return true;
                     if (disabledAfter && price.to < disabledAfter && date < price.from) return true;

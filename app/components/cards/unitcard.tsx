@@ -1,5 +1,5 @@
 'use client';
-import { $Enums } from "@prisma/client";
+import { $Enums} from "@prisma/client";
 import CustomCalendar from "../inputs/customcalendar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -38,26 +38,9 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (guests) {
-      if (parseInt(guests) > unit.capacity) {
-        setGuests("");
-      }
-
-      if (unit.reservations?.some(r => {
-        const newCheckIn = checkIn ? new Date(checkIn) : null;
-        const newCheckOut = checkOut ? new Date(checkOut) : null;
-
-        return (
-          (newCheckIn && newCheckOut && newCheckIn >= new Date(r.checkIn) && newCheckIn < new Date(r.checkOut)) ||
-          (newCheckOut && newCheckOut > new Date(r.checkIn) && newCheckOut <= new Date(r.checkOut)) ||
-          (newCheckIn && newCheckIn <= new Date(r.checkIn) && newCheckOut && newCheckOut >= new Date(r.checkOut))
-        );
-      })) {
-        setCheckIn(null);
-        setCheckOut(null);
-      }
-    }
-  }, [checkIn, checkOut, guests, unit.capacity, unit.reservations]);
+    if (!guests) return; 
+    if (parseInt(guests) > unit.capacity) setGuests("");
+  }, [guests]);
 
   useEffect(() => {
     calculatePrice();
@@ -134,7 +117,7 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
 
       while (currentDate < checkOut) {
         const applicablePrice = unit.priceLists.find(price =>
-          price.from <= currentDate && price.to >= currentDate
+          price.from <= currentDate && price.to >= currentDate && !price.closed
         );
         if (applicablePrice) {
           let price = applicablePrice.price;
@@ -144,13 +127,18 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
           }
           total += price;
         }
+        else{
+            setCheckIn(null);
+            setCheckOut(null);
+            setCalculatedPrice(0);
+            return;
+        }
         currentDate.setDate(currentDate.getDate() + 1);
       }
 
       setCalculatedPrice(total);
 
   };
-
   return (
     <div className="rounded-lg shadow-md border border-gray-200 p-4">
       {user && (

@@ -22,6 +22,9 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
     const newFrom = new Date(from);
     const newTo = new Date(to);
 
+    newFrom.setHours(0,0,0,0);
+    newTo.setHours(0,0,0,0);
+
     if (newFrom > newTo) {
       toast.error("Date 'To' must be greater than date 'From'!");
       return;

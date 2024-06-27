@@ -43,7 +43,7 @@ export async function getUsers() {
 
 export async function getAccommodationUnits(accommodationId: number, searchParams? : {checkIn?:string, checkOut?: string, guests?:string}) {
   const where: any = { accommodationId: accommodationId };
-  where.priceLists = { some: { not: undefined } };
+  where.priceLists = { some: { not: undefined, closed: false } };
 
   if (searchParams) {
     if (searchParams.checkIn && searchParams.checkOut) {
@@ -179,7 +179,7 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
   const where: any = { status: 'Active' };
   const unitConditions: any[] = [
     { not: undefined },
-    { priceLists: { some: { not: undefined } } },
+    { priceLists: { some: { not: undefined, closed : false } } },
   ];
 
   let startDate: Date | null = null;
