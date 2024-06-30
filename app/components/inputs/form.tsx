@@ -4,18 +4,18 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import ModalBase from "../cards/modalbase";
-import { SafeUser } from "@/app/types/type";
 import { countries, status, accommodationType} from "@/app/types/type";
 
 interface FormProps {
   type: string;
   initialData?: any;
-  users?: SafeUser[];
+  users?: {id: number, name: string, surname: string}[];
   locations?: Location[];
   amenities? : Amenity[];
+  units? :  {id: number, title: string, accommodation: string}[];
 }
 
-const Form = ({ type, initialData, locations, users, amenities }: FormProps) => {
+const Form = ({ type, initialData, locations, users, amenities, units }: FormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const formFields: { label: string; type: string; name: string }[] = [];
   let customFields: { label: string; type: string; name: string; options?: { value: string; label: string }[] }[] = [];
@@ -28,6 +28,9 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
   useEffect(() => {
     if (initialData) {
       setFormData({ ...initialData });
+      if(initialData.passId){
+        setFormData((prevData) => ({ ...prevData, password: initialData.passId }));
+      }
       if (initialData.amenities && initialData.amenities !== "None") {
         const amenityIds = initialData.amenities.map((amenity: Amenity) => amenity.id);
         setFormData((prevData) => ({ ...prevData, amenities: amenityIds }));
@@ -184,12 +187,16 @@ const Form = ({ type, initialData, locations, users, amenities }: FormProps) => 
 
     case "reservation":
       formFields.push(
-        { label: "Unit", type: "number", name: "unitId" },
-        { label: "Check In", type: "text", name: "checkIn" },
-        { label: "Check Out", type: "text", name: "checkOut" },
+        { label: "Check In", type: "string", name: "checkIn" },
+        { label: "Check Out", type: "string", name: "checkOut" },
         { label: "Guests", type: "number", name: "guests" },
+        { label: "Price", type: "number", name: "price" },
+        { label: "Payment", type: "string", name: "paymentId" },
       );
       customFields = [
+        { label: "Unit", type: "select", name: "unitId", options: units?.map((unit) => (
+          { value: unit.id.toString(), label: `${unit.title} - ${unit.accommodation}` })) || []
+        },
         { label: "Guest", type: "select", name: "userId", options: users?.map((user) => (
           { value: user.id.toString(), label: `${user.name} ${user.surname}` })) || []
         },

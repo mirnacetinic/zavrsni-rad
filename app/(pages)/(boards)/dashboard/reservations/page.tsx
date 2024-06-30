@@ -3,11 +3,12 @@ import InfoCard from "@/app/components/cards/infocard";
 import Form from "@/app/components/inputs/form";
 import Chart from "@/app/components/cards/chart";
 import StatCard from "@/app/components/cards/statcard";
-import { getUsers } from "@/app/actions/getInfo";
+import { getUnits, getUsers } from "@/app/actions/getInfo";
 
 const ReservationsPage = async () => {
   const reservationsAll = await getDashReservations();
   const users = await getUsers();
+  const units = await getUnits();
 
   const inquiries: any[] = [];
   const reservations: any[] = [];
@@ -139,12 +140,12 @@ const ReservationsPage = async () => {
     <div className="main-div">
       <div className="title">
         Reservations
-        <Form type='reservation' users={users} />
+        <Form type='reservation' users={users} units={units} />
       </div>
       {reservations.length !== 0 && (
         <>
           <div className="info">
-            <InfoCard data={reservations} type='reservation' users={users} />
+            <InfoCard data={reservations} type='reservation' users={users} units={units} />
             <StatCard title="Reservations statistics:"
               body={[
                 { label: 'Total revenue:', data: totalRevenue + '€' },
@@ -167,7 +168,7 @@ const ReservationsPage = async () => {
             Inquiries
           </div>
           <div className="info">
-            <InfoCard data={inquiries} type='reservation' users={users} />
+            <InfoCard data={inquiries} type='reservation' users={users} units={units} />
             <StatCard title="Inquiries statistics:"
               body={[
                 { label: 'Potential revenue:', data: '€' + potentialRevenue },

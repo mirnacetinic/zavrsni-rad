@@ -12,7 +12,7 @@ const ReservationsPage = async () => {
     const reservations = await getReservations(user.id);
     return(
         <div>
-            <h2 className="m-2">My reservations</h2>
+            <h1 className="mx-auto p-4">My reservations</h1>
             <div className="flex">
                 {reservations.length === 0?
                     <div>Looks like you do not have any reservations yet</div>

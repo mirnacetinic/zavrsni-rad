@@ -82,6 +82,7 @@ model Accommodation {
   user        User              @relation(fields: [userId], references: [id])
   units       Unit[]
   imageUrl    String?
+  imageKey    String?
 }
 
 model Unit {

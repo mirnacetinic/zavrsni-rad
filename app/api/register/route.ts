@@ -56,7 +56,15 @@ export async function PUT(req:Request){
     const body = await req.json();
     const {id, name, surname, email, country, password, role, status} = body;
     try{
-        const hashPass = await hash(password, 10);
+        const existingUser = await prisma.user.findUnique({
+            where:{ id: id}
+        });
+
+        if(!existingUser){
+            return NextResponse.json({user:null},{ status: 409, headers: { "message": "User does not exist!" } })
+        }
+
+        const hashPass = existingUser.hashPassword === password? password : await hash(password, 10);
         const updatedUser = await prisma.user.update({
             where: { id : id },
             data: {

@@ -41,6 +41,7 @@ const HostCard: React.FC<HostProps> = ({
   };
 
   const handleUnit = async (data: FieldValues, accommodationId?: number) => {
+    setUnitModalOpen(false);
     if (accommodationId) {
       data.accommodationId = accommodationId;
     }
@@ -56,7 +57,6 @@ const HostCard: React.FC<HostProps> = ({
     if (response.ok) {
       toast.success(response.headers.get("message") || "Success");
       router.refresh();
-      setUnitModalOpen(false);
       setUnitToEdit(null);
       setSelectedAccommodationForUnit(undefined);
     } else {
@@ -203,7 +203,7 @@ const HostCard: React.FC<HostProps> = ({
           />
           <div className="flex justify-between items-center m-2">
             <div>
-              {accommodation.image && (<img src={accommodation.image} width={400} height={300} />)}
+              {accommodation.image && (<img src={accommodation.image} width={400} height={300} alt="Pic"/>)}
               <h2 className="text-xl font-bold">{accommodation.title}</h2>
               <p className="text-gray-600">{accommodation.type}</p>
               <p className="text-gray-600">

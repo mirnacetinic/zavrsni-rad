@@ -18,13 +18,13 @@ const Dashboard = async () => {
 
               <div>
                 <h2 className="text-xl font-semibold m-2">Checking In today</h2>
-                {checkingInToday.length > 0 ? ( <InfoCard data={checkingInToday} type="reservation" />
+                {checkingInToday.length > 0 ? ( <InfoCard data={checkingInToday} type="host" />
                 ) : (
                   <p className="m-2 font-semibold">No check-ins today</p>
                 )}
                 <h2 className="text-xl font-semibold m-2">Upcoming</h2>
                 {upcoming.length > 0 ? (
-                  <InfoCard data={upcoming} type="reservation" />
+                  <InfoCard data={upcoming} type="host" />
                 ) : (
                   <p className="m-2 font-semibold">No upcoming reservations</p>
                 )}

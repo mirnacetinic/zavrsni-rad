@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaSort, FaSortDown, FaSortUp, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Form from "../inputs/form";
-import { SafeUser } from "@/app/types/type";
 import { Amenity, Location } from "@prisma/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -11,22 +10,48 @@ import { useRouter } from "next/navigation";
 interface InfoCardProps<T> {
   data: T[];
   type: string;
-  users?: SafeUser[];
+  users?: {id: number, name: string, surname: string}[];
   locations?: Location[];
   amenities? : Amenity[];
+  units? :  {id: number, title: string, accommodation: string}[];
 }
 
-const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ data, type, users, locations, amenities }: InfoCardProps<T>) => {
+const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ data, type, users, locations, amenities, units }: InfoCardProps<T>) => {
   const router = useRouter();
   const [filteredData, setFilteredData] = useState(data);
   const [expandedCells, setExpandedCells] = useState<{ [key: number]: { [key: string]: boolean } }>({});
   const [slidableCells, setSlidableCells] = useState<{ [key: number]: { [key: string]: number | undefined } }>({});
   const [sortParameters, setSortParameters] = useState<{ key: keyof T; direction: "asc" | "desc" } | null>(null);
+  const [filters, setFilters] = useState<{ key: keyof T; value: string }[]>([]);
   const [rating, setRating] = useState<{ [key: number]: number }>({});
 
-  useEffect(() => {
-    setFilteredData(data);
-  }, [data]);
+ useEffect(() => {
+    applyFilters();
+  }, [data, filters]);
+
+  const applyFilters = () => {
+    let filtered = [...data];
+    filters.forEach(({ key, value }) => {
+      filtered = filtered.filter((item) => filterItem(item, key, value));
+    });
+    setFilteredData(filtered);
+  };
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof T) => {
+    const { value } = e.target;
+    setFilters((prev) => {
+      if (value === "") {
+        return prev.filter((filter) => filter.key !== key);
+      } else {
+        const existingFilter = prev.find((filter) => filter.key === key);
+        if (existingFilter) {
+          return prev.map((filter) => (filter.key === key ? { ...filter, value } : filter));
+        } else {
+          return [...prev, { key, value }];
+        }
+      }
+    });
+  };
 
   const toggleExpandCell = (rowId: number, cellKey: string) => {
     setExpandedCells((prev) => ({
@@ -48,12 +73,6 @@ const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ 
       }
       return { ...prev, [rowId]: newRowState };
     });
-  };
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof T) => {
-    const { value } = e.target;
-    const filtered = data.filter((item) => filterItem(item, key, value));
-    setFilteredData(filtered);
   };
 
   const filterItem = (item: T, key: keyof T, value: string): boolean => {
@@ -337,7 +356,7 @@ const InfoCard = <T extends { id: number; status?: string, past? : boolean }>({ 
                             </>
                           ) : (
                             <div className="flex flex-row justify-center items-center">
-                            <Form type={type} initialData={item} users={users} locations={locations} amenities={amenities} />
+                            <Form type={type} initialData={item} users={users} locations={locations} amenities={amenities} units={units} />
                             {type !== "host" && (
                               <button onClick={(e) => { e.stopPropagation(); deleteInstance(item.id); }} className="form_button">
                                 Delete

@@ -58,6 +58,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
   const [selectedUnit, setSelectedUnit] = useState<FieldValues | null>(null);
   const [image, setImage] = useState<{ url: string; key: string }>({url:"", key:""});
   const [type, setType] = useState<string>(accommodation?.type || "");
+  const [loading, setLoading] = useState<boolean>(false); 
 
   const handleAddUnit = (unitData: FieldValues) => {
     if (selectedUnit) {
@@ -67,8 +68,8 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
     } else {
       setUnits((prevUnits) => [...prevUnits, unitData]);
     }
-    setSelectedUnit(null);
     openUnit();
+    setSelectedUnit(null);
   };
 
   const removeUnit = (index: number) => {
@@ -142,6 +143,7 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
 
   const handleDeleteImage = async (key: string) => {
     try {
+      setLoading(true); 
       const response = await fetch("/api/image", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -155,43 +157,53 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong!");
+    } finally {
+      setLoading(false); 
     }
   };
 
   const handleAccommodation = async (fieldData: FieldValues) => {
-    const { agree, unitsNo, ...data } = fieldData;
-    data.ownerId = user.id;
-    data.units = units;
-    data.imageUrl = image.url;
-    let method = "POST";
-    if(accommodation){
-      method = "PUT";
-      data.id = accommodation.id;
-      data.ownerId = accommodation.ownerId;
-    }
-    const response = await fetch("/api/accommodation", {
-      method: method,
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.ok) {
-      const responseData = await response.json();
-      toast.success(response.headers.get("message") || "Success!");
-      setUnits([]);
-      setType("");
-      setImage({url:"", key:""});
-      setStep(Steps.TYPE);
-      onClose();
-      reset();
-      if(method==='POST'){
-        router.push(`/accommodations/${responseData.id}`);
+    try {
+      setLoading(true); 
+      const { agree, unitsNo, ...data } = fieldData;
+      data.ownerId = user.id;
+      data.units = units;
+      data.imageUrl = image.url;
+      data.imageKey = image.key;
+      let method = "POST";
+      if(accommodation){
+        method = "PUT";
+        data.id = accommodation.id;
+        data.ownerId = accommodation.ownerId;
       }
-      router.refresh();
-    } else {
-      toast.error(response.headers.get("message"));
+      const response = await fetch("/api/accommodation", {
+        method: method,
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        toast.success(response.headers.get("message") || "Success!");
+        setUnits([]);
+        setType("");
+        setImage({url:"", key:""});
+        setStep(Steps.TYPE);
+        onClose();
+        reset();
+        if(method==='POST'){
+          router.push(`/accommodations/${responseData.id}`);
+        }
+        router.refresh();
+      } else {
+        toast.error(response.headers.get("message"));
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong!");
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -324,14 +336,17 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
                         },
             }}
             endpoint="imageAcc"
+            onUploadBegin={()=>setLoading(true)}
             onClientUploadComplete={(res) => {
               toast.success("Upload Completed");
               setImage({ url: res[0].url, key: res[0].key });
+              setLoading(false);
             }}
             onUploadError={(error: Error) => {alert(`ERROR! ${error.message}`);}}
           />
           {image.url ? 
           (
+            
             <div key="Image" className="relative flex justify-center">
               <button type="button" onClick={() => handleDeleteImage(image.key)}
                 className="absolute top-0 right-0  bg-red-500 text-white rounded-full py-1 px-2">
@@ -377,7 +392,9 @@ const HostModal = ({ isOpen, onClose, user, accommodation, locationsList }: Moda
           Next
         </button>
       {step === Steps.FINISH && (
-        <button onClick={handleSubmit(handleAccommodation)} className="form_button">Confirm</button>
+        <button onClick={handleSubmit(handleAccommodation)} className="form_button" disabled={loading}>
+          {loading ? 'Processing...' : 'Confirm'}
+        </button>
       )}
   </div>
   </ModalBase>

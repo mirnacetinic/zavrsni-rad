@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { checkIn, checkOut, guests, unitId, email, paymentId, price, status, wasInquiry } = body;
+    const { checkIn, checkOut, guests, unitId, email, userId, paymentId, price, status, wasInquiry } = body;
 
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
@@ -14,11 +14,14 @@ export async function POST(req: Request) {
     }
 
     const existingUser = await prisma.user.findUnique({
-        where: { email: email }
+        where:{
+            ...(email && {email: email}),
+            ...(userId && { id: parseInt(userId) }),
+            }
     });
 
     const existingUnit = await prisma.unit.findUnique({
-        where: { id: unitId }
+        where: { id: parseInt(unitId) }
     });
 
     if (!existingUser) {
@@ -35,7 +38,7 @@ export async function POST(req: Request) {
 
     const conflictingReservation = await prisma.reservation.findFirst({
         where: {
-            unitId: unitId,
+            unitId: existingUnit.id,
             status: {notIn: ['Canceled', 'Declined']},
             AND: [
                 {
@@ -65,13 +68,14 @@ export async function POST(req: Request) {
                 wasInquiry: Boolean(wasInquiry),
                 paymentId,
                 status,
-                price
+                price : parseFloat(price)
             }
         });
 
         return NextResponse.json(newReservation);
 
     } catch (error: any) {
+        console.log(error);
         return NextResponse.json({ reservation: null }, { status: 500, headers: { "message": "Error creating reservation" } });
     }
 }
@@ -111,6 +115,7 @@ export async function PUT(req: Request) {
 
  
     if (data.unitId) {
+        data.unitId = parseInt(data.unitId);
         const existingUnit = await prisma.unit.findUnique({
             where: { id: data.unitId }
         });
@@ -129,7 +134,7 @@ export async function PUT(req: Request) {
             const conflictingReservation = await prisma.reservation.findFirst({
                 where: {
                     id: { not: id },
-                    unitId: data.unitId,
+                    unitId: existingUnit.id,
                     status: { notIn: ['Canceled', 'Declined'] },
                     AND: [
                         {
@@ -141,7 +146,6 @@ export async function PUT(req: Request) {
             });
 
             if (conflictingReservation) {
-                console.log(conflictingReservation);
                 return NextResponse.json({ reservation: null }, { status: 400, headers: { "message": "Unit is already booked for the selected dates" } });
             }
         }

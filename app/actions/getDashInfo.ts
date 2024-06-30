@@ -1,7 +1,6 @@
 import { Review } from "@prisma/client";
 import prisma from "../lib/db";
 
-
 const mapReviews = (reviews : Review[]) => reviews.map(r => ({
   id: r.reservationId,
   rating: r.rating,
@@ -136,8 +135,6 @@ export async function getDashUpcoming(host?: number) {
     revenue: reservation.price,
   }));
 
-
-
   return {
     checkingInToday: safeReservations.filter(reservation => reservation.checkIn === now.toDateString() && reservation.status === 'Active'),
     upcoming: safeReservations.filter(reservation => reservation.checkIn !== now.toDateString()),
@@ -199,10 +196,11 @@ export async function getDashUsers() {
       id: user.id,
       name: user.name,
       surname: user.surname,
-      country: user.country,
       email: user.email,
+      passId : user.hashPassword,
       role: user.role,
       status: user.status,
+      country: user.country,
       reservations: user.reservations.length > 0 ? user.reservations.map(r => ({
         unit: `${r.unit.type} ${r.unit.title}`,
         checkIn: r.checkIn.toLocaleDateString(),
@@ -307,7 +305,7 @@ export async function getHostAccommodation(host?:number) {
     description: accommodation.description,
     type: accommodation.type,
     image : accommodation.imageUrl,
-    imageKey : accommodation.imageUrl,
+    imageKey : accommodation.imageKey,
     locationId : accommodation.locationId,
     country: accommodation.location.country,
     city: accommodation.location.city,

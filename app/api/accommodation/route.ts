@@ -123,13 +123,14 @@ export async function PUT(req: Request) {
     try {
       const body = await req.json();
       const { id, locationId, ownerId, units, ...accommodationData } = body;
+      console.log(units);
   
       if (!id) {
         return NextResponse.json({ updatedAccommodation: null }, { status: 400, headers: { message: "Missing accommodation Id" } });
       }
   
       const unitUpserts = units?.map((unit: any) => ({
-        where: { id: parseInt(unit.id) || 0 },
+        where: { id: (unit.id && (parseInt(unit.id))) || 0 },
         update: {
           type: unit.type,
           title: unit.title,
@@ -216,6 +217,7 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({ updatedAccommodation },{status: 200, headers: { message: "Accommodation and units updated successfully!" }} );
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ updatedAccommodation: null },{ status: 500, headers: { message: "Error updating accommodation and units" } });
   }
 }

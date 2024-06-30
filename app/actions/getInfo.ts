@@ -12,33 +12,14 @@ export async function getAmenities() {
 
 export async function getUsers() {
   const users = await prisma.user.findMany({
-    include:{
-      favourites : {
-        select:{
-          unit: {
-            select:{
-              id:true
-            }
-          }
-        }
-      }
-     
-    },
-    orderBy:{
-      createdAt: 'desc'
+    select:{
+      id : true,
+      name : true,
+      surname: true
     }
   });
-  const safeUsers = users.map((user) => ({
-    id : user.id,
-    name: user.name,
-    surname: user.surname,
-    email: user.email,
-    role: user.role,
-    status : user.status,
-    favourites : user.favourites.map(fav=>fav.unit.id)
-  }));
-
-  return safeUsers;
+  
+  return users;
 }
 
 export async function getAccommodationUnits(accommodationId: number, searchParams? : {checkIn?:string, checkOut?: string, guests?:string}) {
@@ -261,9 +242,14 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
   const accommodations = await prisma.accommodation.findMany({
     where,
     include: {
-      location: true,
+      location:{
+        select:{
+          city: true,
+          country : true,
+        }
+      },
       units: {
-        include: {
+        select: {
           _count: { select: { reservations: true } },
           amenities: { select: { amenity: { select: { name: true } } } },
           reservations: { select: { review: { select: { rating: true } } } },
@@ -302,7 +288,6 @@ if (startDate && endDate) {
 
   price = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length * days : 0;
 }
-
 
     return {
       id: accommodation.id,
@@ -368,9 +353,11 @@ export async function getReservations(guest? : number) {
 export async function getFavourites( id : number) {
    const favourites = await prisma.userFavorites.findMany({
     where:{ userId : id },
-    include:{
+    select:{
       unit :{
-        include:{
+        select:{
+          title: true,
+          type : true,
           accommodation:{
             include:{
               location : true,
@@ -383,13 +370,37 @@ export async function getFavourites( id : number) {
 
    const faves = favourites.map((f)=>({
     ...f.unit.accommodation,
+    unit : f.unit.type + ' ' + f.unit.title,
     city : f.unit.accommodation.location.city,
-    country : f.unit.accommodation.location.country,
-
-}));
+    country : f.unit.accommodation.location.country
+  }));
 
    return faves;
 }
 
+
+export async function getUnits(){
+  const units = await prisma.unit.findMany({
+    select:{
+      id: true,
+      title: true,
+      type : true,
+      accommodation:{
+        select:{
+          title:true,
+          type: true
+        }
+      }
+    }
+  });
+
+  const safeUnits = units.map((u)=>({
+    id: u.id,
+    title : u.type + ' ' + u.title,
+    accommodation : u.accommodation.type + ' ' + u.accommodation.title
+  }))
+
+  return safeUnits;
+}
 
 

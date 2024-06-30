@@ -42,7 +42,7 @@ export async function PUT(req: Request) {
         );
       }
   
-      return NextResponse.json({ updated },{ status: 200, headers: { message: "Pricelist updated successfully!" } }
+      return NextResponse.json({ updated },{ status: 200, headers: { message: "Updated successfully!" } }
       );
     } catch (error) {
       return NextResponse.json({ priceList: null },{ status: 500, headers: { message: "Error updating priceList"} }
@@ -63,7 +63,7 @@ export async function PUT(req: Request) {
         );
       }
   
-      return NextResponse.json({ deleted },{ status: 200, headers: { message: "Pricelist deleted successfully!" } }
+      return NextResponse.json({ deleted },{ status: 200, headers: { message: "Deleted successfully!" } }
       );
     } catch (error) {
       return NextResponse.json({ priceList: null },{ status: 500, headers: { message: "Error deleting priceList"} }

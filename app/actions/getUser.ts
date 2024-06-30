@@ -13,7 +13,6 @@ export default async function getUser(){
         where: { email : session.user.email as string}, 
         include:{
           favourites : true,
-          reservations : true
         }
     });
 
@@ -21,7 +20,6 @@ export default async function getUser(){
       return{
         ...user,
         favourites : user.favourites.map(f=>f.unitId),
-        reservations : user.reservations.map(r=>r)
       }
     }
 

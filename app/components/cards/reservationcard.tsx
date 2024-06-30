@@ -84,7 +84,7 @@ const ReservationCard = ( { reservation, email } : ReservationCardProps) => {
                     </div>
                 )}
             </div>
-            {reservation.status !=='Canceled' &&  new Date(reservation.checkIn) > now &&(
+            {reservation.status !=='Canceled' &&  reservation.status!== 'Declined' && new Date(reservation.checkIn) > now &&(
             <div className="flex justify-center mt-4">
                 <button onClick={()=>handleStatus('Canceled')} className="form_button">Cancel</button>
                 {reservation.status === "Accepted" && (

@@ -45,6 +45,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
   const [amenitiesAll, setAmenities] = useState<Amenity[]>(amenities || []);
   const [uploadedImages, setuploadedImages] = useState<{ url: string, key: string }[]>([]);
   const [priceList, setPriceList] = useState<{ id?: number ,from: Date; to: Date; price: number }[]>([]);
+  const [loading, setLoading] = useState<boolean>(false); 
 
 
   useEffect(() => {
@@ -129,6 +130,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
 
   const handleDeleteImage = async (key: string) => {
     try {
+      setLoading(true); 
       const response = await fetch('/api/image', {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -142,6 +144,9 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
+    }
+    finally{
+      setLoading(false);
     }
   }
 
@@ -257,12 +262,15 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
                   }
                 }}
               endpoint={uploadedImages.length>0? "imageAcc":"imageUnit"}
+              onUploadBegin={()=>setLoading(true)}
               onClientUploadComplete={(res) => {
                 const imageFiles = res.map((file) => ({ url: file.url, key: file.key }));
                 setuploadedImages((prev) => [...prev, ...imageFiles]);
+                setLoading(false);
               }}
               onUploadError={(error: Error) => {
                 alert(`ERROR! ${error.message}`);
+                setLoading(false);
               }}/>
             <div className="uploaded-images">
                 {uploadedImages?.map((image, index) => (
@@ -300,7 +308,7 @@ const UnitModal = ({ isOpen, onClose, onAddUnit, unit, amenities }: UnitModalPro
             Next
           </button>
         {step === Steps.FINISH && (
-          <button type="submit" className="form_button">Save</button>
+          <button type="submit" className="form_button" disabled={loading}>Save</button>
         )}
       </div>
     </form>
