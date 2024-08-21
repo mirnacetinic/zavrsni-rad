@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import ReservationModal from "../inputs/reservationmodal";
 import { IoIosHeartEmpty, IoIosHeart } from "react-icons/io";
 import { SafeUnit, SafeUser } from "@/app/types/type";
-import { MdOutlineStar } from "react-icons/md";
 
 interface UnitCardProps {
   key: number;
@@ -172,8 +171,8 @@ const UnitCard = ({ unit, user, ownerEmail }: UnitCardProps) => {
             <div className="flex flex-row space-x-2 overflow-x-auto">
               {unit.reviews.slice(reviewIndex, reviewIndex + 4).map((review, index) => (
                 <div className="mx-1 w-56 p-2 border border-gray-300 rounded-lg" key={index}>
-                  <p className="font-semibold text-gray-800 mb-1">Unit: {review.rating} <MdOutlineStar/></p>
-                  <p className="text-gray-600 mb-1">Host: {review.hostRating} <MdOutlineStar/></p>
+                  <p className="font-semibold text-gray-800 mb-0.5">Unit:{review.rating} stars</p>
+                  <p className="font-semibold text-gray-800 mb-0.5">Host:{review.hostRating} stars</p>
                   <p className="italic text-gray-500">{review.experience}</p>
                 </div>
               ))}
