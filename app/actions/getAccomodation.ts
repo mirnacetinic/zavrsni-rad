@@ -51,8 +51,7 @@ export default async function getAccommodation(id: string) {
                     reservation:{
                         unit:{
                             accommodationId:accommodation.id
-                        }
-                        
+                        }   
                     }
                 },
                 _avg:{

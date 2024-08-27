@@ -2,8 +2,8 @@ import getUser from '@/app/actions/getUser';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-
-const stripe = new Stripe('sk_test_51PJFg4AhLSjHhMlaxWzgo4kAJaH6wBjBuU4lPLbENxnh3B1awYIEV8HD1ETvnYercZAfwTjlrH0ZsvCayIw8NUKh00KNGUSDWD',{
+if(process.env.STRIPE_SECRET_KEY === undefined) throw new Error("Stripe secret undifined!");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY,{
     apiVersion: '2024-04-10'
 });
 
@@ -23,6 +23,7 @@ export async function POST(req:Request) {
         
 
     })
+
     if(paymentIntent) return NextResponse.json(paymentIntent);
 
 

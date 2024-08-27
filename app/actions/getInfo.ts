@@ -34,15 +34,29 @@ export async function getAccommodationUnits(accommodationId: number, searchParam
       if (startDate > endDate) {
         throw new Error('CheckIn must be before the checkOut!');
       } else {
-        where.priceLists= {
-            some: {
-              AND: [
-                {closed: false},
-                { from: { lte: startDate } },
-                { to: { gte: endDate } },
-              ],
-            },
-          };
+        where.priceLists = {
+          some: {
+            AND: [
+              {
+                closed: false,
+                from: { lte: startDate },
+                to: { gte: endDate },
+              },
+            ],
+          },
+          none: {
+            AND: [
+              { closed: true },
+              {
+                OR: [
+                  { from: { lte: startDate }, to: { gte: startDate } },
+                  { from: { lte: endDate }, to: { gte: endDate } },
+                  { from: { gte: startDate }, to: { lte: endDate } },
+                ],
+              },
+            ],
+          },
+        };
 
           where.reservations= {
             none: {
@@ -184,7 +198,7 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
       if (startDate > endDate) {
         throw new Error('CheckIn must be before the checkOut!');
       } else {
-
+        
         unitConditions.push({
           reservations: {
             none: {
@@ -253,10 +267,13 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
           _count: { select: { reservations: true } },
           amenities: { select: { amenity: { select: { name: true } } } },
           reservations: { select: { review: { select: { rating: true } } } },
-          priceLists: true,
-        },
-      },
-    },
+          priceLists: {
+            where:{
+              closed: false
+            }
+          }
+        }}
+    }
   });
 
   const safeAccommodations = accommodations.map((accommodation) => {
@@ -271,11 +288,10 @@ export async function getAccommodations(searchParams?: { whereTo?: string; check
 if (startDate && endDate) {
   const days = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
-  const prices = accommodation.units?.flatMap((unit) =>
-    unit?.priceLists.filter(priceList => 
+  const prices = accommodation.units.flatMap((unit) =>
+    unit.priceLists.filter(priceList => 
       priceList.from <= startDate && 
-      priceList.to >= endDate && 
-      !priceList.closed
+      priceList.to >= endDate 
     ).map(priceList => {
       let unitPrice = priceList.price;
       if (priceList.deal) {
@@ -286,7 +302,7 @@ if (startDate && endDate) {
     })
   );
 
-  price = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length * days : 0;
+  price = prices.reduce((sum, price) => sum + price, 0) / prices.length * days;
 }
 
     return {

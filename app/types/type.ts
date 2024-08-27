@@ -30,23 +30,6 @@ export type SearchAccommodation ={
   price : number,
 }
 
-export type SafeAccommodation = {
-    id: number;
-    ownerId: number;
-    owner: string;
-    title: string;
-    description: string;
-    type: AccommodationType;
-    locationId: number;
-    country: string;
-    image: string | null;
-    imageKey : string | null;
-    city: string;
-    address: string;
-    status: ActiveStatus;
-    units? : SafeUnit[] | [];
-}
-
 export interface SafeUnit {
   id: number;
   title: string;
@@ -63,6 +46,23 @@ export interface SafeUnit {
   reviews? : Review[],
   priceLists : PriceList[];
   closedDates? : {id:number, start : Date, end : Date}[]
+}
+
+export type SafeAccommodation = {
+    id: number;
+    ownerId: number;
+    owner: string;
+    title: string;
+    description: string;
+    type: AccommodationType;
+    locationId: number;
+    country: string;
+    image: string | null;
+    imageKey : string | null;
+    city: string;
+    address: string;
+    status: ActiveStatus;
+    units? : SafeUnit[] | [];
 }
 
 

@@ -1,3 +1,4 @@
+'use client';
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
@@ -8,10 +9,18 @@ interface PriceListProps {
 }
 
 const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState<Date | null>(null);
+  const [to, setTo] = useState<Date | null>(null);
   const [price, setPrice] = useState(0);
   const [showForm, setShowForm] = useState(false);
+
+  // Helper function to format Date objects to YYYY-MM-DD strings
+  const formatDate = (date: Date | null): string => {
+    if (!date) return "";
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
+    return adjustedDate.toISOString().split("T")[0];
+  };
 
   const handleAddPrice = () => {
     if (!from || !to || price <= 0) {
@@ -22,8 +31,8 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
     const newFrom = new Date(from);
     const newTo = new Date(to);
 
-    newFrom.setHours(0,0,0,0);
-    newTo.setHours(0,0,0,0);
+    newFrom.setHours(0, 0, 0, 0);
+    newTo.setHours(0, 0, 0, 0);
 
     if (newFrom > newTo) {
       toast.error("Date 'To' must be greater than date 'From'!");
@@ -46,8 +55,8 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
       [...prevPriceList, newPrice].sort((a, b) => a.from.getTime() - b.from.getTime())
     );
 
-    setFrom("");
-    setTo("");
+    setFrom(null);
+    setTo(null);
     setPrice(0);
     setShowForm(false);
   };
@@ -60,8 +69,8 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
     const priceItem = priceList[index];
     if (!priceItem) return;
 
-    setFrom(priceItem.from.toISOString().split("T")[0]);
-    setTo(priceItem.to.toISOString().split("T")[0]);
+    setFrom(priceItem.from);
+    setTo(priceItem.to);
     setPrice(priceItem.price);
     setShowForm(true);
 
@@ -82,16 +91,16 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
             <input
               type="date"
               className="form-input"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              value={formatDate(from)}
+              onChange={(e) => setFrom(new Date(e.target.value))}
             />
             <label>To</label>
             <input
               type="date"
               required
               className="form-input"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
+              value={formatDate(to)}
+              onChange={(e) => setTo(new Date(e.target.value))}
             />
             <label>Rate</label>
             <input
@@ -119,8 +128,8 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
                   {priceItem.from.toDateString()} - {priceItem.to.toDateString()} : €{priceItem.price}
                 </div>
                 <div className="flex items-center space-x-2">
-                <MdOutlineModeEdit className="m-2 cursor-pointer" onClick={()  => handleEditPrice(index)}/>
-                <MdDelete className="cursor-pointer" onClick={() => handleDeletePrice(index)}/>
+                  <MdOutlineModeEdit className="m-2 cursor-pointer" onClick={() => handleEditPrice(index)} />
+                  <MdDelete className="cursor-pointer" onClick={() => handleDeletePrice(index)} />
                 </div>
               </li>
             ))}

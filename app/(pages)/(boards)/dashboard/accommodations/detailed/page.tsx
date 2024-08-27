@@ -18,7 +18,7 @@ const AccommodationsPage = async () =>{
         <div className="info">
         {accommodations.length> 0 && (
             <div>   
-            <HostCard accommodations={accommodations} user={user} amenities={amenities} locations={locations}/>
+                <HostCard accommodations={accommodations} user={user} amenities={amenities} locations={locations}/>
             </div>
         )}
         </div>

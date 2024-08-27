@@ -25,8 +25,8 @@ enum Steps {
   FINISH,
 }
 
-
-const stripePromise = loadStripe('pk_test_51PJFg4AhLSjHhMlaHrxJpEw3HlsfoweBNfevwd57QzE6ASI6OCKS6Ay2wWxE4pcPUjySADaUiipELB1XBpCiVrDW00FtviylsL');
+if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) throw new Error("Stripe key undifined!");
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, checkOut, guests, email, ownerEmail, unit, price }) => {
   const [step, setStep] = useState(Steps.SUMMARY);
@@ -233,7 +233,7 @@ const ReservationModal: React.FC<ModalProps> = ({ isOpen, onClose, checkIn, chec
           <p>Loading...</p>
           :
           unit.inquiry ? (
-            <div>Perfect! We have everything we need for now. We have sent you details about your inquiry to your email. You will receive an email when the host accepts or denies your inquiry.</div>
+            <div>Perfect! We have everything we need for now. We have sent you details about your inquiry to your email.</div>
           ) : (
             <div>Perfect! We have everything we need. Your reservation is now confirmed and you have received confirmation and check-in information via email! Safe travels!</div>
           )}

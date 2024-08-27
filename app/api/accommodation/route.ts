@@ -123,7 +123,6 @@ export async function PUT(req: Request) {
     try {
       const body = await req.json();
       const { id, locationId, ownerId, units, ...accommodationData } = body;
-      console.log(units);
   
       if (!id) {
         return NextResponse.json({ updatedAccommodation: null }, { status: 400, headers: { message: "Missing accommodation Id" } });
