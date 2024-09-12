@@ -9,9 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY,{
 
 export async function POST(req:Request) {
     const user = await getUser();
-    if(!user){
-        return NextResponse.json(null,{status:401, headers:{ message:'Unauthorised'}})
-    }
+    if(!user) return NextResponse.json(null, { status:401, headers : { message:'Unauthorised'}})
     const body = await req.json();
     const { price } = body;
     
@@ -19,13 +17,10 @@ export async function POST(req:Request) {
         amount : parseFloat(price) * 100,
         currency : 'eur',
         automatic_payment_methods : {enabled:true},
-        setup_future_usage: 'off_session',
-        
-
+        setup_future_usage: 'off_session'     
     })
 
     if(paymentIntent) return NextResponse.json(paymentIntent);
-
 
     return NextResponse.json(null);
 

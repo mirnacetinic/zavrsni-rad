@@ -187,8 +187,8 @@ const Form = ({ type, initialData, locations, users, amenities, units }: FormPro
 
     case "reservation":
       formFields.push(
-        { label: "Check In", type: "string", name: "checkIn" },
-        { label: "Check Out", type: "string", name: "checkOut" },
+        { label: "Check In", type: "date", name: "checkIn" },
+        { label: "Check Out", type: "date", name: "checkOut" },
         { label: "Guests", type: "number", name: "guests" },
         { label: "Price", type: "number", name: "price" },
         { label: "Payment", type: "string", name: "paymentId" },
@@ -233,7 +233,8 @@ const Form = ({ type, initialData, locations, users, amenities, units }: FormPro
               className="form-input"
               type={field.type}
               name={field.name}
-              value={formData[field.name] || ''}
+              value={formData[field.name]? field.name !== "checkIn" && field.name !== "checkOut"? formData[field.name] :  new Date(new Date(formData[field.name]).getTime() - new Date().getTimezoneOffset() * 60000)
+                .toISOString().split("T")[0]: ''}
               onChange={handleInputChange}
               required
             />

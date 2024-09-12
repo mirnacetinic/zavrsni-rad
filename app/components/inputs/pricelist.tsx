@@ -14,7 +14,7 @@ const PriceListForm = ({ priceList, setPriceList }: PriceListProps) => {
   const [price, setPrice] = useState(0);
   const [showForm, setShowForm] = useState(false);
 
-  // Helper function to format Date objects to YYYY-MM-DD strings
+  
   const formatDate = (date: Date | null): string => {
     if (!date) return "";
     const offset = date.getTimezoneOffset();
